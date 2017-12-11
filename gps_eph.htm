@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html><head>
+   <title> GNSS satellite ephems </title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   <meta name="Author" content="Bill Gray">
+</head>
+<body>
+<h1> GNSS satellites ephems </h1>
+
+<p> Use the form below to create ephemerides for <a href="#gnss">
+GNSS satellites </a> (GPS,  Galileo,  GLONASS,  etc.)
+You can use <a href="gps_find.htm"> this form to find out which GNSS
+satellites are visible from your site. </a> </p>
+
+<p></p><hr>
+<form method="GET" enctype="application/x-www-form-urlencoded"
+action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want to reset the form to the defaults?')">
+
+  <p> Satellite ID (e.g., G03, R15): <input name="obj" id="obj" maxlength="10" size="10" value="">
+  <p> Time: <input name="time" id="time" maxlength="40" size="40"> UTC </p>
+  <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="5" size="5">
+  <p> Step size: <input name="step" id="step" maxlength="10" size="10" value="1m">
+  <p> Number of ephemeris steps: <input name="n_steps" id="n_steps" maxlength="10" size="10" value="20">
+
+<p><input value=" Create ephemerides " type="submit"> <input value=" Reset " type="reset">
+</p><hr> </form>
+
+<p> <b> Step size </b> can end in 'm' for minutes.  Otherwise,  assumed to be seconds. </p>
+
+<p> There are <a href="tools.htm"> several other tools for asteroid observers</a>
+on this site,  including <a href="gps_find.htm"> a tool to list GNSS satellites
+visible from a given site.</a>
+
+<h2> <a name="tips"> Tips: </a> </h2>
+
+<p> <b> Time</b> can be in almost any human-recognizable form,  such as <br>
+
+</p><pre>
+2017 feb 27 03:14:15.9   feb 27 2017 03:14:15.9   27.314159/2    (assumed to be current year)
+2017 02 27.314159        27.314159/02/2017        now+3h         (three hours from 'right now')
+27.314159fe2017          JD 2457811.814159        Fri 03:14 p.m.
+mjd57811.314159 </pre>
+
+<p> <a href="https://projectpluto.com/update8d.htm#time_entry"> Click here for a full list of possible
+time formats that can be used. </a>  Feel free to experiment,  but getting
+<i>too</i> clever is not advised.  I recommend a four-digit year,  named month,
+and day followed by HH:MM:SS or decimal days (the first two examples shown
+above),  leaving no ambiguity in your input. </p>
+
+<p> <b> Time span: </b> Ephemerides are available from 1992 June 20 to four or
+five days from now.  <i>Note</i> that unfortunately,  ephemerides for Galileo,
+QZSS,  and BeiDou only run up to about a day ago;  from that point on,  all
+we've got are ephems for GPS and GLONASS.  I'm working on this. </p>
+
+<p> <b> Satellite IDs </b> with 'G' followed by two digits are GPS satellites.  Those
+with 'R' followed by two digits are (Russian) GLONASS satellites.  'E'
+is for the (European) Galileo satellites,  'J' for the (Japanese) QZSS,
+and 'C' the (Chinese) BeiDou satellites. </p>
+
+<p> <a name="mpc_code"> <b> MPC observatory code: </b> </a> This should be a
+three-character code from
+<a href="http://www.minorplanetcenter.org/iau/lists/ObsCodesF.html">
+the MPC's list of observatory codes. </a>  If you don't have such a code,
+send me your latitude,  longitude,  and altitude (see contact details at
+bottom) and I'll add a code for you. </p>
+
+<p> <b> Satellite magnitudes</b>:  Jaime Nomen told me the magnitudes for GPS
+satellites range from 10 to 14,  depending in part on the phase angle.  (I'm
+hoping the GLONASS satellites are brighter,  but haven't heard of any
+observations yet.)  By default,  the satellites are ordered by elongation;
+I'd suggest getting satellites with high elongation that aren't marked 'Sha'
+(in the earth's shadow).
+
+<p> Jaime recommends getting images of multiple satellites at multiple times,
+ to help detect random timing errors.
+
+<p> <b> Accuracy</b> appears to be about an arcsecond,  which corresponds to
+about 40 milliseconds of motion.  I should be able to improve this.  The satellites
+have positions known to within a few centimeters.  Of course,  that's the position
+of the antenna;  if the center of light measured on a CCD is,  say,  a meter
+away,  that would lead about half a millisecond of error (the satellites move at
+about 2000 meters a second).  I'm not sure why we aren't at something close to that
+level of accuracy already. </p>
+
+<p> <b> Source code </b> will be posted on <a href="http://github.com/Bill-Gray">
+GitHub </a> at some point.  I'm trying to sort out some dependencies so the
+code will be a little less opaque,  easier to understand,  and more likely
+to cause prospective clients to say:  "Let's hire this guy!"
+
+<p> <a name="gnss"> <b> 'GNSS' </b> includes GPS,  GLONASS,  Galileo,
+QZSS,  and BeiDou satellites.  You can get positions for GPS and GLONASS
+for dates starting about a day ago and running a few days into the future (i.e.,
+predictions are available).  For Galileo,  QZSS,  and BeiDou,  this is
+sadly not the case.  You'll get data for them,  but only a day or so "late". </p>
+
+<p> I realize that makes them nearly useless for testing your timing;
+obviously,  you need some advance notice as to which direction to
+point your telescope.  I'm working on this... I've inquiries into
+various places as to where predictive ephems for all satellite systems
+might be found.  If worst comes to worst,  I'll take the "day old" ephems
+and integrate them ahead to the desired times.  But I'd really rather not
+do that. </p>
+
+<h2> <a name="ack"> Acknowledgments </a> </h2>
+
+<p> My thanks go to Jaime Nomen and Noelia S&aacute;nchez Ortiz for their
+thoughts on using navigation satellites for timing astrometry,  and for
+providing <a href="https://www.projectpluto.com/pluto/mpecs/navst43.htm">
+some example astrometry for testing that I was getting the right answers.
+</a> </p>
+
+
+<h2> <a name="contact"> Contact info </a> </h2>
+
+<p> I can be reached at
+p&#x202e;&#x43e;&#xe7;.&ouml;t&#x16d;lp&#x165;&#x441;&eacute;&#x458;&ocirc;&#x159;p&#x40;ot&uacute;l&#x202c;m.
+If you're a human instead of a spambot,  you can probably figure out
+how to remove the diacritical marks... </p>
+
+</body></html>
