@@ -276,6 +276,10 @@ for my needs),  and cover the preceding and following day.  IGUs are
 provided at six-hour intervals;  combine that with their two-day
 coverage,  and you see that we might get data in any of eight files. */
 
+/* Base URL for the University of Bern files: */
+
+#define UNIBE_BASE_URL "ftp://ftp.aiub.unibe.ch/CODE/"
+
 static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             const bool fetch_files)
 {
@@ -301,9 +305,9 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    if( rval)
       return( rval);
 
-#ifdef USE_UNIBE
+#ifdef UNIBE_BASE_URL
    sprintf( filename, "COD%04d%d.EPH.Z", day / 7, day % 7);
-   sprintf( command, "ftp://ftp.unibe.ch/aiub/CODE/%4d/%s", i, filename);
+   sprintf( command, UNIBE_BASE_URL "%4d/%s", i, filename);
    if( gps_verbose)
       printf( "Final file: '%s', %d %d: '%s'\n", filename, glumph,
             glumph - day * glumphs_per_day, command);
@@ -315,7 +319,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       return( rval);
 
    strcpy( filename + 12, "_R");
-   sprintf( command, "ftp://ftp.unibe.ch/aiub/CODE/%s", filename);
+   sprintf( command, UNIBE_BASE_URL "%s", filename);
    if( gps_verbose)
       printf( "Rapid file: '%s', %d %d: '%s'\n", filename, glumph,
             glumph - day * glumphs_per_day, command);
@@ -326,7 +330,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    for( i = 0; !rval && i < 5; i++, day--)
       {
       sprintf( filename, "COD%04d%d.EPH_5D", day / 7, day % 7);
-      sprintf( command, "ftp://ftp.unibe.ch/aiub/CODE/%s", filename);
+      sprintf( command, UNIBE_BASE_URL "%s", filename);
       if( gps_verbose)
           printf("Five-day file: '%s', %d %d: '%s'\n", filename, glumph,
             glumph - day * glumphs_per_day, command);
@@ -336,7 +340,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       if( gps_verbose)
          printf( "get_cached_posns: %p\n", (void *)rval);
       }
-#endif         /* #ifdef USE_UNIBE */
+#endif         /* #ifdef UNIBE_BASE_URL */
    for( i = 0; !rval && i < 8; i++)
       {
       const int tglumph = glumph + (i - 3) * glumphs_per_day / 4;
