@@ -381,7 +381,7 @@ int dummy_main( const char *time_text, const char *observatory_code)
 
    full_ctime( tbuff, curr_t, FULL_CTIME_YMD);
    printf( "Current time = %s UTC\n", tbuff);
-   full_ctime( tbuff, utc, FULL_CTIME_YMD);
+   full_ctime( tbuff, utc, FULL_CTIME_YMD | FULL_CTIME_MILLISECS);
    printf( "GPS positions for JD %f = %s UTC\n", utc, tbuff);
    if( err_code <= 0)
       {
