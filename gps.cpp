@@ -206,8 +206,12 @@ static void add_posns_to_cache( const int glumph, double *loc)
    memcpy( tptr->posns, loc, sizeof( tptr->posns));
 }
 
-static double *get_cached_posns( const char *filename, int glumph0,
-                              const int glumph)
+/* The GPS timing system starts on 1980 Jan 7 = MJD 44245.
+Seems to be a one-day offset within the .sp3 files... */
+
+#define GPS_SYSTEM_START 44244.
+
+static double *get_cached_posns( const char *filename, const int glumph)
 {
    double *rval = fetch_posns_from_cache( glumph);
 
@@ -219,12 +223,16 @@ static double *get_cached_posns( const char *filename, int glumph0,
          {
          double locs[MAX_N_GPS_SATS * 3];
          char buff[200];
-         int i, freq;
+         int i, freq, glumph0;
 
          for( i = 0; i < 2; i++)
             if( !fgets( buff, sizeof( buff), ifile))
                printf( "Error reading line %d\n", i + 1);
          freq = atoi( buff + 25);
+         glumph0 = (int)( (atof( buff + 39) + atof( buff + 45)
+                        - GPS_SYSTEM_START) * glumphs_per_day + .0001);
+         assert( glumph0 > 0);
+         assert( glumph >= glumph0);
          assert( freq == 300 || freq == 900);   /* five or 15 minutes */
          while( read_posns_for_one_glumph( ifile, locs))
             {
@@ -252,8 +260,8 @@ static double *get_cached_posns( const char *filename, int glumph0,
    return( rval);
 }
 
-/* Days between (year) Jan 1 and 1980 Jan 7,  start of the GPS ddddy
-system.  Should return -6 for year=1980,  360 for year=1981. */
+/* Days between (year) Jan 1 and 1980 Jan 7 = MJD 44245,  start of the
+GPS ddddy system.  Should return -6 for year=1980,  360 for year=1981. */
 
 static int start_of_year( const int year)
 {
@@ -289,10 +297,11 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    if( fetch_files)
       try_to_download( command, filename);
    filename[12] = '\0';       /* remove .Z extension */
-   rval = get_cached_posns( filename, day * glumphs_per_day, glumph);
+   rval = get_cached_posns( filename, glumph);
    if( rval)
       return( rval);
 
+#ifdef USE_UNIBE
    sprintf( filename, "COD%04d%d.EPH.Z", day / 7, day % 7);
    sprintf( command, "ftp://ftp.unibe.ch/aiub/CODE/%4d/%s", i, filename);
    if( gps_verbose)
@@ -301,7 +310,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    if( fetch_files)
       try_to_download( command, filename);
    filename[12] = '\0';       /* remove .Z extension */
-   rval = get_cached_posns( filename, day * glumphs_per_day, glumph);
+   rval = get_cached_posns( filename, glumph);
    if( rval)
       return( rval);
 
@@ -312,7 +321,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             glumph - day * glumphs_per_day, command);
    if( fetch_files)
       try_to_download( command, filename);
-   rval = get_cached_posns( filename, day * glumphs_per_day, glumph);
+   rval = get_cached_posns( filename, glumph);
 
    for( i = 0; !rval && i < 5; i++, day--)
       {
@@ -323,9 +332,32 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             glumph - day * glumphs_per_day, command);
       if( fetch_files)
          try_to_download( command, filename);
-      rval = get_cached_posns( filename, day * glumphs_per_day, glumph);
+      rval = get_cached_posns( filename, glumph);
       if( gps_verbose)
          printf( "get_cached_posns: %p\n", (void *)rval);
+      }
+#endif         /* #ifdef USE_UNIBE */
+   for( i = 0; !rval && i < 8; i++)
+      {
+      const int tglumph = glumph + (i - 3) * glumphs_per_day / 4;
+      const int day = tglumph / glumphs_per_day;
+      const int week = day / 7;
+      const int glumphs_per_hour = 4;
+      const int hour = (tglumph % glumphs_per_day) / glumphs_per_hour;
+
+
+      sprintf( filename, "igu%d%d_%02d.sp3.Z",
+                  week, day % 7, (hour / 6) * 6);
+      sprintf( command, "ftp://cddis.gsfc.nasa.gov/pub/gps/products/%d/%s",
+                  week, filename);
+      if( gps_verbose)
+         printf( "IGU file: '%s'\n", command);
+      if( fetch_files)
+         try_to_download( command, filename);
+      filename[15] = '\0';       /* remove .Z extension */
+      rval = get_cached_posns( filename, glumph);
+      if( rval)
+         return( rval);
       }
    return( rval);
 }
