@@ -15,7 +15,7 @@ satellite today and a replacement satellite next year.  So we
 need some sort of cross-designation table to give you the 'real'
 designations.
 
-   The file ftp://ftp.unibe.ch/aiub/BSWUSER52/GEN/I14.ATX gives
+   The file ftp://ftp.aiub.unibe.ch/BSWUSER52/GEN/I14.ATX
 you those cross-designations,  along with a lot of GNSS antenna
 data not relevant to this purpose.
 
