@@ -13,8 +13,8 @@
 #	Note that I've only tried clang on PC-BSD (which is based on FreeBSD).
 
 CC=g++
-LIBSADDED=
 EXE=
+CURL=-lcurl
 CFLAGS=-Wextra -Wall -O3 -pedantic -Wno-unused-parameter -I $(INSTALL_DIR)/include
 
 # You can have your include files in ~/include and libraries in
@@ -30,7 +30,6 @@ endif
 
 ifdef CLANG
 	CC=clang
-	LIBS_ADDED=-lm
 endif
 
 RM=rm -f
@@ -43,7 +42,6 @@ ifdef MSWIN
 	EXE=.exe
 	MKDIR=-mkdir
 else
-	LIBSADDED=-lm
 	MKDIR=mkdir -p
 endif
 
@@ -51,10 +49,10 @@ LIB_DIR=$(INSTALL_DIR)/lib
 LIBSADDED=-L $(LIB_DIR)
 
 ifdef XCOMPILE
-   CC=x86_64-w64-mingw32-g++
-   EXE=.exe
-   LIB_DIR=$(INSTALL_DIR)/win_lib
-   LIBSADDED=-L $(LIB_DIR) -mwindows
+	CC=x86_64-w64-mingw32-g++
+	EXE=.exe
+	LIB_DIR=$(INSTALL_DIR)/win_lib
+	LIBSADDED=-L $(LIB_DIR) -mwindows
 endif
 
 all: names$(EXE) test_gps$(EXE) list_gps$(EXE) list_gps.cgi
@@ -76,11 +74,13 @@ names$(EXE): names.o
 	$(CC) $(CFLAGS) -o names$(EXE) names.o $(LIBSADDED) -llunar
 
 test_gps$(EXE): test_gps.o gps.o
-	$(CC) $(CFLAGS) -o test_gps$(EXE) test_gps.o gps.o $(LIBSADDED) -llunar -lcurl
+	$(CC) $(CFLAGS) -o test_gps$(EXE) test_gps.o gps.o $(LIBSADDED) -llunar $(CURL)
 
 list_gps$(EXE): list_gps.cpp gps.o
-	$(CC) $(CFLAGS) -o list_gps$(EXE) list_gps.cpp gps.o $(LIBSADDED) -llunar -lcurl
+	$(CC) $(CFLAGS) -o list_gps$(EXE) list_gps.cpp gps.o $(LIBSADDED) -llunar $(CURL) -lm
 
 list_gps.cgi  : list_gps.cpp gps.o
-	$(CC) $(CFLAGS) -o list_gps.cgi   list_gps.cpp gps.o $(LIBSADDED) -llunar -lcurl -DCGI_VERSION ../find_orb/cgi_func.o
+	$(CC) $(CFLAGS) -o list_gps.cgi   list_gps.cpp gps.o $(LIBSADDED) -llunar $(CURL) -lm -DCGI_VERSION ../find_orb/cgi_func.o
 
+gps.o: gps.cpp
+	$(CC) $(CFLAGS) $(CURLI) -c $<
