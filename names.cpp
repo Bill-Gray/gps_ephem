@@ -75,13 +75,37 @@ static void output_line( const char *name, const char *from, const char *until)
                name + 20, name + 40, name + 50, len, name);
 }
 
+static const char *beidou_and_qzs =
+   "00000 99999 C11      2012-018A Beidou 12\n"
+   "00000 99999 C12      2012-018B Beidou 13\n"
+   "00000 99999 C05      2012-008A Beidou 11\n"
+   "00000 99999 C02      2012-059A Beidou 16\n"
+   "00000 99999 C09      2011-038A Beidou 9\n"
+   "00000 99999 C10      2011-073A Beidou 10\n"
+   "00000 99999 C06      2010-036A Beidou 5\n"
+   "00000 99999 C13      2016-021A Beidou IGSO-6\n"
+   "00000 99999 C03      2010-024A Beidou 4\n"
+   "00000 99999 C08      2011-013A Beidou 8\n"
+   "00000 99999 C07      2010-068A Beidou 7\n"
+   "00000 99999 C01      2010-001A Beidou 3\n"
+   "00000 99999 C04      2010-057A Beidou 6\n"
+   "00000 99999 C14      2012-050B Beidou 15\n"
+   "00000 99999 J01      2010-045A QZS-1 (MICHIBIKI)\n"
+   "00000 99999 J02      2017-028A QZS-2\n";
+
+
 int main( const int argc, const char **argv)
 {
    FILE *ifile = fopen( "I14.ATX", "rb");
    char name[BUFF_SIZE], from[BUFF_SIZE], until[BUFF_SIZE], buff[BUFF_SIZE];
    bool done = false;
 
-   assert( ifile);
+   if( !ifile)
+      {
+      printf( "This program needs the file I14.ATX.  Download it from\n"
+              "ftp://ftp.aiub.unibe.ch/BSWUSER52/GEN/I14.ATX\n");
+      return( -1);
+      }
    *name = *from = *until = '\0';
    printf( "#  See 'names.cpp'\n");
    while( !done && fgets( buff, sizeof( buff), ifile))
@@ -102,5 +126,6 @@ int main( const int argc, const char **argv)
          strcpy( until, buff);
       }
    fclose( ifile);
+   printf( "%s", beidou_and_qzs);
    return( 0);
 }
