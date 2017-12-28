@@ -23,7 +23,7 @@ measure matches the "expected" position to your desired level of accuracy.
 
 Note that these utilities are available on-line at
 
-https://www.projectpluto.com/list_gps.htm
+https://projectpluto.com/gps_find.htm
 
 I expect almost everyone will simply visit the above site,  rather than go to
 the trouble of building and running the code on their own machines.
