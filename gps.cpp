@@ -7,7 +7,10 @@
 #include <unistd.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <math.h>
 #include "gps.h"
+#include "watdefs.h"
+#include "afuncs.h"
 
 static size_t total_written;
 int gps_verbose;
@@ -76,7 +79,6 @@ static void try_to_download( const char *url, const char *filename)
       }
 }
 
-
 /* GPS ephems are provided at fifteen-minute intervals.  We'll call
 15 minutes = 1 "glumph",  for convenience.  I hope it's obvious,  but
 there are 96 glumphs in a day. */
@@ -114,6 +116,7 @@ typedef struct
 static cached_posns_t *cache[N_CACHED];
 
 static char desigs[MAX_N_GPS_SATS][4];
+char is_from_tle[MAX_N_GPS_SATS];
 
 static int desig_to_index( const char *desig)
 {
@@ -442,4 +445,203 @@ int get_gps_positions( double *output_coords, const double mjd_gps)
          }
       }
    return( err_code);
+}
+
+char *fgets_trimmed( char *buff, size_t max_bytes, FILE *ifile)
+{
+   char *rval = fgets( buff, (int)max_bytes, ifile);
+
+   if( rval)
+      {
+      int i;
+
+      for( i = 0; buff[i] && buff[i] != 10 && buff[i] != 13; i++)
+         ;
+      buff[i] = '\0';
+      }
+   return( rval);
+}
+
+char **load_file_into_memory( const char *filename, size_t *n_lines)
+{
+   FILE *ifile = fopen( filename, "rb");
+   char **rval = NULL;
+
+   if( ifile)
+      {
+      size_t filesize = 0, lines_read = 0;
+      char buff[400];
+
+      while( fgets_trimmed( buff, sizeof( buff), ifile))
+         {
+         lines_read++;
+         filesize += strlen( buff) + 1;
+         }
+      rval = (char **)malloc( filesize + (lines_read + 1) *  sizeof( char *));
+      if( rval &&
+             (rval[0] = (char *)( rval + lines_read + 1)) != NULL)
+         {
+         fseek( ifile, 0L, SEEK_SET);
+         lines_read = 0;
+         while( fgets_trimmed( buff, sizeof( buff), ifile))
+            {
+            strcpy( rval[lines_read], buff);
+            rval[lines_read + 1] = rval[lines_read] + strlen( buff) + 1;
+            lines_read++;
+            }
+         rval[lines_read] = NULL;
+         }
+      fclose( ifile);
+      if( n_lines)
+         *n_lines = lines_read;
+      }
+   return( rval);
+}
+
+/* Used for cross-designations/identifications.  This looks through the file
+'names.txt' (see 'names.cpp' for a discussion of how this was made).  If the
+search string is three characters,  it's assumed to be a letter/number/number
+designator and we look for that text.  Otherwise,  it's assumed to be a
+six-character international YYNNNletter designation,  and we look for that
+instead.  A pointer to the relevant line from 'names.txt' is returned. */
+
+const char *get_name_data( const char *search_str, const int mjd)
+{
+   static char **lines;
+   const char *rval = NULL;
+
+   if( !search_str)
+      {
+      if( lines)
+         free( lines);
+      lines = NULL;
+      }
+   else
+      {
+      size_t i = 0;
+      const size_t search_len = strlen( search_str);
+
+      if( !lines)
+         lines = load_file_into_memory( "names.txt", NULL);
+      assert( lines);
+      while( lines[i] && !rval)
+         {
+         const int ids_match = (search_len == 3 ?
+                     !memcmp( search_str, lines[i] + 12, 3)
+                   : !memcmp( search_str, lines[i] + 23, 2)
+                           && !memcmp( search_str + 2, lines[i] + 26, 4));
+
+         if( ids_match &&
+                mjd >= atoi( lines[i]) && mjd <= atoi( lines[i] + 6))
+            rval = lines[i];
+         i++;
+         }
+      }
+   return( rval);
+}
+
+#include "norad.h"
+
+static const char *gnss_filename = "gnss.tle";
+
+static int extract_gnss_tles( const char *tle_filename, const int mjd_gps)
+{
+   FILE *ifile = fopen( tle_filename, "rb");
+   FILE *ofile = fopen( gnss_filename, "wb");
+   char line0[100], line1[100], line2[100];
+   int rval = 0;
+
+   assert( ifile);
+   assert( ofile);
+   *line0 = *line1 = '\0';
+   while( fgets( line2, sizeof( line2), ifile))
+      {
+      tle_t tle;
+      const char *name_line;
+
+      if( *line2 == '2' && *line1 == '1'
+               && (name_line = get_name_data( line1 + 9, (int)mjd_gps)) != NULL
+               && parse_elements( line1, line2, &tle) >= 0)
+         fprintf( ofile, "%s%s%s", line0, line1, line2);
+      strcpy( line0, line1);
+      strcpy( line1, line2);
+      }
+   fclose( ifile);
+   fclose( ofile);
+   return( rval);
+}
+
+
+/* We read in TLEs,  and check to see that the object's international ID
+(the YYNNNletter one) matches a GNSS satellite for that date,  as listed
+in 'names.txt'.  We also check to see that the position for the satellite
+is all zeroes;  if it isn't,  it means the position was already computed,
+much more accurately,  using .sp3 data.
+
+   Tabulated ephems in .sp3 files are in earth-centered,  earth-fixed coords
+(i.e.,  if the satellite is above lat=lon=0,  it'll have y=z=0.)  The results
+from SDP4 are in earth-centered coordinates of date.  So we have to "remove"
+the earth's rotation. */
+
+int get_gps_positions_from_tle( const char *tle_filename,
+                        double *output_coords, const double mjd_gps)
+{
+   FILE *ifile;
+   char line0[100], line1[100], line2[100];
+   int rval = 0;
+   const double tdt_minus_tai = 32.184;       /* seconds */
+   const double tai_minus_gps = 19.;      /* seconds */
+   const double tdt_minus_gps = tdt_minus_tai + tai_minus_gps;
+   const double utc_minus_gps =
+               tdt_minus_gps - td_minus_utc( mjd_gps + 2400000.5);
+   const double mjd_utc = mjd_gps + utc_minus_gps / seconds_per_day;
+   const double rotation = green_sidereal_time( mjd_utc + 2400000.5);
+   static int gnss_tle_created = 0;
+
+   if( !gnss_tle_created)
+      {
+      extract_gnss_tles( tle_filename, (int)mjd_gps);
+      gnss_tle_created = 1;
+      }
+   ifile = fopen( gnss_filename, "rb");
+   assert( ifile);
+   if( !ifile)
+      return( -1);
+   *line0 = *line1 = '\0';
+   while( fgets( line2, sizeof( line2), ifile))
+      {
+      tle_t tle;
+      const char *name_line;
+
+      if( *line2 == '2' && *line1 == '1'
+               && (name_line = get_name_data( line1 + 9, (int)mjd_gps)) != NULL
+               && parse_elements( line1, line2, &tle) >= 0)
+         {
+         char desig[5];
+         double *posn, t_since, tval;
+         double sat_params[N_SAT_PARAMS];
+         int idx;
+
+         memcpy( desig, name_line + 12, 3);
+         desig[3] = '\0';
+         idx = desig_to_index( desig);
+         posn = output_coords + 3 * idx;
+
+         if( !posn[0] && !posn[1] && !posn[2])
+            {
+            SDP4_init( sat_params, &tle);
+            t_since = mjd_utc - (tle.epoch - 2400000.5);
+            SDP4( t_since * minutes_per_day, &tle, sat_params, posn, NULL);
+            tval = posn[0] * cos( rotation) + posn[1] * sin( rotation);
+            posn[1] = posn[1] * cos( rotation) - posn[0] * sin( rotation);
+            posn[0] = tval;
+            is_from_tle[idx] = 1;
+            rval++;
+            }
+         }
+      strcpy( line0, line1);
+      strcpy( line1, line2);
+      }
+   fclose( ifile);
+   return( rval);
 }
