@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html><head>
+   <title> Calibrating timing of astronomical images using navigation satellites </title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   <meta name="Author" content="Bill Gray">
+</head>
+
+<h1> Calibrating timing of astronomical images using navigation satellites </h1>
+
+<h2> Overview </h2>
+
+<p> Getting the timing right in astronomical imaging is both
+important and surprisingly difficult to do.  The common tendency seems
+to be to say that you've corrected the time on your computer using
+GPS signals or NTP,  and that therefore,  the time written out in
+your image files must be that of the midpoint of the exposure.
+
+<p> Sadly,  while your computer may indeed be synched to have
+almost exactly the right time,  the time in your images can still
+be considerably off.  I've seen cases where the times were for the
+beginning of the exposure.  Or the end of exposure.  Or,  for reasons
+that passeth all understanding,  one exposure duration too early.
+Or the time the image was written out to the hard disk.
+
+<p> About the only way to really verify that the image times are
+correct is to check them against a known object.  Global Navigation
+Satellite Systems (GNSS) provide satellites that move about 40 arcseconds
+per second.  If you image one and can measure the endpoints of its
+trail to within (say) two arcseconds,  you've basically fixed the
+time at which the image was taken to within 1/20 second.
+
+<p> Positions are available for GNSS satellites from five systems:
+GPS (United States),  GLONASS (Soviet Union/Russia),  Galileo (Europe),
+BeiDou (China),  and QZSS (Japan).  The positions should be good to
+within centimeters,  more than good enough for our purposes.
+
+<p> The basic procedure is to <a href="gps_find.htm"> get a list of
+GNSS satellites visible at your location for a given time.</a>  You
+can then pick out one or more to observe;  I recommend choosing those
+at high elongations from the sun,  but not actually in the earth's
+shadow.  The brightness of these satellites tends to drop quickly
+when they're far from opposition.
+
+<p> Then,  for each satellite you wish to observe,  you can
+<a href="gps_eph.htm"> create ephemerides for a particular satellite</a>
+and go out and observe it.  The difference between where you measure
+its position and the ephemeris position gives you your timing offset.
+
+<p> I recommend observing multiple satellites (to reduce the chances
+for error) and to use different exposure durations.  This last point
+is significant.  You could observe lots of satellites with,  say,  a
+ten-second exposure,  and determine that your timing was off by
+seven seconds,  and adjust your timing accordingly.
+
+<p> What you might fail to notice in this case is that a 20-second
+duration would be off by twelve seconds,  if the time reported was
+that of the end of the exposure,  plus two seconds while the image
+was downloaded from the camera.
+
+<h2> <a name="tles"> Ephemeris sources </a> </h2>
+
+<p> <i>Usually</i>,  the tools on this site can just give you an
+accurate position for the GNSS satellites,  and you can regard that
+as the answer you'd get if your timing was good to within 1/40
+second or so.
+
+<p> Ppositions at that level of accuracy are
+available a few days in advance for GPS and GLONASS satellites.
+For Galileo,  BeiDou,  and QZSS satellites,  you only get that level
+of accuracy a few days late.  These tools will give you positions
+for such satellites in those cases,  usually good to within a few
+arcminutes.  So you can go out,  observe a BeiDou or Galileo satellite,
+then wait a few days for the precise ephemerides to become available.
+
+<p> I realize that this is somewhat annoying.  Unfortunately,  we
+seem to be stuck with it.  I'm getting the "imprecise" positions
+from <a href="tle_info.htm"> TLEs (Two-Line Elements)</a>.  Without
+those,  we'd have no idea where to look in advance for Galileo,
+BeiDou,  or QZSS objects.  We'd know exactly where they had been,
+but not where to point our telescopes tonight.
+
+<h2> <a name="to_do"> Remaining things to do </a> </h2>
+
+<p> &bull; It would be convenient if you could simply upload your
+astrometric data and get back a report on what your timing offsets
+were for each observation.  This is high on my agenda.
+
+<p> &bull; None of this helps with figuring out what your timing
+may have been,  say,  two years ago.  I'm thinking of providing a
+tool in which you can upload a list of images you've made over the
+years:  "I got the following RA/dec rectangle at thus-and-such time",
+repeated for each image.  The tool could then tell you in which
+images you got GNSS objects.
+
+<p> The problem with this is that there are around 80 GNSS satellites,
+or about one in every 500 square degrees of sky.  If you're a big
+asteroid survey,  this ought to give you plenty of opportunities
+to spot-check your timing (i.e.,  you don't get checking on every
+image,  but enough to see night-to-night variations).  For smaller
+scale observers,  you'll just get a spot-check at larger intervals.
+
+<h2> <a name="contact"> Contact info </a> </h2>
+
+<p> I can be reached at
+p&#x202e;&#x43e;&#xe7;.&ouml;t&#x16d;lp&#x165;&#x441;&eacute;&#x458;&ocirc;&#x159;p&#x40;ot&uacute;l&#x202c;m.
+If you're a human instead of a spambot,  you can probably figure out
+how to remove the diacritical marks... </p>
+
+</body></html>

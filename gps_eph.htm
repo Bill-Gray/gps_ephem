@@ -7,8 +7,13 @@
 <body>
 <h1> GNSS satellites ephems </h1>
 
+<p> <i> <a href="#changes"> Updated 2018 Jan 1 </a> </i> </p>
+
+<p> <a href="gps_expl.htm"> Click here for an explanation of what this page
+is and why it exists. </a> </p>
+
 <p> Use the form below to create ephemerides for <a href="#gnss">
-GNSS satellites </a> (GPS,  Galileo,  GLONASS,  etc.)
+GNSS satellites </a> (GPS,  Galileo,  GLONASS,  BeiDou,  and JXSS.)
 You can use <a href="gps_find.htm"> this form to find out which GNSS
 satellites are visible from your site. </a> </p>
 
@@ -21,11 +26,14 @@ action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want t
   <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="5" size="5">
   <p> Step size: <input name="step" id="step" maxlength="10" size="10" value="1m">
   <p> Number of ephemeris steps: <input name="n_steps" id="n_steps" maxlength="10" size="10" value="20">
+<br>
+<input type="radio" name="ang_fmt" value="0" checked="checked"> RA/dec in base 60 (Babylonian) <br>
+<input type="radio" name="ang_fmt" value="1"                  > RA/dec in decimal degrees <br>
 
 <p><input value=" Create ephemerides " type="submit"> <input value=" Reset " type="reset">
 </p><hr> </form>
 
-<p> <b> Step size </b> can end in 'm' for minutes.  Otherwise,  assumed to be seconds. </p>
+<p> <b> Step size </b> can end in 'm' for minutes or 'd' for days.  Otherwise,  assumed to be seconds. </p>
 
 <p> There are <a href="tools.htm"> several other tools for asteroid observers</a>
 on this site,  including <a href="gps_find.htm"> a tool to list GNSS satellites
@@ -87,18 +95,14 @@ now <a href="https://github.com/Bill-Gray/gps_ephem"> available at GitHub. </a>
 
 <p> <a name="gnss"> <b> 'GNSS' </b> (Global Navigation Satellite System)
 includes GPS,  GLONASS,  Galileo,
-QZSS,  and BeiDou satellites.  You can get positions for GPS and GLONASS
+QZSS,  and BeiDou satellites.  You can get precise positions for GPS and GLONASS
 for dates starting about a day ago and running a few days into the future (i.e.,
 predictions are available).  For Galileo,  QZSS,  and BeiDou,  this is
-sadly not the case.  You'll get data for them,  but only a day or so "late". </p>
+sadly not the case.  You get approximate positions for finding them,  but
+the precise positions needed to really check your timing lag by a few days. </p>
 
-<p> I realize that makes them nearly useless for testing your timing;
-obviously,  you need some advance notice as to which direction to
-point your telescope.  I'm working on this... I've inquiries into
-various places as to where predictive ephems for all satellite systems
-might be found.  If worst comes to worst,  I'll take the "day old" ephems
-and integrate them ahead to the desired times.  But I'd really rather not
-do that. </p>
+<p> I realize this is an annoyance:  you can image the objects,  but then
+have to wait a few days to actually check your timing. </p>
 
 <h2> <a name="ack"> Acknowledgments </a> </h2>
 
@@ -107,6 +111,21 @@ thoughts on using navigation satellites for timing astrometry,  and for
 providing <a href="https://www.projectpluto.com/pluto/mpecs/navst43.htm">
 some example astrometry for testing that I was getting the right answers.
 </a> </p>
+
+<h2> <a name="changes"> Change log </a> </h2>
+
+<p> (2018 Jan 1) Galileo,  BeiDou,  and JXSS navsats are now also listed,
+along with the GPS and GLONASS satellites,  even for "current" times.
+My hope is that this will provide alternative,  possibly brighter targets.
+Be warned,  though,  that there's a slight element of inconvenience to them.
+I can tell you where to look for these objects,  with an accuracy of an
+arcminute or so.  But it takes a few days before really precise positions
+are available for them.  Basically,  you can look here,  find out where
+to get these satellites,  and then check back in a few days to learn where
+they "really" were. </p>
+
+<p> (2018 Jan 1) Also,  if the step size is in decimal minutes or days,
+the output ephems are labelled in decimal minutes or days. </p>
 
 <h2> <a name="contact"> Contact info </a> </h2>
 
