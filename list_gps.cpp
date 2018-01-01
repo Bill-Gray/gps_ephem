@@ -105,13 +105,23 @@ static void compute_aberration( const double t_cen, double *ra, double *dec)
    *dec += ((x * cos_ra + y * sin_ra) * sin( *dec) - z * cos( *dec)) / c;
 }
 
-static const char *show_base_60( const double ival, char *buff)
-{
-   const long mas = (long)( ival * 3600. * 1000.);
+static bool show_decimal_degrees = false;
 
-   sprintf( buff, "%02ld %02ld %02ld.%03ld",
+static const char *show_base_60( const double ival, char *buff, const int is_ra)
+{
+
+   if( show_decimal_degrees)
+      {
+      snprintf( buff, 13, (is_ra ? "%012.8f" : "%011.8f "), ival);
+      }
+   else
+      {
+      const long mas = (long)( ival * (is_ra ? 240. : 3600.) * 1000.);
+
+      snprintf( buff, 13, "%02ld %02ld %02ld.%03ld",
                mas / 3600000L, (mas / 60000L) % 60L,
                (mas / 1000L) % 60L, mas % 1000L);
+      }
    return( buff);
 }
 
@@ -131,7 +141,7 @@ typedef struct
    double j2000_topo[3], j2000_geo[3];
    double topo_r;
    double ra, dec, alt, az, elong;
-   bool in_shadow;
+   bool in_shadow, is_from_tle;
 } gps_ephem_t;
 
 static void set_ra_dec( gps_ephem_t *loc, const double year)
@@ -208,6 +218,19 @@ static void set_designations( const size_t n_sats, gps_ephem_t *loc,
       }
 }
 
+static double curr_jd( void)
+{
+   const double jd_1970 = 2440587.5;
+
+   return( jd_1970 + (double)time( NULL) / seconds_per_day);
+}
+
+#define USE_TLES_ONLY         0
+#define USE_SP3_ONLY          1
+#define USE_TLES_AND_SP3      2
+
+int tle_usage = USE_TLES_AND_SP3;
+
 static int compute_gps_satellite_locations( gps_ephem_t *locs,
          const double jd_utc, const double lon,
          const double rho_cos_phi, const double rho_sin_phi)
@@ -246,7 +269,13 @@ static int compute_gps_satellite_locations( gps_ephem_t *locs,
    alt_az_matrix[7] = sin( lon) * cos( lat);
    alt_az_matrix[8] =             sin( lat);
    gps_time -= .07 / seconds_per_day;     /* light-time lag,  or close enough */
-   err_code = get_gps_positions( sat_locs, gps_time - 2400000.5);
+
+   if( tle_usage != USE_TLES_ONLY)
+      err_code = get_gps_positions( sat_locs, gps_time - 2400000.5);
+   else
+      for( i = 0; i < MAX_N_GPS_SATS * 3; i++)
+         tptr[i] = 0.;
+
    if( err_code)
       {
       printf( "Couldn't get satellite positions : %d\n", err_code);
@@ -257,6 +286,19 @@ static int compute_gps_satellite_locations( gps_ephem_t *locs,
 #endif
       return( err_code);
       }
+
+   if( tle_usage != USE_SP3_ONLY)
+      if( curr_jd( ) < jd_utc + 3. || tle_usage == USE_TLES_ONLY)
+#ifdef CGI_VERSION
+         get_gps_positions_from_tle( "../../tles/all_tle.txt", sat_locs,
+                     gps_time - 2400000.5);
+#else
+         get_gps_positions_from_tle( "../tles/all_tle.txt", sat_locs,
+                     gps_time - 2400000.5);
+#endif
+           /* Above paths are for my ISP's server and my own desktop,
+              respectively.  Alter to suit file paths on your machine. */
+
    get_unit_vector_to_sun( year, sun_vect);
 
    for( i = 0; i < MAX_N_GPS_SATS; i++, tptr += 3)
@@ -264,6 +306,7 @@ static int compute_gps_satellite_locations( gps_ephem_t *locs,
          {
          int j;
          double alt_az_vect[3];
+         extern char is_from_tle[];
 
          deprecess_vector( precess_matrix, tptr, locs->j2000_geo);
          for( j = 0; j < 3; j++)
@@ -285,6 +328,7 @@ static int compute_gps_satellite_locations( gps_ephem_t *locs,
                locs->az += PI + PI;
             locs->in_shadow = ( dot_prod > 0. && geocentric_dist_2 <
                  dot_prod * dot_prod + EARTH_SEMIMAJOR_AXIS * EARTH_SEMIMAJOR_AXIS);
+            locs->is_from_tle = is_from_tle[i];
             locs++;
             rval++;
             }
@@ -294,19 +338,27 @@ static int compute_gps_satellite_locations( gps_ephem_t *locs,
 }
 
 bool creating_fake_astrometry = false;
+bool asterisk_has_been_shown = false;
 
 static void display_satellite_info( const gps_ephem_t *loc, const bool show_ids)
 {
    char ra_buff[30], dec_buff[30];
    const char *ra_dec_fmt = (creating_fake_astrometry ? "%s%c%.11s" :
-                                                        " %s %c%s");
+                                                        "%s %c%s");
 
    if( show_ids)
       printf( "%s: ", loc->obj_desig);
+
+   if( !creating_fake_astrometry)
+      {
+      printf( loc->is_from_tle ? "*" : " ");
+      if( loc->is_from_tle)
+         asterisk_has_been_shown = true;
+      }
    printf( ra_dec_fmt,
-               show_base_60( loc->ra * 12. / PI, ra_buff),
+               show_base_60( loc->ra * 180. / PI, ra_buff, 1),
                (loc->dec < 0. ? '-' : '+'),
-               show_base_60( fabs( loc->dec * 180. / PI), dec_buff));
+               show_base_60( fabs( loc->dec * 180. / PI), dec_buff, 0));
    if( !creating_fake_astrometry)
       {
       printf( "  %.5f %6.1f%6.1f", loc->topo_r,
@@ -349,6 +401,9 @@ static void sort_sat_info( const int n_sats, gps_ephem_t *locs, const int criter
             case 5:
                compare = strcmp( locs[i].international_desig, locs[j].international_desig);
                break;
+            case 6:
+               compare = (locs[i].dec > locs[j].dec ? 1 : -1);
+               break;
             }
          if( criterion < 0)       /* negative 'criterion' = descending order */
             compare = -compare;
@@ -366,6 +421,18 @@ int sort_order = 1;          /* default = sort by elongation */
 
 char ephem_step[50], ephem_target[10];
 int n_ephem_steps = 20;
+
+static const char *asterisk_message =
+   "Objects marked with an asterisk have less accurate positions.  They're\n"
+   "good enough to let you find the object (usually within an arcminute or\n"
+   "two).  Observe them and try to get ephemerides again a few days later,\n"
+   "and precise positions will probably be available.\n"
+#ifdef CGI_VERSION
+   "<a href=\"https://www.projectpluto.com/gps_expl.htm#tles\">"
+   "Click here for more information.</a>\n";
+#else
+   "Visit https://www.projectpluto.com/gps_expl.htm#tles for more info.\n";
+#endif
 
 int dummy_main( const char *time_text, const char *observatory_code)
 {
@@ -421,17 +488,28 @@ int dummy_main( const char *time_text, const char *observatory_code)
       double step_size = atof( ephem_step);
       const char end_char = ephem_step[strlen( ephem_step) - 1];
       int j, k;
+      int time_format = FULL_CTIME_YMD
+                                    | FULL_CTIME_LEADING_ZEROES
+                                    | FULL_CTIME_MONTHS_AS_DIGITS;
 
       if( end_char == 'm')
+         {
          step_size /= minutes_per_day;
-      else
+         time_format |= FULL_CTIME_FORMAT_HH_MM | FULL_CTIME_5_PLACES;
+         }
+      else if( end_char == 'd')
+         time_format |= FULL_CTIME_FORMAT_DAY | FULL_CTIME_8_PLACES;
+      else        /* assume seconds */
+         {
          step_size /= seconds_per_day;
+         time_format |= FULL_CTIME_MILLISECS;
+         }
       if( creating_fake_astrometry)
          printf( "COM Time sigma 1e-9\n");
       else
          {
          printf( "Target object: %s\n", ephem_target);
-         printf( "HH:MM:SS  RA     (J2000)     dec     dist (km)     Azim  Alt  Elo\n");
+         printf( "UTC date/time             RA    (J2000)     dec     dist (km)     Azim  Alt  Elo\n");
          }
       for( i = 0; i < n_ephem_steps; i++)
          {
@@ -451,11 +529,13 @@ int dummy_main( const char *time_text, const char *observatory_code)
                if( tbuff[j] != ' ')
                   tbuff[k++] = tbuff[j];
             tbuff[k] = '\0';
-            printf( "     GNS%s   ", ephem_target);
+            printf( "     GNS%s   %s\n", ephem_target, tbuff);
             }
          else
-            full_ctime( tbuff, curr_utc, FULL_CTIME_TIME_ONLY);
-         printf( "%s", tbuff);
+            {
+            full_ctime( tbuff, curr_utc, time_format | FULL_CTIME_ROUNDING);
+            printf( "%-23s", tbuff);
+            }
          n_sats = compute_gps_satellite_locations( loc, curr_utc, lon,
                                                 rho_cos_phi, rho_sin_phi);
 
@@ -478,6 +558,8 @@ int dummy_main( const char *time_text, const char *observatory_code)
       }
    load_earth_orientation_params( NULL);   /* free up memory */
    free_cached_gps_positions( );
+   if( asterisk_has_been_shown)
+      printf( "%s", asterisk_message);
    return( 0);
 }
 
@@ -533,6 +615,8 @@ int main( const int argc, const char **argv)
          sort_order = atoi( buff);
       if( !strcmp( field, "n_steps") && strlen( buff) < 10)
          n_ephem_steps = atoi( buff);
+      if( !strcmp( field, "ang_fmt") && *buff == '1')
+         show_decimal_degrees = true;
       if( !strcmp( field, "step") && strlen( buff) < 10)
          strcpy( ephem_step, buff);
       if( !strcmp( field, "obj") && strlen( buff) < 10)
@@ -569,11 +653,17 @@ int main( const int argc, const char **argv)
             case 'a': case 'A':
                minimum_altitude = atof( argv[i] + 2) * PI / 180.;
                break;
+            case 'd': case 'D':
+               show_decimal_degrees = true;
+               break;
             case 'n': case 'N':
                n_ephem_steps = atoi( argv[i] + 2);
                break;
             case 's': case 'S':
                sort_order = atoi( argv[i] + 2);
+               break;
+            case 't': case 'T':
+               tle_usage = atoi( argv[i] + 2);
                break;
             case 'v': case 'V':
                {
