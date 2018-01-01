@@ -74,13 +74,13 @@ names$(EXE): names.o
 	$(CC) $(CFLAGS) -o names$(EXE) names.o $(LIBSADDED) -llunar
 
 test_gps$(EXE): test_gps.o gps.o
-	$(CC) $(CFLAGS) -o test_gps$(EXE) test_gps.o gps.o $(LIBSADDED) -llunar $(CURL)
+	$(CC) $(CFLAGS) -o test_gps$(EXE) test_gps.o gps.o $(LIBSADDED) -llunar $(CURL) -lsatell
 
 list_gps$(EXE): list_gps.cpp gps.o
-	$(CC) $(CFLAGS) -o list_gps$(EXE) list_gps.cpp gps.o $(LIBSADDED) -llunar $(CURL) -lm
+	$(CC) $(CFLAGS) -o list_gps$(EXE) list_gps.cpp gps.o $(LIBSADDED) -llunar $(CURL) -lm -lsatell
 
 list_gps.cgi  : list_gps.cpp gps.o
-	$(CC) $(CFLAGS) -o list_gps.cgi   list_gps.cpp gps.o $(LIBSADDED) -llunar $(CURL) -lm -DCGI_VERSION ../find_orb/cgi_func.o
+	$(CC) $(CFLAGS) -o list_gps.cgi   list_gps.cpp gps.o $(LIBSADDED) -llunar $(CURL) -lm -lsatell -DCGI_VERSION
 
 gps.o: gps.cpp
 	$(CC) $(CFLAGS) $(CURLI) -c $<
