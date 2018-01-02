@@ -487,7 +487,7 @@ int dummy_main( const char *time_text, const char *observatory_code)
       {
       double step_size = atof( ephem_step);
       const char end_char = ephem_step[strlen( ephem_step) - 1];
-      int j, k;
+      int j;
       int time_format = FULL_CTIME_YMD
                                     | FULL_CTIME_LEADING_ZEROES
                                     | FULL_CTIME_MONTHS_AS_DIGITS;
@@ -517,19 +517,11 @@ int dummy_main( const char *time_text, const char *observatory_code)
 
          if( creating_fake_astrometry)
             {
-            full_ctime( tbuff, curr_utc, FULL_CTIME_YMD
+            full_ctime( tbuff, curr_utc, FULL_CTIME_YMD | FULL_CTIME_MICRODAYS
                                     | FULL_CTIME_LEADING_ZEROES
-                                    | FULL_CTIME_MONTHS_AS_DIGITS
-                                    | FULL_CTIME_MILLISECS);
-            tbuff[0] = 'C';
-            tbuff[1] = (tbuff[1] == '9' ? 'J' : 'K');
-            tbuff[10] = ':';
-            tbuff[13] = tbuff[16] = tbuff[19] = ' ';
-            for( j = k = 0; tbuff[j]; j++)
-               if( tbuff[j] != ' ')
-                  tbuff[k++] = tbuff[j];
-            tbuff[k] = '\0';
-            printf( "     GNS%s   %s\n", ephem_target, tbuff);
+                                    | FULL_CTIME_ROUNDING
+                                    | FULL_CTIME_MONTHS_AS_DIGITS);
+            printf( "     GNS%s   C%s", ephem_target, tbuff);
             }
          else
             {
