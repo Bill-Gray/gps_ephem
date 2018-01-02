@@ -609,6 +609,8 @@ int main( const int argc, const char **argv)
          n_ephem_steps = atoi( buff);
       if( !strcmp( field, "ang_fmt") && *buff == '1')
          show_decimal_degrees = true;
+      if( !strcmp( field, "ang_fmt") && *buff == '2')
+         creating_fake_astrometry = true;
       if( !strcmp( field, "step") && strlen( buff) < 10)
          strcpy( ephem_step, buff);
       if( !strcmp( field, "obj") && strlen( buff) < 10)
