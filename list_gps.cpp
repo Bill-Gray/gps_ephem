@@ -112,7 +112,7 @@ static const char *show_base_60( const double ival, char *buff, const int is_ra)
 
    if( show_decimal_degrees)
       {
-      snprintf( buff, 13, (is_ra ? "%012.8f" : "%011.8f "), ival);
+      snprintf( buff, 30, (is_ra ? "%012.8f" : "%011.8f "), ival);
       }
    else
       {
@@ -452,11 +452,17 @@ int dummy_main( const char *time_text, const char *observatory_code)
    printf( "GPS positions for JD %f = %s UTC\n", utc, tbuff);
    if( err_code <= 0)
       {
-      printf( "Problem loading EOPs:  rval %d\n", err_code);
+      printf( "\nProblem loading EOPs (Earth Orientation Parameters):  rval %d\n", err_code);
 #ifdef CGI_VERSION
       printf( "Please notify the owner of this site.  New Earth Orientation Parameters\n"
               "need to be uploaded every few months (they can't be predicted far in\n"
               "advance).  The owner appears to have forgotten to do this.\n");
+#else
+      printf( "You probably need to download the EOP file\n"
+              "ftp://maia.usno.navy.mil/ser7/finals.all\n"
+              "This needs to be downloaded every few months (the earth's orientation\n"
+              "can't be predicted far in advance).  Get a current 'finals.all',  and\n"
+              "this error will probably go away.\n\n");
 #endif
      }
    if( utc > curr_t + 4.)
