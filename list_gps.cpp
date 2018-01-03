@@ -639,7 +639,19 @@ int main( const int argc, const char **argv)
 {
    int i;
 
-   assert( argc > 2);
+   if( argc < 3)
+      {
+      printf( "list_gps (date/time) (MPC station)   (to get a list of sats)\n"
+              "list_gps (date/time) (MPC station) (target) (ephem step)\n\n"
+              "-a(alt)     Set minimum altitude (default=0)\n"
+              "-d          RA/decs shown in decimal degrees\n"
+              "-n(#)       Set number of ephemeris steps shown\n"
+              "-s(#)       Set sort order\n"
+              "-t(#)       Set TLE usage: 1=don't use them, 0=use only TLEs\n"
+              "-v          Verbose mode\n"
+              "-z          Ephemerides are simulated 80-column MPC astrometry\n");
+      return( -1);
+      }
    for( i = 1; i < argc; i++)
       if( argv[i][0] == '-')
          switch( argv[i][1])
