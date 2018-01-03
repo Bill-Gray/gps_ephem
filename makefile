@@ -74,7 +74,7 @@ names$(EXE): names.o
 	$(CC) $(CFLAGS) -o names$(EXE) names.o $(LIBSADDED) -llunar
 
 test_gps$(EXE): test_gps.o gps.o
-	$(CC) $(CFLAGS) -o test_gps$(EXE) test_gps.o gps.o $(LIBSADDED) -llunar $(CURL) -lsatell
+	$(CC) $(CFLAGS) -o test_gps$(EXE) test_gps.o gps.o $(LIBSADDED) -llunar $(CURL) -lm -lsatell
 
 list_gps$(EXE): list_gps.cpp gps.o
 	$(CC) $(CFLAGS) -o list_gps$(EXE) list_gps.cpp gps.o $(LIBSADDED) -llunar $(CURL) -lm -lsatell
