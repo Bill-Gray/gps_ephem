@@ -419,6 +419,10 @@ static void sort_sat_info( const int n_sats, gps_ephem_t *locs, const int criter
 
 int sort_order = 1;          /* default = sort by elongation */
 
+#define ERR_CODE_TOO_FAR_IN_FUTURE        -903
+#define ERR_CODE_TOO_FAR_IN_PAST          -904
+#define ERR_CODE_OBSERVATORY_UNKNOWN      -905
+
 char ephem_step[50], ephem_target[10];
 int n_ephem_steps = 20;
 
@@ -468,12 +472,12 @@ int dummy_main( const char *time_text, const char *observatory_code)
    if( utc > curr_t + 4.)
       {
       printf( "Predictions are only available for about four days in advance.\n");
-      err_code = -903;
+      return( ERR_CODE_TOO_FAR_IN_FUTURE);
       }
    if( utc < 2448793.500000)     /* 1992 Jun 20  0:00:00 UTC */
       {
       printf( "GPS/GLONASS ephemerides only extend back to 1992 June 20.\n");
-      err_code = -904;
+      return( ERR_CODE_TOO_FAR_IN_PAST);
       }
    err_code = get_observer_loc( observatory_code, &lon, &rho_cos_phi, &rho_sin_phi);
    if( err_code)
@@ -484,7 +488,7 @@ int dummy_main( const char *time_text, const char *observatory_code)
       printf( "If you think that code really does exist,  notify the owner of this\n"
               "page.  The list of observatories probably needs to be updated.\n");
 #endif
-      err_code = -905;
+      err_code = ERR_CODE_OBSERVATORY_UNKNOWN;
       }
    if( err_code)
       return( err_code);
