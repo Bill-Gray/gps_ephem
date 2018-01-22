@@ -287,7 +287,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             const bool fetch_files)
 {
    int day = glumph / glumphs_per_day, i;
-   char filename[20], command[200];
+   char filename[25], command[200];
    double *rval;
 
    *err_code = 0;
@@ -295,8 +295,8 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    while( i < 2200 && start_of_year( i + 1) < day)
       i++;
 
-   sprintf( filename, "gbm%04d%d.sp3.Z", day / 7, day % 7);
-   sprintf( command, "ftp://cddis.gsfc.nasa.gov/pub/gps/products/mgex/%4d/%s",
+   snprintf( filename, sizeof( filename), "gbm%04d%d.sp3.Z", day / 7, day % 7);
+   snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/mgex/%4d/%s",
                day / 7, filename);
    if( gps_verbose)
       printf( "MGEX (multi-GNSS) file: '%s', %d %d: '%s'\n", filename, glumph,
@@ -309,8 +309,8 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       return( rval);
 
 #ifdef UNIBE_BASE_URL
-   sprintf( filename, "COD%04d%d.EPH.Z", day / 7, day % 7);
-   sprintf( command, UNIBE_BASE_URL "%4d/%s", i, filename);
+   snprintf( filename, sizeof( filename), "COD%04d%d.EPH.Z", day / 7, day % 7);
+   snprintf( command, sizeof( command), UNIBE_BASE_URL "%4d/%s", i, filename);
    if( gps_verbose)
       printf( "Final file: '%s', %d %d: '%s'\n", filename, glumph,
             glumph - day * glumphs_per_day, command);
@@ -322,7 +322,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       return( rval);
 
    strcpy( filename + 12, "_R");
-   sprintf( command, UNIBE_BASE_URL "%s", filename);
+   snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
    if( gps_verbose)
       printf( "Rapid file: '%s', %d %d: '%s'\n", filename, glumph,
             glumph - day * glumphs_per_day, command);
@@ -332,8 +332,8 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
 
    for( i = 0; !rval && i < 5; i++, day--)
       {
-      sprintf( filename, "COD%04d%d.EPH_5D", day / 7, day % 7);
-      sprintf( command, UNIBE_BASE_URL "%s", filename);
+      snprintf( filename, sizeof( filename), "COD%04d%d.EPH_5D", day / 7, day % 7);
+      snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
       if( gps_verbose)
           printf("Five-day file: '%s', %d %d: '%s'\n", filename, glumph,
             glumph - day * glumphs_per_day, command);
@@ -352,10 +352,9 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       const int glumphs_per_hour = 4;
       const int hour = (tglumph % glumphs_per_day) / glumphs_per_hour;
 
-
-      sprintf( filename, "igu%d%d_%02d.sp3.Z",
+      snprintf( filename, sizeof( filename), "igu%d%d_%02d.sp3.Z",
                   week, day % 7, (hour / 6) * 6);
-      sprintf( command, "ftp://cddis.gsfc.nasa.gov/pub/gps/products/%d/%s",
+      snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/%d/%s",
                   week, filename);
       if( gps_verbose)
          printf( "IGU file: '%s'\n", command);
