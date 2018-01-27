@@ -58,6 +58,13 @@ double approx_lat_from_parallax( const double rho_cos_phi,
    return( lat);
 }
 
+const char *imprecise_position_message =
+  "WARNING: Your observatory's position is given with low precision.  This will\n"
+  "cause the computed positions for navigation satellites to be imprecise,  too.\n"
+  "I'd recommend getting a corrected,  precise latitude,  longitude,  and altitude\n"
+  "using GPS or mapping software,  and sending that to the MPC and to me at\n"
+  "pluto (at) projectpluto (dot) com.\n";
+
 static int get_observer_loc( const char *code, double *lon, double *rho_cos_phi,
                double *rho_sin_phi)
 {
@@ -79,6 +86,8 @@ static int get_observer_loc( const char *code, double *lon, double *rho_cos_phi,
                      approx_lat_from_parallax( *rho_cos_phi, *rho_sin_phi,
                               EARTH_SEMIMINOR_AXIS / EARTH_SEMIMAJOR_AXIS));
             *lon *= PI / 180.;
+            if( buff[11] == ' ' || buff[19] == ' ' || buff[28] == ' ')
+               printf( "%s", imprecise_position_message);
             }
    fclose( ifile);
    return( rval);
