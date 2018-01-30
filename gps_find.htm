@@ -113,7 +113,15 @@ sadly not the case.  You get approximate positions for finding them,  but
 the precise positions needed to really check your timing lag by a few days. </p>
 
 <p> I realize this is an annoyance:  you can image the objects,  but then
-have to wait a few days to actually check your timing. </p>
+have to wait a few days to actually check your timing.  The problem is that
+very precise positions (centimeter-level accuracy) are provided in the
+<a href="https://www.ngs.noaa.gov/orbits/SP3_format.html"> SP3 format </a>
+for all GNSS satellites for those "past" dates.  But for the
+near future and last day or so,  SP3 data exists only for GPS and GLONASS. </p>
+
+<p> Positions for the remaining satellites are computed using
+<a href="tle_info.htm"> Two-Line Elements (TLEs)</a>.  Those are good enough
+to find the object,  but not good enough to really measure timing accurately. </p>
 
 <h2> <a name="ack"> Acknowledgments </a> </h2>
 
