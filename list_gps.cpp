@@ -71,7 +71,7 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
                {
                rval = 0;         /* we got it */
                if( buff[4] != '!')
-                  if( buff[11] == ' ' || buff[19] == ' ' || buff[28] == ' ')
+                  if( buff[12] == ' ' || buff[20] == ' ' || buff[29] == ' ')
                      printf( "%s", imprecise_position_message);
                }
          fclose( ifile);
