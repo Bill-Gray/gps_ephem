@@ -91,7 +91,8 @@ static const char *beidou_and_qzs =
    "00000 99999 C04      2010-057A Beidou 6\n"
    "00000 99999 C14      2012-050B Beidou 15\n"
    "00000 99999 J01      2010-045A QZS-1 (MICHIBIKI)\n"
-   "00000 99999 J02      2017-028A QZS-2\n";
+   "00000 99999 J02      2017-028A QZS-2\n"
+   "00000 99999 J03      2017-062A QZS-4\n";
 
 
 int main( const int argc, const char **argv)
