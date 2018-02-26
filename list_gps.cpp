@@ -27,7 +27,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include "afuncs.h"
 #include "date.h"
 #include "lunar.h"         /* for obliquity( ) prototype */
+#include "mpc_func.h"
 #include "gps.h"
+
+#define EARTH_SEMIMAJOR_AXIS 6378.137
 
 #ifdef CGI_VERSION
    #include <sys/time.h>         /* these allow resource limiting */
@@ -39,24 +42,7 @@ int get_urlencoded_form_data( const char **idata,       /* cgi_func.c */
                               char *buff, const size_t max_buff);
 #endif
 
-#define EARTH_SEMIMAJOR_AXIS 6378.140
-#define EARTH_SEMIMINOR_AXIS 6356.755
-
 #define PI 3.1415926535897932384626433832795028841971693993751058209749445923
-
-/* From p. 83,  Meeus' _Astronomical Algorithms_,  generalized to
-take the axis ratio as a parameter.  See miscell/ellip_pt.c. */
-
-double approx_lat_from_parallax( const double rho_cos_phi,
-                  const double rho_sin_phi, const double axis_ratio)
-{
-   const double flattening = 1. - axis_ratio;
-   const double phi = atan2( rho_sin_phi, rho_cos_phi);
-   const double lat = phi + flattening * (sin( phi * 2.)
-                                 + .5 * flattening * sin( phi * 4.));
-
-   return( lat);
-}
 
 const char *imprecise_position_message =
   "WARNING: Your observatory's position is given with low precision.  This will\n"
@@ -65,31 +51,32 @@ const char *imprecise_position_message =
   "using GPS or mapping software,  and sending that to the MPC and to me at\n"
   "pluto (at) projectpluto (dot) com.\n";
 
-static int get_observer_loc( const char *code, double *lon, double *rho_cos_phi,
-               double *rho_sin_phi)
+static int get_observer_loc( mpc_code_t *cdata, const char *code)
 {
-   FILE *ifile = fopen( "ObsCodes.htm", "rb");
-   char buff[200];
-   int rval = -1;
+   int rval = -1, i;
 
-   if( !ifile)
-      ifile = fopen( "ObsCodes.html", "rb");
-   if( !ifile)
-      return( -2);
-   while( rval && fgets( buff, sizeof( buff), ifile))
-      if( !memcmp( buff, code, 3))
-         if( sscanf( buff + 4, "%lf%lf%lf", lon, rho_cos_phi, rho_sin_phi) == 3)
-            {
-            rval = 0;         /* we got it */
-            printf( "Observatory (%s) %s", code, buff + 30);
-            printf( "Longitude %f, latitude %f\n", *lon, (180. / PI) *
-                     approx_lat_from_parallax( *rho_cos_phi, *rho_sin_phi,
-                              EARTH_SEMIMINOR_AXIS / EARTH_SEMIMAJOR_AXIS));
-            *lon *= PI / 180.;
-            if( buff[11] == ' ' || buff[19] == ' ' || buff[28] == ' ')
-               printf( "%s", imprecise_position_message);
-            }
-   fclose( ifile);
+   for( i = 0; i < 3 && rval; i++)
+      {
+      const char *filenames[3] = { "rovers.txt", "ObsCodes.htm",
+                                                 "ObsCodes.html" };
+      FILE *ifile = fopen( filenames[i], "rb");
+
+      if( ifile)
+         {
+         char buff[200];
+
+         while( rval && fgets( buff, sizeof( buff), ifile))
+            if( !memcmp( buff, code, 3) &&
+                     get_mpc_code_info( cdata, buff) == 3)
+               {
+               rval = 0;         /* we got it */
+               if( buff[4] != '!')
+                  if( buff[11] == ' ' || buff[19] == ' ' || buff[28] == ' ')
+                     printf( "%s", imprecise_position_message);
+               }
+         fclose( ifile);
+         }
+      }
    return( rval);
 }
 
@@ -241,8 +228,7 @@ static double curr_jd( void)
 int tle_usage = USE_TLES_AND_SP3;
 
 static int compute_gps_satellite_locations( gps_ephem_t *locs,
-         const double jd_utc, const double lon,
-         const double rho_cos_phi, const double rho_sin_phi)
+         const double jd_utc, const mpc_code_t *cdata)
 {
    const double tdt = jd_utc + td_minus_utc( jd_utc) / seconds_per_day;
    const double tdt_minus_gps = 51.184;
@@ -254,12 +240,10 @@ static int compute_gps_satellite_locations( gps_ephem_t *locs,
    double precess_matrix[9], alt_az_matrix[9];
    const double j2000 = 2451545.;
    const double year = (tdt - j2000) / 365.25;
-   const double lat = approx_lat_from_parallax( rho_cos_phi, rho_sin_phi,
-                        EARTH_SEMIMINOR_AXIS / EARTH_SEMIMAJOR_AXIS);
 
-   observer_loc[0] = cos( lon) * rho_cos_phi * EARTH_SEMIMAJOR_AXIS;
-   observer_loc[1] = sin( lon) * rho_cos_phi * EARTH_SEMIMAJOR_AXIS;
-   observer_loc[2] =             rho_sin_phi * EARTH_SEMIMAJOR_AXIS;
+   observer_loc[0] = cos( cdata->lon) * cdata->rho_cos_phi * EARTH_SEMIMAJOR_AXIS;
+   observer_loc[1] = sin( cdata->lon) * cdata->rho_cos_phi * EARTH_SEMIMAJOR_AXIS;
+   observer_loc[2] =                    cdata->rho_sin_phi * EARTH_SEMIMAJOR_AXIS;
    err_code = setup_precession_with_nutation_eops( precess_matrix,
                                   2000. + year);
    if( err_code)
@@ -268,15 +252,15 @@ static int compute_gps_satellite_locations( gps_ephem_t *locs,
       return( err_code);
       }
 
-   alt_az_matrix[0] = -cos( lon) * sin( lat);
-   alt_az_matrix[1] = -sin( lon) * sin( lat);
-   alt_az_matrix[2] =              cos( lat);
-   alt_az_matrix[3] = -sin( lon);
-   alt_az_matrix[4] = cos( lon);
+   alt_az_matrix[0] = -cos( cdata->lon) * sin( cdata->lat);
+   alt_az_matrix[1] = -sin( cdata->lon) * sin( cdata->lat);
+   alt_az_matrix[2] =                     cos( cdata->lat);
+   alt_az_matrix[3] = -sin( cdata->lon);
+   alt_az_matrix[4] = cos( cdata->lon);
    alt_az_matrix[5] = 0.;
-   alt_az_matrix[6] = cos( lon) * cos( lat);
-   alt_az_matrix[7] = sin( lon) * cos( lat);
-   alt_az_matrix[8] =             sin( lat);
+   alt_az_matrix[6] = cos( cdata->lon) * cos( cdata->lat);
+   alt_az_matrix[7] = sin( cdata->lon) * cos( cdata->lat);
+   alt_az_matrix[8] =                    sin( cdata->lat);
    gps_time -= .07 / seconds_per_day;     /* light-time lag,  or close enough */
 
    if( tle_usage != USE_TLES_ONLY)
@@ -454,7 +438,7 @@ int dummy_main( const char *time_text, const char *observatory_code)
    const double utc = get_time_from_string( curr_t, time_text, FULL_CTIME_YMD,
                                  NULL);
    int i, n_sats;
-   double lon, rho_cos_phi, rho_sin_phi;
+   mpc_code_t cdata;
    gps_ephem_t loc[MAX_N_GPS_SATS];
    char tbuff[80];
    int err_code = load_earth_orientation_params( "finals.all");
@@ -488,7 +472,7 @@ int dummy_main( const char *time_text, const char *observatory_code)
       printf( "GPS/GLONASS ephemerides only extend back to 1992 June 20.\n");
       return( ERR_CODE_TOO_FAR_IN_PAST);
       }
-   err_code = get_observer_loc( observatory_code, &lon, &rho_cos_phi, &rho_sin_phi);
+   err_code = get_observer_loc( &cdata, observatory_code);
    if( err_code)
       {
       printf( "Couldn't find observer '%s': err %d\n",
@@ -501,6 +485,10 @@ int dummy_main( const char *time_text, const char *observatory_code)
       }
    if( err_code)
       return( err_code);
+
+   printf( "Observatory (%s) %s", observatory_code, cdata.name);
+   printf( "Longitude %f, latitude %f  alt %.2f m\n",
+            cdata.lon * (180. / PI), cdata.lat * (180. / PI), cdata.alt);
 
    if( *ephem_target)
       {
@@ -547,8 +535,7 @@ int dummy_main( const char *time_text, const char *observatory_code)
             full_ctime( tbuff, curr_utc, time_format | FULL_CTIME_ROUNDING);
             printf( "%-23s", tbuff);
             }
-         n_sats = compute_gps_satellite_locations( loc, curr_utc, lon,
-                                                rho_cos_phi, rho_sin_phi);
+         n_sats = compute_gps_satellite_locations( loc, curr_utc, &cdata);
 
          for( j = 0; j < n_sats; j++)
             if( !strcmp( loc[j].obj_desig, ephem_target))
@@ -559,8 +546,7 @@ int dummy_main( const char *time_text, const char *observatory_code)
       }
    else        /* just list all the satellites */
       {
-      n_sats = compute_gps_satellite_locations( loc, utc, lon,
-                                                rho_cos_phi, rho_sin_phi);
+      n_sats = compute_gps_satellite_locations( loc, utc, &cdata);
       sort_sat_info( n_sats, loc, sort_order);
       printf( " Nr:  RA     (J2000)     dec     dist (km)     Azim  Alt  Elo   Desig\n");
       for( i = 0; i < n_sats; i++)
