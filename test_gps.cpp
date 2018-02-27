@@ -10,7 +10,7 @@ int main( const int argc, const char **argv)
       double *tptr = locs;
       int i;
 
-      printf( "rval = %d\n", get_gps_positions( locs, atof( argv[1])));
+      printf( "rval = %d\n", get_gps_positions( locs, NULL, atof( argv[1])));
       for( i = 0; i < MAX_N_GPS_SATS; i++, tptr += 3)
          if( tptr[0] || tptr[1] || tptr[2])
             printf( "%2d: %14.6f%14.6f%14.6f\n", i, tptr[0], tptr[1], tptr[2]);

@@ -84,6 +84,7 @@ static void try_to_download( const char *url, const char *filename)
 there are 96 glumphs in a day. */
 
 const int glumphs_per_day = 24 * 4;
+const double seconds_per_glumph = 15. * 60.;
 
 /* To compute the positions of GPS satellites at any given time,
 we need the ephemeris data for the two preceding and the two following
@@ -401,7 +402,17 @@ static double interpolate( const double *y, const double x, const int n_pts)
 
 #define INTERPOLATION_ORDER 10
 
-int get_gps_positions( double *output_coords, const double mjd_gps)
+/* If observer_loc == NULL,  we just compute positions without any light-time
+lag considered.  Otherwise,  we start out assuming a lag of 0.07 seconds,
+about right for most navsats.  That gets us a highly accurate distance,
+and a second iteration gets us as good as we're gonna get.  A more
+thorough implementation would examine how much the light-time lag changed;
+then,  if the observer_loc were near Saturn,  it would do another iteration
+or two until the light-time lag converged near an hour and a half.  But
+this should suffice for ordinary purposes. */
+
+int get_gps_positions( double *output_coords, const double *observer_loc,
+                            const double mjd_gps)
 {
    const double jan_6_1980 = 44244.0;
    const double glumphs = (mjd_gps - jan_6_1980) * (double)glumphs_per_day;
@@ -424,6 +435,8 @@ int get_gps_positions( double *output_coords, const double mjd_gps)
       {
       double tarray[3][INTERPOLATION_ORDER];
       bool got_data = true;
+      int pass;
+      double light_time_lag = 0.07;   /* initial guess */
 
       for( j = 0; j < INTERPOLATION_ORDER && got_data; j++)
          {
@@ -436,12 +449,25 @@ int get_gps_positions( double *output_coords, const double mjd_gps)
          tarray[2][j] = tptr[2];
          }
       if( got_data)
-         {
-         double *tptr = output_coords + i * 3;
+         for( pass = 0; pass < 2; pass++)
+            {
+            double *tptr = output_coords + i * 3;
+            double dist_squared = 0., delta;
+            const double delay = light_time_lag / seconds_per_glumph;
 
-         for( j = 0; j < 3; j++)
-            tptr[j] = interpolate( tarray[j], interpolation_loc, INTERPOLATION_ORDER);
-         }
+            for( j = 0; j < 3; j++)
+               {
+               tptr[j] = interpolate( tarray[j],
+                                     interpolation_loc - delay,
+                                     INTERPOLATION_ORDER);
+               if( observer_loc)
+                  delta = tptr[j] - observer_loc[j];
+               else
+                  delta = 0.;
+               dist_squared += delta * delta;
+               }
+            light_time_lag = sqrt( dist_squared) / SPEED_OF_LIGHT;
+            }
       }
    return( err_code);
 }

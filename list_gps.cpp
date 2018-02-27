@@ -232,7 +232,7 @@ static int compute_gps_satellite_locations( gps_ephem_t *locs,
 {
    const double tdt = jd_utc + td_minus_utc( jd_utc) / seconds_per_day;
    const double tdt_minus_gps = 51.184;
-   double gps_time = tdt - tdt_minus_gps / seconds_per_day;
+   const double gps_time = tdt - tdt_minus_gps / seconds_per_day;
    int err_code;
    int i, rval = 0;
    double sat_locs[MAX_N_GPS_SATS * 3];
@@ -261,10 +261,9 @@ static int compute_gps_satellite_locations( gps_ephem_t *locs,
    alt_az_matrix[6] = cos( cdata->lon) * cos( cdata->lat);
    alt_az_matrix[7] = sin( cdata->lon) * cos( cdata->lat);
    alt_az_matrix[8] =                    sin( cdata->lat);
-   gps_time -= .07 / seconds_per_day;     /* light-time lag,  or close enough */
 
    if( tle_usage != USE_TLES_ONLY)
-      err_code = get_gps_positions( sat_locs, gps_time - 2400000.5);
+      err_code = get_gps_positions( sat_locs, observer_loc, gps_time - 2400000.5);
    else
       for( i = 0; i < MAX_N_GPS_SATS * 3; i++)
          tptr[i] = 0.;
