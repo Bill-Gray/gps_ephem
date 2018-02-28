@@ -73,6 +73,16 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
                if( buff[4] != '!')
                   if( buff[12] == ' ' || buff[20] == ' ' || buff[29] == ' ')
                      printf( "%s", imprecise_position_message);
+               if( code[3] == '+' || code[3] == '-')
+                  {                                   /* altitude offset */
+                  double offset = atof( code + 3);
+                  const double meters_per_kilometer = 1000.;
+
+                  cdata->alt += offset;
+                  offset /= EARTH_SEMIMAJOR_AXIS * meters_per_kilometer;
+                  cdata->rho_cos_phi += offset * cos( cdata->lat);
+                  cdata->rho_sin_phi += offset * sin( cdata->lat);
+                  }
                }
          fclose( ifile);
          }
