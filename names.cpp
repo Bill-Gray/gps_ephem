@@ -107,7 +107,9 @@ int main( const int argc, const char **argv)
               "ftp://ftp.aiub.unibe.ch/BSWUSER52/GEN/I14.ATX\n");
       return( -1);
       }
-   *name = *from = *until = '\0';
+   *name = '\0';
+   memset( from, 0, sizeof( from));
+   memset( until, 0, sizeof( until));
    printf( "#  See 'names.cpp'\n");
    while( !done && fgets( buff, sizeof( buff), ifile))
       {

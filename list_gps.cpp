@@ -122,14 +122,14 @@ static const char *show_base_60( const double ival, char *buff, const int is_ra)
       }
    else
       {
-      const long zas = (long)( ival * (is_ra ? 2400. : 3600.) * 1000.);
-      const long mas = zas / (is_ra ? 10L : 1L);
+      const unsigned long zas = (unsigned long)( ival * (is_ra ? 2400. : 3600.) * 1000.);
+      const unsigned long mas = zas / (is_ra ? 10L : 1L);
 
-      snprintf( buff, 13, "%02ld %02ld %02ld.%03ld",
-               mas / 3600000L, (mas / 60000L) % 60L,
-               (mas / 1000L) % 60L, mas % 1000L);
+      snprintf( buff, 30, "%02lu %02lu %02lu.%03lu",
+               mas / 3600000UL, (mas / 60000UL) % 60UL,
+               (mas / 1000UL) % 60UL, mas % 1000UL);
       if( is_ra)
-         snprintf( buff + 9, 5, "%04ld", zas % 10000L);
+         snprintf( buff + 9, 5, "%04lu", zas % 10000UL);
       }
    return( buff);
 }
