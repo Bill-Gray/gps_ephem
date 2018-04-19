@@ -391,14 +391,16 @@ static void display_satellite_info( const gps_ephem_t *loc, const bool show_ids)
                show_base_60( fabs( loc->dec * 180. / PI), dec_buff, 0));
    if( !creating_fake_astrometry)
       {
+      if( show_decimal_degrees)
+         printf( " ");
       printf( "  %.5f %6.1f%6.1f", loc->topo_r,
                    loc->az * 180. / PI, loc->alt * 180. / PI);
       if( loc->in_shadow)
          printf( " Sha");
       else
          printf( " %3.0f", (180 / PI) * loc->elong);
-      printf( "%5.1f %3.0f", loc->motion * 3600. * 180. / PI,
-                  loc->posn_ang * 180. / PI);
+      printf( "%6.2f %5.1f", loc->motion * 3600. * 180. / PI,
+                  360. - loc->posn_ang * 180. / PI);
       if( show_ids)
          printf( " %s %s", loc->international_desig, loc->type);
       printf( "\n");
@@ -473,7 +475,7 @@ static const char *asterisk_message =
 int dummy_main( const char *time_text, const char *observatory_code)
 {
    const char *legend =
-          "RA      (J2000)     dec     dist (km)    Azim   Alt Elo Rate  PA";
+          "RA      (J2000)     dec     dist (km)    Azim   Alt Elo  Rate  PA ";
    const double jan_1_1970 = 2440587.5;
    const double curr_t = jan_1_1970 + (double)time( NULL) / seconds_per_day;
    const double utc = get_time_from_string( curr_t, time_text, FULL_CTIME_YMD,
