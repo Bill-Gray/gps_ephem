@@ -150,6 +150,7 @@ typedef struct
    double j2000_topo[3], j2000_geo[3];
    double topo_r;
    double ra, dec, alt, az, elong;
+   double motion, posn_ang;
    bool in_shadow, is_from_tle;
 } gps_ephem_t;
 
@@ -240,7 +241,7 @@ static double curr_jd( void)
 
 int tle_usage = USE_TLES_AND_SP3;
 
-static int compute_gps_satellite_locations( gps_ephem_t *locs,
+static int compute_gps_satellite_locations_minus_motion( gps_ephem_t *locs,
          const double jd_utc, const mpc_code_t *cdata)
 {
    const double tdt = jd_utc + td_minus_utc( jd_utc) / seconds_per_day;
@@ -338,8 +339,32 @@ static int compute_gps_satellite_locations( gps_ephem_t *locs,
             rval++;
             }
          }
-   set_designations( rval, locs - rval, (int)( jd_utc - 2400000.5));
    return( rval);
+}
+
+/* To compute apparent motion of the satellites,  compute their positions at
+two closely spaced times (a second apart) and look at how far they moved.
+Resulting motion is therefore in radians/second. */
+
+static int compute_gps_satellite_locations( gps_ephem_t *locs,
+         const double jd_utc, const mpc_code_t *cdata)
+{
+   gps_ephem_t locs2[MAX_N_GPS_SATS];
+   const int n_sats = compute_gps_satellite_locations_minus_motion(
+                        locs, jd_utc, cdata);
+   const int n_sats2 = compute_gps_satellite_locations_minus_motion(
+                        locs2, jd_utc + 1. / seconds_per_day, cdata);
+   int i;
+
+   if( n_sats != n_sats2)
+      {
+      printf( "Internal error: n_sats = %d, n_sats2 = %d\n", n_sats, n_sats2);
+      return( 0);
+      }
+   for( i = 0; i < n_sats; i++)
+      calc_dist_and_posn_ang( &locs[i].ra, &locs2[i].ra, &locs[i].motion, &locs[i].posn_ang);
+   set_designations( n_sats, locs, (int)( jd_utc - 2400000.5));
+   return( n_sats);
 }
 
 bool creating_fake_astrometry = false;
@@ -372,6 +397,8 @@ static void display_satellite_info( const gps_ephem_t *loc, const bool show_ids)
          printf( " Sha");
       else
          printf( " %3.0f", (180 / PI) * loc->elong);
+      printf( "%5.1f %3.0f", loc->motion * 3600. * 180. / PI,
+                  loc->posn_ang * 180. / PI);
       if( show_ids)
          printf( " %s %s", loc->international_desig, loc->type);
       printf( "\n");
@@ -445,6 +472,8 @@ static const char *asterisk_message =
 
 int dummy_main( const char *time_text, const char *observatory_code)
 {
+   const char *legend =
+          "RA      (J2000)     dec     dist (km)    Azim   Alt Elo Rate  PA";
    const double jan_1_1970 = 2440587.5;
    const double curr_t = jan_1_1970 + (double)time( NULL) / seconds_per_day;
    const double utc = get_time_from_string( curr_t, time_text, FULL_CTIME_YMD,
@@ -528,7 +557,7 @@ int dummy_main( const char *time_text, const char *observatory_code)
       else
          {
          printf( "Target object: %s\n", ephem_target);
-         printf( "UTC date/time             RA    (J2000)     dec     dist (km)     Azim  Alt  Elo\n");
+         printf( "UTC date/time             %s\n", legend);
          }
       for( i = 0; i < n_ephem_steps; i++)
          {
@@ -560,7 +589,7 @@ int dummy_main( const char *time_text, const char *observatory_code)
       {
       n_sats = compute_gps_satellite_locations( loc, utc, &cdata);
       sort_sat_info( n_sats, loc, sort_order);
-      printf( " Nr:  RA     (J2000)     dec     dist (km)     Azim  Alt  Elo   Desig\n");
+      printf( " Nr:    %s   Desig\n", legend);
       for( i = 0; i < n_sats; i++)
          if( loc[i].alt > minimum_altitude)
             display_satellite_info( loc + i, true);
