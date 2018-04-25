@@ -73,6 +73,17 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
                if( buff[4] != '!')
                   if( buff[12] == ' ' || buff[20] == ' ' || buff[29] == ' ')
                      printf( "%s", imprecise_position_message);
+               if( !memcmp( code, "568", 3))
+                  printf( "\nSpecial fix for Mauna Kea observers:  use 'codes' for specific\n"
+                          "telescopes such as CFH (sic),  2.2,  etc.  Full list is at\n\n"
+#ifdef CGI_VERSION
+   "<a href=\"https://github.com/Bill-Gray/find_orb/blob/master/rovers.txt#L161\">"
+#endif
+                          "https://github.com/Bill-Gray/find_orb/blob/master/rovers.txt#L161"
+#ifdef CGI_VERSION
+   "</a>"
+#endif
+                          "\n\n(scroll up for an explanation of these codes)\n\n");
                if( code[3] == '+' || code[3] == '-')
                   {                                   /* altitude offset */
                   double offset = atof( code + 3);
