@@ -284,6 +284,8 @@ coverage,  and you see that we might get data in any of eight files. */
 
 #define UNIBE_BASE_URL "ftp://ftp.aiub.unibe.ch/CODE/"
 
+bool use_mgex_data = true;
+
 static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             const bool fetch_files)
 {
@@ -296,18 +298,21 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    while( i < 2200 && start_of_year( i + 1) < day)
       i++;
 
-   snprintf( filename, sizeof( filename), "gbm%04d%d.sp3.Z", day / 7, day % 7);
-   snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/mgex/%4d/%s",
+   if( use_mgex_data)
+      {
+      snprintf( filename, sizeof( filename), "gbm%04d%d.sp3.Z", day / 7, day % 7);
+      snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/mgex/%4d/%s",
                day / 7, filename);
-   if( gps_verbose)
-      printf( "MGEX (multi-GNSS) file: '%s', %d %d: '%s'\n", filename, glumph,
-            glumph - day * glumphs_per_day, command);
-   if( fetch_files)
-      try_to_download( command, filename);
-   filename[12] = '\0';       /* remove .Z extension */
-   rval = get_cached_posns( filename, glumph);
-   if( rval)
-      return( rval);
+      if( gps_verbose)
+         printf( "MGEX (multi-GNSS) file: '%s', %d %d: '%s'\n", filename, glumph,
+                glumph - day * glumphs_per_day, command);
+      if( fetch_files)
+         try_to_download( command, filename);
+      filename[12] = '\0';       /* remove .Z extension */
+      rval = get_cached_posns( filename, glumph);
+      if( rval)
+         return( rval);
+      }
 
 #ifdef UNIBE_BASE_URL
    snprintf( filename, sizeof( filename), "COD%04d%d.EPH.Z", day / 7, day % 7);

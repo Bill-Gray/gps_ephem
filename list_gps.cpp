@@ -721,6 +721,13 @@ int main( const int argc, const char **argv)
             case 'd': case 'D':
                show_decimal_degrees = true;
                break;
+            case 'm': case 'M':
+               {
+               extern bool use_mgex_data;
+
+               use_mgex_data = false;
+               }
+               break;
             case 'n': case 'N':
                n_ephem_steps = atoi( argv[i] + 2);
                break;
