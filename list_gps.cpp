@@ -492,7 +492,7 @@ int dummy_main( const int argc, const char **argv)
 {
    const char *ephem_step = NULL, *ephem_target = NULL;
    int n_ephem_steps = 20;
-   const char *observatory_code = argv[2];
+   char observatory_code[20];
    const char *legend =
           "RA      (J2000)     dec     dist (km)    Azim   Alt Elo  Rate  PA ";
    const double jan_1_1970 = 2440587.5;
@@ -518,6 +518,15 @@ int dummy_main( const int argc, const char **argv)
               "-z          Ephemerides are simulated 80-column MPC astrometry\n");
       return( -1);
       }
+   strcpy( observatory_code, argv[2]);
+   i = (int)strlen( observatory_code) - 2;
+   if( i > 0 && !strcmp( observatory_code + i, " m"))
+      {
+      extern bool use_mgex_data;
+
+      use_mgex_data = false;
+      observatory_code[i] = '\0';
+      }
    for( i = 3; i < argc; i++)
       if( argv[i][0] == '-')
          {
@@ -533,13 +542,6 @@ int dummy_main( const int argc, const char **argv)
                break;
             case 'i': case 'I':
                ephem_step = arg;
-               break;
-            case 'm': case 'M':
-               {
-               extern bool use_mgex_data;
-
-               use_mgex_data = false;
-               }
                break;
             case 'n': case 'N':
                n_ephem_steps = atoi( arg);
@@ -646,6 +648,7 @@ int dummy_main( const int argc, const char **argv)
       for( i = 0; i < n_ephem_steps; i++)
          {
          const double curr_utc = utc + (double)i * step_size;
+         bool got_data = false;
 
          if( creating_fake_astrometry)
             {
@@ -664,7 +667,12 @@ int dummy_main( const int argc, const char **argv)
 
          for( j = 0; j < n_sats; j++)
             if( !strcmp( loc[j].obj_desig, ephem_target))
+               {
+               got_data = true;
                display_satellite_info( loc + j, false);
+               }
+         if( !got_data)
+            printf( "  Object not found\n");
          if( creating_fake_astrometry)
             printf( "                Fake %s\n", observatory_code);
          }
@@ -752,11 +760,6 @@ int main( const int argc, const char **argv)
          option = 'i';
       if( !strcmp( field, "obj") && strlen( buff) < 10)
          option = 'o';
-      if( !strcmp( field, "ast"))
-         {
-         *buff = '\0';
-         option = 'f';
-         }
       if( !strcmp( field, "obscode") && strlen( buff) < 20)
          {
          strcpy( observatory_code, buff);
