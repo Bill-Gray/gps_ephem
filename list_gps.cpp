@@ -488,6 +488,53 @@ static const char *get_arg( const int argc, const char **argv, const int idx)
       return( argv[idx + 1]);
 }
 
+static void test_astrometry( const char *ifilename)
+{
+   FILE *ifile = fopen( ifilename, "rb");
+   char buff[300];
+
+   assert( ifile);
+   while( fgets( buff, sizeof( buff), ifile))
+      {
+      const double jd = extract_date_from_mpc_report( buff, NULL);
+      double ra, dec;
+
+      if( jd)
+         {
+         mpc_code_t cdata;
+         gps_ephem_t loc[MAX_N_GPS_SATS];
+         int i, n_sats;
+
+         buff[80] = '\0';
+         printf( "%s\n", buff);
+         get_observer_loc( &cdata, buff + 77);
+         get_ra_dec_from_mpc_report( buff, NULL, &ra, NULL,
+                                           NULL, &dec, NULL);
+         n_sats = compute_gps_satellite_locations( loc, jd, &cdata);
+         printf( "JD %f RA %f dec %f\n", jd, ra * 180. / PI, dec * 180. / PI);
+         for( i = 0; i < n_sats; i++)
+            {
+            double delta_dec = dec - loc[i].dec;
+            double delta_ra = ra - loc[i].ra;
+            const double TOL = 300.;                /* five arcmin */
+
+            while( delta_ra > PI)
+               delta_ra -= PI + PI;
+            while( delta_ra < -PI)
+               delta_ra += PI + PI;
+            delta_ra  *= 180. * 3600. / PI;
+            delta_dec *= 180. * 3600. / PI;
+            if( fabs( delta_dec) < TOL && fabs( delta_ra) < TOL)
+               {
+               printf( "dRA %6.2f dDec %6.2f ", delta_ra, delta_dec);
+               printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
+               }
+            }
+         }
+      }
+   fclose( ifile);
+}
+
 int dummy_main( const int argc, const char **argv)
 {
    const char *ephem_step = NULL, *ephem_target = NULL;
@@ -505,7 +552,31 @@ int dummy_main( const int argc, const char **argv)
    char tbuff[80];
    int err_code = load_earth_orientation_params( "finals.all");
 
-   if( argc < 3)
+   full_ctime( tbuff, curr_t, FULL_CTIME_YMD);
+   printf( "Current time = %s UTC\n", tbuff);
+   if( err_code <= 0)
+      {
+      printf( "\nProblem loading EOPs (Earth Orientation Parameters):  rval %d\n", err_code);
+#ifdef CGI_VERSION
+      printf( "Please notify the owner of this site.  New Earth Orientation Parameters\n"
+              "need to be uploaded every few months (they can't be predicted far in\n"
+              "advance).  The owner appears to have forgotten to do this.\n");
+#else
+      printf( "You probably need to download the EOP file\n"
+              "ftp://maia.usno.navy.mil/ser7/finals.all\n"
+              "This needs to be downloaded every few months (the earth's orientation\n"
+              "can't be predicted far in advance).  Get a current 'finals.all',  and\n"
+              "this error will probably go away.\n\n");
+#endif
+     }
+
+   if( argc >= 2 && argv[1][0] == '-' && argv[1][1] == 'f')
+      {
+      test_astrometry( get_arg( argc, argv, 1));
+      return( 0);
+      }
+
+   if(  argc < 3)
       {
       printf( "list_gps (date/time) (MPC station)   (to get a list of sats)\n"
               "list_gps (date/time) (MPC station) -o(target) -i(ephem step)\n\n"
@@ -570,25 +641,8 @@ int dummy_main( const int argc, const char **argv)
                break;
             }
          }
-   full_ctime( tbuff, curr_t, FULL_CTIME_YMD);
-   printf( "Current time = %s UTC\n", tbuff);
    full_ctime( tbuff, utc, FULL_CTIME_YMD | FULL_CTIME_MILLISECS);
    printf( "GPS positions for JD %f = %s UTC\n", utc, tbuff);
-   if( err_code <= 0)
-      {
-      printf( "\nProblem loading EOPs (Earth Orientation Parameters):  rval %d\n", err_code);
-#ifdef CGI_VERSION
-      printf( "Please notify the owner of this site.  New Earth Orientation Parameters\n"
-              "need to be uploaded every few months (they can't be predicted far in\n"
-              "advance).  The owner appears to have forgotten to do this.\n");
-#else
-      printf( "You probably need to download the EOP file\n"
-              "ftp://maia.usno.navy.mil/ser7/finals.all\n"
-              "This needs to be downloaded every few months (the earth's orientation\n"
-              "can't be predicted far in advance).  Get a current 'finals.all',  and\n"
-              "this error will probably go away.\n\n");
-#endif
-     }
    if( utc > curr_t + 4.)
       {
       printf( "Predictions are only available for about four days in advance.\n");
@@ -760,6 +814,18 @@ int main( const int argc, const char **argv)
          option = 'i';
       if( !strcmp( field, "obj") && strlen( buff) < 10)
          option = 'o';
+      if( !strcmp( field, "ast"))
+         {
+         const char *filename = "temp.ast";
+         FILE *ofile = fopen( filename, "wb");
+
+         assert( ofile);
+         fwrite( buff, strlen( buff), 1, ofile);
+         fclose( ofile);
+         strcpy( buff, filename);
+         n_args = 1;
+         option = 'f';
+         }
       if( !strcmp( field, "obscode") && strlen( buff) < 20)
          {
          strcpy( observatory_code, buff);
