@@ -468,9 +468,6 @@ int sort_order = 1;          /* default = sort by elongation */
 #define ERR_CODE_TOO_FAR_IN_PAST          -904
 #define ERR_CODE_OBSERVATORY_UNKNOWN      -905
 
-char ephem_step[50], ephem_target[10];
-int n_ephem_steps = 20;
-
 static const char *asterisk_message =
    "Objects marked with an asterisk have less accurate positions.  They're\n"
    "good enough to let you find the object (usually within an arcminute or\n"
@@ -483,13 +480,24 @@ static const char *asterisk_message =
    "Visit https://www.projectpluto.com/gps_expl.htm#tles for more info.\n";
 #endif
 
-int dummy_main( const char *time_text, const char *observatory_code)
+static const char *get_arg( const int argc, const char **argv, const int idx)
 {
+   if( argv[idx][2])
+      return( argv[idx] + 2);
+   else
+      return( argv[idx + 1]);
+}
+
+int dummy_main( const int argc, const char **argv)
+{
+   const char *ephem_step = NULL, *ephem_target = NULL;
+   int n_ephem_steps = 20;
+   const char *observatory_code = argv[2];
    const char *legend =
           "RA      (J2000)     dec     dist (km)    Azim   Alt Elo  Rate  PA ";
    const double jan_1_1970 = 2440587.5;
    const double curr_t = jan_1_1970 + (double)time( NULL) / seconds_per_day;
-   const double utc = get_time_from_string( curr_t, time_text, FULL_CTIME_YMD,
+   const double utc = get_time_from_string( curr_t, argv[1], FULL_CTIME_YMD,
                                  NULL);
    int i, n_sats;
    mpc_code_t cdata;
@@ -497,6 +505,69 @@ int dummy_main( const char *time_text, const char *observatory_code)
    char tbuff[80];
    int err_code = load_earth_orientation_params( "finals.all");
 
+   if( argc < 3)
+      {
+      printf( "list_gps (date/time) (MPC station)   (to get a list of sats)\n"
+              "list_gps (date/time) (MPC station) -o(target) -i(ephem step)\n\n"
+              "-a(alt)     Set minimum altitude (default=0)\n"
+              "-d          RA/decs shown in decimal degrees\n"
+              "-n(#)       Set number of ephemeris steps shown\n"
+              "-s(#)       Set sort order\n"
+              "-t(#)       Set TLE usage: 1=don't use them, 0=use only TLEs\n"
+              "-v          Verbose mode\n"
+              "-z          Ephemerides are simulated 80-column MPC astrometry\n");
+      return( -1);
+      }
+   for( i = 3; i < argc; i++)
+      if( argv[i][0] == '-')
+         {
+         const char *arg = get_arg( argc, argv, i);
+
+         switch( argv[i][1])
+            {
+            case 'a': case 'A':
+               minimum_altitude = atof( arg) * PI / 180.;
+               break;
+            case 'd': case 'D':
+               show_decimal_degrees = true;
+               break;
+            case 'i': case 'I':
+               ephem_step = arg;
+               break;
+            case 'm': case 'M':
+               {
+               extern bool use_mgex_data;
+
+               use_mgex_data = false;
+               }
+               break;
+            case 'n': case 'N':
+               n_ephem_steps = atoi( arg);
+               break;
+            case 'o':
+               ephem_target = arg;
+               break;
+            case 's': case 'S':
+               sort_order = atoi( arg);
+               break;
+            case 't': case 'T':
+               tle_usage = atoi( arg);
+               break;
+            case 'v': case 'V':
+               {
+               extern int gps_verbose;
+
+               gps_verbose = 1;
+               }
+               break;
+            case 'z':
+               creating_fake_astrometry = true;
+               break;
+            default:
+               printf( "Command line option '%s' not understood\n", argv[i]);
+               break;
+            }
+         }
    full_ctime( tbuff, curr_t, FULL_CTIME_YMD);
    printf( "Current time = %s UTC\n", tbuff);
    full_ctime( tbuff, utc, FULL_CTIME_YMD | FULL_CTIME_MILLISECS);
@@ -544,7 +615,7 @@ int dummy_main( const char *time_text, const char *observatory_code)
    printf( "Longitude %f, latitude %f  alt %.2f m\n",
             cdata.lon * (180. / PI), cdata.lat * (180. / PI), cdata.alt);
 
-   if( *ephem_target)
+   if( ephem_target && ephem_step)
       {
       double step_size = atof( ephem_step);
       const char end_char = ephem_step[strlen( ephem_step) - 1];
@@ -627,6 +698,8 @@ int main( const int argc, const char **argv)
    int rval, i;
    extern char **environ;
    const time_t t0 = time( NULL);
+   int n_args = 3;
+   char *args[20];
 
    *idata = '\0';
    for( i = 0; environ[i]; i++)
@@ -654,108 +727,66 @@ int main( const int argc, const char **argv)
    fprintf( lock_file, "Input '%s'\n", idata);
    avoid_runaway_process( 15);
    fprintf( lock_file, "15-second limit set\n");
+   args[0] = NULL;
+   args[1] = time_text;
+   args[2] = observatory_code;
    while( !get_urlencoded_form_data( &tptr, field, sizeof( field),
                                             buff, max_buff_size))
       {
+      char option = 0;
+
       fprintf( lock_file, "Field '%s': '%s'\n", field, buff);
       if( !strcmp( field, "time") && strlen( buff) < 80)
          strcpy( time_text, buff);
-      if( !strcmp( field, "min_alt") && strlen( buff) < 80)
-         minimum_altitude = atof( buff) * PI / 180.;
+      if( !strcmp( field, "min_alt") && strlen( buff) < 10)
+         option = 'a';
       if( !strcmp( field, "sort") && strlen( buff) < 10)
-         sort_order = atoi( buff);
+         option = 's';
       if( !strcmp( field, "n_steps") && strlen( buff) < 10)
-         n_ephem_steps = atoi( buff);
+         option = 'n';
       if( !strcmp( field, "ang_fmt") && *buff == '1')
          show_decimal_degrees = true;
       if( !strcmp( field, "ang_fmt") && *buff == '2')
          creating_fake_astrometry = true;
       if( !strcmp( field, "step") && strlen( buff) < 10)
-         strcpy( ephem_step, buff);
+         option = 'i';
       if( !strcmp( field, "obj") && strlen( buff) < 10)
-         strcpy( ephem_target, buff);
+         option = 'o';
       if( !strcmp( field, "ast"))
-         creating_fake_astrometry = true;
+         {
+         *buff = '\0';
+         option = 'f';
+         }
       if( !strcmp( field, "obscode") && strlen( buff) < 20)
          {
          strcpy( observatory_code, buff);
          if( buff[3] == 'v')
             {
-            extern int gps_verbose;
-
-            gps_verbose = 1;
-            printf( "Obs code '%s'\n", observatory_code);
+            option = 'v';
+            observatory_code[3] = *buff = '\0';
             }
+         }
+      if( option)
+         {
+         args[n_args] = (char *)malloc( strlen( buff) + 3);
+         args[n_args][0] = '-';
+         args[n_args][1] = option;
+         strcpy( args[n_args] + 2, buff);
+         n_args++;
          }
       }
    fprintf( lock_file, "Options read and parsed\n");
-   rval = dummy_main( time_text, observatory_code);
+   for( i = 0; i < n_args; i++)
+      fprintf( lock_file, "%d: '%s'\n", i, args[i]);
+   rval = dummy_main( n_args, (const char **)args);
    fprintf( lock_file, "Done: rval %d\n", rval);
+   for( i = 3; i < n_args; i++)
+      free( args[i]);
    fclose( lock_file);
 }
 #else       /* "standard" command-line test version */
 int main( const int argc, const char **argv)
 {
-   int i;
-
-   if( argc < 3)
-      {
-      printf( "list_gps (date/time) (MPC station)   (to get a list of sats)\n"
-              "list_gps (date/time) (MPC station) (target) (ephem step)\n\n"
-              "-a(alt)     Set minimum altitude (default=0)\n"
-              "-d          RA/decs shown in decimal degrees\n"
-              "-n(#)       Set number of ephemeris steps shown\n"
-              "-s(#)       Set sort order\n"
-              "-t(#)       Set TLE usage: 1=don't use them, 0=use only TLEs\n"
-              "-v          Verbose mode\n"
-              "-z          Ephemerides are simulated 80-column MPC astrometry\n");
-      return( -1);
-      }
-   for( i = 1; i < argc; i++)
-      if( argv[i][0] == '-')
-         switch( argv[i][1])
-            {
-            case 'a': case 'A':
-               minimum_altitude = atof( argv[i] + 2) * PI / 180.;
-               break;
-            case 'd': case 'D':
-               show_decimal_degrees = true;
-               break;
-            case 'm': case 'M':
-               {
-               extern bool use_mgex_data;
-
-               use_mgex_data = false;
-               }
-               break;
-            case 'n': case 'N':
-               n_ephem_steps = atoi( argv[i] + 2);
-               break;
-            case 's': case 'S':
-               sort_order = atoi( argv[i] + 2);
-               break;
-            case 't': case 'T':
-               tle_usage = atoi( argv[i] + 2);
-               break;
-            case 'v': case 'V':
-               {
-               extern int gps_verbose;
-
-               gps_verbose = 1;
-               }
-               break;
-            case 'z':
-               creating_fake_astrometry = true;
-               break;
-            default:
-               printf( "Command line option '%s' not understood\n", argv[i]);
-               break;
-            }
-   if( argc > 4 && argv[3][0] != '-')
-      {
-      strcpy( ephem_target, argv[3]);
-      strcpy( ephem_step, argv[4]);
-      }
-   return( dummy_main( argv[1], argv[2]));
+   return( dummy_main( argc, argv));
 }
 #endif
