@@ -499,9 +499,11 @@ static void test_astrometry( const char *ifilename)
    assert( ifile);
    while( fgets( buff, sizeof( buff), ifile))
       {
-      const double jd = extract_date_from_mpc_report( buff, NULL);
-      double ra, dec;
+      double ra, dec, jd;
+      double altitude_adjustment = 0.;
 
+      if( strlen( buff) > 81 && (buff[80] == '+' || buff[80] == '-'))
+         altitude_adjustment = atof( buff + 80);
       if( !memcmp( buff, "COM MGEX", 8))
          {
          extern bool use_mgex_data;
@@ -509,15 +511,19 @@ static void test_astrometry( const char *ifilename)
          use_mgex_data = false;
          printf( "Not using MGEX data\n");
          }
+      buff[80] = '\0';
+      jd = extract_date_from_mpc_report( buff, NULL);
       if( jd)
          {
          mpc_code_t cdata;
          gps_ephem_t loc[MAX_N_GPS_SATS];
          int i, n_sats;
+         const double earth_radius = 6378140.;  /* equatorial, in meters */
 
-         buff[80] = '\0';
          printf( "%s\n", buff);
          get_observer_loc( &cdata, buff + 77);
+         cdata.rho_cos_phi *= 1. + altitude_adjustment / earth_radius;
+         cdata.rho_sin_phi *= 1. + altitude_adjustment / earth_radius;
          get_ra_dec_from_mpc_report( buff, NULL, &ra, NULL,
                                            NULL, &dec, NULL);
          n_sats = compute_gps_satellite_locations( loc, jd, &cdata);
