@@ -12,6 +12,9 @@
 #include "watdefs.h"
 #include "afuncs.h"
 
+const double pi =
+      3.1415926535897932384626433832795028841971693993751058209749445923;
+
 static size_t total_written;
 int gps_verbose;
 
@@ -374,6 +377,24 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    return( rval);
 }
 
+/* If,  as described below,  you observed an object with a light-time lag of
+(say) 0.07 seconds,  then it should be precessed from Earth-fixed inertial
+coordinates to J2000 using the earth's orientation as it was 0.07 seconds
+before you made your observation.  Instead,  it's processed using the
+orientation at the time of observation.
+
+To fix this small difference,  we just spin around the Z axis by the
+amount the earth rotates during those 0.07 seconds. */
+
+static inline void rotate_vect( double *vect, const double angle)
+{
+   const double cos_angle = cos( angle), sin_angle = sin( angle);
+   const double new_y = vect[1] * cos_angle - vect[0] * sin_angle;
+
+   vect[0] = vect[0] * cos_angle + vect[1] * sin_angle;
+   vect[1] = new_y;
+}
+
 /* Lagrange interpolation through n_pts evenly spaced in x,  y[0] = value
 at x=0, y[1] = value at x=1,  etc.  Experimentation with the following
 function shows negligible errors with n_pts = 10 and x "in the middle",
@@ -472,6 +493,7 @@ int get_gps_positions( double *output_coords, const double *observer_loc,
                dist_squared += delta * delta;
                }
             light_time_lag = sqrt( dist_squared) / SPEED_OF_LIGHT;
+            rotate_vect( tptr, 2. * pi * light_time_lag / seconds_per_day);
             }
       }
    return( err_code);
