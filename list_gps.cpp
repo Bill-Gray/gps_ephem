@@ -492,6 +492,9 @@ static void test_astrometry( const char *ifilename)
 {
    FILE *ifile = fopen( ifilename, "rb");
    char buff[300];
+   double sum_along = 0., sum_cross = 0.;
+   double sum_along2 = 0., sum_cross2 = 0.;
+   int n_found = 0;
 
    assert( ifile);
    while( fgets( buff, sizeof( buff), ifile))
@@ -499,6 +502,13 @@ static void test_astrometry( const char *ifilename)
       const double jd = extract_date_from_mpc_report( buff, NULL);
       double ra, dec;
 
+      if( !memcmp( buff, "COM MGEX", 8))
+         {
+         extern bool use_mgex_data;
+
+         use_mgex_data = false;
+         printf( "Not using MGEX data\n");
+         }
       if( jd)
          {
          mpc_code_t cdata;
@@ -511,26 +521,52 @@ static void test_astrometry( const char *ifilename)
          get_ra_dec_from_mpc_report( buff, NULL, &ra, NULL,
                                            NULL, &dec, NULL);
          n_sats = compute_gps_satellite_locations( loc, jd, &cdata);
-         printf( "JD %f RA %f dec %f\n", jd, ra * 180. / PI, dec * 180. / PI);
          for( i = 0; i < n_sats; i++)
             {
             double delta_dec = dec - loc[i].dec;
             double delta_ra = ra - loc[i].ra;
             const double TOL = 300.;                /* five arcmin */
+            const double radians_to_arcsec = 3600. * 180. / PI;
 
             while( delta_ra > PI)
                delta_ra -= PI + PI;
             while( delta_ra < -PI)
                delta_ra += PI + PI;
-            delta_ra  *= 180. * 3600. / PI;
-            delta_dec *= 180. * 3600. / PI;
+            delta_ra  *= radians_to_arcsec;
+            delta_dec *= radians_to_arcsec;
+            delta_ra *= cos( dec);
             if( fabs( delta_dec) < TOL && fabs( delta_ra) < TOL)
                {
-               printf( "dRA %6.2f dDec %6.2f ", delta_ra, delta_dec);
+               const double motion = loc[i].motion * radians_to_arcsec;
+               const double sin_ang = sin( loc[i].posn_ang);
+               const double cos_ang = cos( loc[i].posn_ang);
+               const double cross_res = cos_ang * delta_ra + sin_ang * delta_dec;
+               double along_res = cos_ang * delta_ra - sin_ang * delta_dec;
+
+               along_res /= motion;
+/*             printf( "dRA %6.2f\" dDec %6.2f\" ", delta_ra, delta_dec);
+*/             printf( "    xresid %6.2f\"  along %8.4fs  ", cross_res, along_res);
                printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
+               n_found++;
+               sum_along += along_res;
+               sum_along2 += along_res * along_res;
+               sum_cross += cross_res;
+               sum_cross2 += cross_res * cross_res;
                }
             }
          }
+      }
+   if( n_found > 1)
+      {
+      printf( "\n%d observations found\n\n", n_found);
+      sum_along /= (double)n_found;
+      sum_along2 /= (double)n_found;
+      sum_cross /= (double)n_found;
+      sum_cross2 /= (double)n_found;
+      printf( "Avg cross-track : %6.2f +/- %.2f\"\n",
+               sum_cross, sqrt( sum_cross2 - sum_cross * sum_cross));
+      printf( "Avg along-track (timing): %8.4f +/- %.4f seconds\n",
+               sum_along, sqrt( sum_along2 - sum_along * sum_along));
       }
    fclose( ifile);
 }
