@@ -59,6 +59,15 @@ duration would be off by twelve seconds,  if the time reported was
 that of the end of the exposure,  plus two seconds while the image
 was downloaded from the camera.
 
+<p> Once you've gotten astrometry,  you can <a href="gps_ast.htm">
+upload your astrometry and find out how far off you were. </a>  The
+tool will figure out which object(s) you observed,  the timing
+difference for each observation,  and how far "cross-track" you were
+(that is,  the difference between your measured position and the
+closest the object should have come to that position).  You'll
+also get the average timing and cross-track residual errors,  and
+their scatter (standard deviation). </p>
+
 <h2> <a name="tles"> Ephemeris sources </a> </h2>
 
 <p> <i>Usually</i>,  the tools on this site can just give you an
@@ -95,6 +104,12 @@ altitude and latitude (10<sup>-6</sup> of the earth's radius).  In
 some cases,  one or even two fewer digits are given.  When that
 happens,  you get a warning message about loss of precision. </p>
 
+<p> The degree to which you should worry about this varies.  At
+least one user of these tools is investigating errors at the millisecond
+level.  In one millisecond,  a GPS satellite moves about three meters.
+If your observatory positions is chopped off to 64-meter precision,
+you can still correct your timing to within about 40 milliseconds.
+
 <p> You <i>may</i> find an 'observatory code' in my
 <a href="https://github.com/Bill-Gray/find_orb/blob/master/rovers.txt">
 errata to the MPC observatory list</a> that gives correct precision.
@@ -105,11 +120,12 @@ Ke1 and Ke2 for the two Keck telescopes,  and so on.  Positions are
 also given for scopes at Cerro Tololo,  Cerro Paranal,  and La Silla
 that would be lumped into one position by MPC. </p>
 
-<h2> <a name="to_do"> Remaining things to do </a> </h2>
+<p> Also,  you can <a href="#contact"> send me your latitude,  longitude,
+and altitude</a> and I'll either correct the MPC's position or add
+an entirely new "MPC code" (unofficial,  of course!) so you can get
+correct data. </p>
 
-<p> &bull; It would be convenient if you could simply upload your
-astrometric data and get back a report on what your timing offsets
-were for each observation.  This is high on my agenda.
+<h2> <a name="to_do"> Remaining things to do </a> </h2>
 
 <p> &bull; None of this helps with figuring out what your timing
 may have been,  say,  two years ago.  I'm thinking of providing a
