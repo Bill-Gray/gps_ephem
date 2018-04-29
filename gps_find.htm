@@ -29,7 +29,7 @@ observable from your MPC code at a given time. </p>
 action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want to reset the form to the defaults?')">
 
   <p> Time: <input name="time" id="time" maxlength="40" size="40"> UTC </p>
-  <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="5" size="5">
+  <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="9" size="9">
   <p> Minimum altitude: <input name="min_alt" id="min_alt" maxlength="5" size="5" value="10">
 
   <p> Sort order: <br>
@@ -94,7 +94,7 @@ I'd suggest getting satellites with high elongation that aren't marked 'Sha'
  to help detect random timing errors.
 
 <p> <b> Accuracy</b> appears to be about an arcsecond,  which corresponds to
-about 40 milliseconds of motion.  I should be able to improve this.  The satellites
+about 40 milliseconds of motion.  I'm working on improving this.  The satellites
 have positions known to within a few centimeters.  Of course,  that's the position
 of the antenna;  if the center of light measured on a CCD is,  say,  a meter
 away,  that would lead about half a millisecond of error (the satellites move at
