@@ -79,8 +79,8 @@ test_gps$(EXE): test_gps.o gps.o
 list_gps$(EXE): list_gps.cpp gps.o
 	$(CC) $(CFLAGS) -o list_gps$(EXE) list_gps.cpp gps.o $(LIBSADDED) -llunar $(CURL) -lm -lsatell
 
-list_gps.cgi  : list_gps.cpp gps.o
-	$(CC) $(CFLAGS) -o list_gps.cgi   list_gps.cpp gps.o $(LIBSADDED) -llunar $(CURL) -lm -lsatell -DCGI_VERSION
+list_gps.cgi  : list_cgi.cpp list_gps.cpp gps.o
+	$(CC) $(CFLAGS) -o list_gps.cgi list_cgi.cpp -DCGI_VERSION list_gps.cpp gps.o $(LIBSADDED) -llunar $(CURL) -lm -lsatell
 
 gps.o: gps.cpp
 	$(CC) $(CFLAGS) $(CURLI) -c $<
