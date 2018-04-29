@@ -23,7 +23,7 @@ action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want t
 
   <p> Satellite ID (e.g., G03, R15): <input name="obj" id="obj" maxlength="10" size="10" value="">
   <p> Time: <input name="time" id="time" maxlength="40" size="40"> UTC </p>
-  <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="5" size="5">
+  <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="8" size="8">
   <p> Step size: <input name="step" id="step" maxlength="10" size="10" value="1m">
   <p> Number of ephemeris steps: <input name="n_steps" id="n_steps" maxlength="10" size="10" value="20">
 <br>
@@ -83,7 +83,7 @@ I'd suggest getting satellites with high elongation that aren't marked 'Sha'
  to help detect random timing errors.
 
 <p> <b> Accuracy</b> appears to be about an arcsecond,  which corresponds to
-about 40 milliseconds of motion.  I should be able to improve this.  The satellites
+about 40 milliseconds of motion.  I'm working on improving this.  The satellites
 have positions known to within a few centimeters.  Of course,  that's the position
 of the antenna;  if the center of light measured on a CCD is,  say,  a meter
 away,  that would lead about half a millisecond of error (the satellites move at
