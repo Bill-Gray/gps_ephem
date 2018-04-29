@@ -20,7 +20,9 @@ almost exactly the right time,  the time in your images can still
 be considerably off.  I've seen cases where the times were for the
 beginning of the exposure.  Or the end of exposure.  Or,  for reasons
 that passeth all understanding,  one exposure duration too early.
-Or the time the image was written out to the hard disk.
+(Probably the camera returned a signal when it started the exposure,
+which the software took to mean the end of the exposure?)  Or the
+time the image was written out to the hard disk.
 
 <p> About the only way to really verify that the image times are
 correct is to check them against a known object.  Global Navigation
@@ -62,15 +64,17 @@ was downloaded from the camera.
 <p> <i>Usually</i>,  the tools on this site can just give you an
 accurate position for the GNSS satellites,  and you can regard that
 as the answer you'd get if your timing was good to within 1/40
-second or so.
+second or so.  (I'm working on improving this.)
 
-<p> Ppositions at that level of accuracy are
+<p> Positions at that level of accuracy are
 available a few days in advance for GPS and GLONASS satellites.
 For Galileo,  BeiDou,  and QZSS satellites,  you only get that level
 of accuracy a few days late.  These tools will give you positions
 for such satellites in those cases,  usually good to within a few
 arcminutes.  So you can go out,  observe a BeiDou or Galileo satellite,
 then wait a few days for the precise ephemerides to become available.
+Once you've got them,  you can use them to check how accurate your
+timing was.
 
 <p> I realize that this is somewhat annoying.  Unfortunately,  we
 seem to be stuck with it.  I'm getting the "imprecise" positions
@@ -78,6 +82,28 @@ from <a href="tle_info.htm"> TLEs (Two-Line Elements)</a>.  Without
 those,  we'd have no idea where to look in advance for Galileo,
 BeiDou,  or QZSS objects.  We'd know exactly where they had been,
 but not where to point our telescopes tonight.
+
+<h2> <a name="sites"> Low-precision site locations </a> </h2>
+
+<p> The positions given for observatories are,  with few exceptions,
+from <a href="https://www.minorplanetcenter.net/iau/lists/ObsCodes.html">
+a list of observatories maintained by the Minor Planet Center</a>.
+(An <a href="https://projectpluto.com/mpc_stat.htm"> extended version
+of the same list is available</a> that adds a few details and explanations.)
+The MPC list provides,  at best,  a precision of about 6.4 meters in
+altitude and latitude (10<sup>-6</sup> of the earth's radius).  In
+some cases,  one or even two fewer digits are given.  When that
+happens,  you get a warning message about loss of precision. </p>
+
+<p> You <i>may</i> find an 'observatory code' in my
+<a href="https://github.com/Bill-Gray/find_orb/blob/master/rovers.txt">
+errata to the MPC observatory list</a> that gives correct precision.
+In particular,  Mauna Kea is not only given to low precision;  the
+position is for one telescope,  probably the IRTF.  As described at
+the above link,  one can instead use 'codes' such as Sub for Subaru,
+Ke1 and Ke2 for the two Keck telescopes,  and so on.  Positions are
+also given for scopes at Cerro Tololo,  Cerro Paranal,  and La Silla
+that would be lumped into one position by MPC. </p>
 
 <h2> <a name="to_do"> Remaining things to do </a> </h2>
 
