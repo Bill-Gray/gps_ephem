@@ -501,6 +501,7 @@ static void test_astrometry( const char *ifilename)
       {
       double ra, dec, jd;
       double altitude_adjustment = 0.;
+      char removed_char = buff[80];
 
       if( strlen( buff) > 81 && (buff[80] == '+' || buff[80] == '-'))
          altitude_adjustment = atof( buff + 80);
@@ -520,12 +521,13 @@ static void test_astrometry( const char *ifilename)
          int i, n_sats;
          const double earth_radius = 6378140.;  /* equatorial, in meters */
 
-         printf( "%s\n", buff);
          get_observer_loc( &cdata, buff + 77);
          cdata.rho_cos_phi *= 1. + altitude_adjustment / earth_radius;
          cdata.rho_sin_phi *= 1. + altitude_adjustment / earth_radius;
          get_ra_dec_from_mpc_report( buff, NULL, &ra, NULL,
                                            NULL, &dec, NULL);
+         buff[80] = removed_char;
+         printf( "%s", buff);
          n_sats = compute_gps_satellite_locations( loc, jd, &cdata);
          for( i = 0; i < n_sats; i++)
             {
@@ -611,6 +613,14 @@ int dummy_main( const int argc, const char **argv)
               "this error will probably go away.\n\n");
 #endif
      }
+   else
+      {
+      const int n_predicted_days = 373;
+
+      full_ctime( tbuff, 2400000.5 + (double)( err_code - n_predicted_days),
+                             FULL_CTIME_YMD | FULL_CTIME_DATE_ONLY);
+      printf( "Earth rotation parameter file date %s\n", tbuff);
+      }
 
    if( argc >= 2 && argv[1][0] == '-' && argv[1][1] == 'f')
       {
