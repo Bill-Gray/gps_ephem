@@ -478,6 +478,59 @@ static const char *get_arg( const int argc, const char **argv, const int idx)
       return( argv[idx + 1]);
 }
 
+/*
+CSS field sizes,  from Eric Christensen,  2017 Mar.  Updated by
+Rob Seaman,  2017 Nov 04.
+
+703 field size, 2003-2016: 2.85 x 2.85 deg.
+G96, 2004 - May 2016: 1.1 x 1.1 deg.
+E12 : 2.05 x 2.05 deg.
+
+10K cameras:
+G96 - May 2016 - present: 2.2 x 2.2 deg.
+703 - Dec. 2016 - present: 4.4 x 4.4 deg.
+*/
+
+static void get_field_size( double *width, double *height, const double jd,
+                        const char *obs_code)
+{
+   const double dec_02_2016 = 2457724.5;
+   const double may_26_2016 = 2457534.5;
+   static char bad_code[10];
+
+   switch( *obs_code)
+      {
+      case '7':         /* 703 */
+         *width = (jd < dec_02_2016 ? 2.85 : 4.4);
+         break;
+      case 'G':         /* G96 */
+         *width = (jd < may_26_2016 ? 1.1 : 2.25);
+         break;
+      case 'E':         /* E12 */
+         *width = 2.05;
+         break;
+      case 'I':         /* I52:  33' field of view;  some loss in corners */
+         *width = 33. / 60.;
+         break;
+      case 'V':         /* V06:  580" field of view */
+         *width = 580. / 3600.;
+         break;
+      default:
+         *width = 0.;
+         if( memcmp( bad_code, obs_code, 4))
+            {
+            printf( "Bad code '%.3s', shouldn't be here\n", obs_code);
+            memcpy( bad_code, obs_code, 4);
+            }
+         break;
+      }
+   *width *= PI / 180.;
+   *height = *width;    /* all square fields thus far */
+}
+
+#define ASTROMETRY 1
+#define FIELD_DATA 2
+
 static void test_astrometry( const char *ifilename)
 {
    FILE *ifile = fopen( ifilename, "rb");
@@ -485,16 +538,16 @@ static void test_astrometry( const char *ifilename)
    double sum_along = 0., sum_cross = 0.;
    double sum_along2 = 0., sum_cross2 = 0.;
    int n_found = 0;
+   int data_type = 0;
 
    assert( ifile);
    while( fgets( buff, sizeof( buff), ifile))
       {
-      double ra, dec, jd;
+      double ra, dec, jd = 0.;
       double altitude_adjustment = 0.;
-      char removed_char = buff[80];
+      char mpc_code[4], time_str[25];
+      static int count;
 
-      if( strlen( buff) > 81 && (buff[80] == '+' || buff[80] == '-'))
-         altitude_adjustment = atof( buff + 80);
       if( !memcmp( buff, "COM MGEX", 8))
          {
          extern bool use_mgex_data;
@@ -502,29 +555,64 @@ static void test_astrometry( const char *ifilename)
          use_mgex_data = false;
          printf( "Not using MGEX data\n");
          }
-      buff[80] = '\0';
-      jd = extract_date_from_mpc_report( buff, NULL);
+      if( sscanf( buff, "%lf,%lf,%23s,%3s", &ra, &dec, time_str, mpc_code) == 4)
+         {
+         jd = get_time_from_string( 0, time_str, FULL_CTIME_YMD, NULL);
+         data_type = FIELD_DATA;
+         ra *= PI / 180.;
+         dec *= PI / 180.;
+         count++;
+         if( count < 10)
+            printf( "Looking at %f, %f, JD %f, '%s'\n",
+                     ra * 180. / PI, dec * 180. / PI, jd, mpc_code);
+         }
+      else
+         {
+         const char removed_char = buff[80];
+
+         if( strlen( buff) > 81 && (buff[80] == '+' || buff[80] == '-'))
+            altitude_adjustment = atof( buff + 80);
+         buff[80] = '\0';
+         jd = extract_date_from_mpc_report( buff, NULL);
+         if( jd)
+            {
+            get_ra_dec_from_mpc_report( buff, NULL, &ra, NULL,
+                                              NULL, &dec, NULL);
+            strcpy( mpc_code, buff + 77);
+            buff[80] = removed_char;
+            data_type = ASTROMETRY;
+            }
+         }
       if( jd)
          {
          mpc_code_t cdata;
          gps_ephem_t loc[MAX_N_GPS_SATS];
          int i, n_sats;
          const double earth_radius = 6378140.;  /* equatorial, in meters */
+         const double TOL = 300.;                /* five arcmin */
+         double width, height;
+         const double radians_to_arcsec = 3600. * 180. / PI;
+         if( data_type == ASTROMETRY)
+            height = width = TOL;
+         else
+            {
+            get_field_size( &width, &height, jd, mpc_code);
+            if( count < 10)
+               printf( "%f x %f deg FOV\n", width * 180. / PI, height * 180. / PI);
+            height *= radians_to_arcsec / 2.;
+            width *= radians_to_arcsec / 2.;
+            }
 
-         get_observer_loc( &cdata, buff + 77);
+         get_observer_loc( &cdata, mpc_code);
          cdata.rho_cos_phi *= 1. + altitude_adjustment / earth_radius;
          cdata.rho_sin_phi *= 1. + altitude_adjustment / earth_radius;
-         get_ra_dec_from_mpc_report( buff, NULL, &ra, NULL,
-                                           NULL, &dec, NULL);
-         buff[80] = removed_char;
-         printf( "%s", buff);
+         if( data_type == ASTROMETRY)
+            printf( "%s", buff);
          n_sats = compute_gps_satellite_locations( loc, jd, &cdata);
          for( i = 0; i < n_sats; i++)
             {
             double delta_dec = dec - loc[i].dec;
             double delta_ra = ra - loc[i].ra;
-            const double TOL = 300.;                /* five arcmin */
-            const double radians_to_arcsec = 3600. * 180. / PI;
 
             while( delta_ra > PI)
                delta_ra -= PI + PI;
@@ -533,7 +621,7 @@ static void test_astrometry( const char *ifilename)
             delta_ra  *= radians_to_arcsec;
             delta_dec *= radians_to_arcsec;
             delta_ra *= cos( dec);
-            if( fabs( delta_dec) < TOL && fabs( delta_ra) < TOL)
+            if( fabs( delta_dec) < width && fabs( delta_ra) < height)
                {
                const double motion = loc[i].motion * radians_to_arcsec;
                const double sin_ang = sin( loc[i].posn_ang);
@@ -542,9 +630,16 @@ static void test_astrometry( const char *ifilename)
                double along_res = cos_ang * delta_ra - sin_ang * delta_dec;
 
                along_res /= motion;
-/*             printf( "dRA %6.2f\" dDec %6.2f\" ", delta_ra, delta_dec);
-*/             printf( "    xresid %6.2f\"  along %8.4fs  ", cross_res, along_res);
-               printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
+               if( data_type == ASTROMETRY)
+                  {
+                  printf( "    xresid %6.2f\"  along %8.4fs  ", cross_res, along_res);
+                  printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
+                  }
+               else
+                  {
+                  printf( "%s", buff);
+                  display_satellite_info( loc + i, true);
+                  }
                n_found++;
                sum_along += along_res;
                sum_along2 += along_res * along_res;
@@ -554,7 +649,7 @@ static void test_astrometry( const char *ifilename)
             }
          }
       }
-   if( n_found > 1)
+   if( n_found > 1 && data_type == ASTROMETRY)
       {
       printf( "\n%d observations found\n\n", n_found);
       sum_along /= (double)n_found;
