@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html><head>
+   <title> Check GNSS astrometry </title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   <meta name="Author" content="Bill Gray">
+</head>
+<body>
+<h1> Check GNSS astrometry </h1>
+
+<p> <a href="gps_expl.htm"> Click here for an explanation of what this page
+is and why it exists. </a> </p>
+
+<p> Cut and paste astrometry in the
+<a href="http://www.minorplanetcenter.net/iau/info/OpticalObs.html"> MPC's
+80-column MPC format </a> (ADES to follow),  and click 'Process observations'.
+The program will figure out which GNSS satellite(s) you observed and tell you
+how far off you were in along-track seconds and cross-track arcseconds,  for
+each observation.  (The object designations can be anything you like;
+they'll be ignored.)   At the bottom,  you'll get averages and standard
+deviations. </p>
+
+<p></p><hr>
+<form method="GET" enctype="application/x-www-form-urlencoded"
+action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want to reset the form to the defaults?')">
+
+<p><textarea name="ast" id="ast" cols=90 rows=10></textarea>
+
+<p><input value=" Process observations " type="submit"> <input value=" Reset " type="reset">
+</p><hr> </form>
+
+<p> There are <a href="tools.htm"> several other tools for asteroid observers</a>
+on this site,  including <a href="gps_find.htm"> a tool to list GNSS satellites
+visible from a given site.</a>
+
+<h2> <a name="contact"> Contact info </a> </h2>
+
+<p> I can be reached at
+p&#x202e;&#x43e;&#xe7;.&ouml;t&#x16d;lp&#x165;&#x441;&eacute;&#x458;&ocirc;&#x159;p&#x40;ot&uacute;l&#x202c;m.
+If you're a human instead of a spambot,  you can probably figure out
+how to remove the diacritical marks... </p>
+
+</body></html>
