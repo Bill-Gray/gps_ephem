@@ -33,10 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include "gps.h"
 #include "cgi_func.h"
 
-void avoid_runaway_process( const int max_time_to_run);   /* cgi_func.c */
-int get_urlencoded_form_data( const char **idata,       /* cgi_func.c */
-                              char *field, const size_t max_field,
-                              char *buff, const size_t max_buff);
 int dummy_main( const int argc, const char **argv);      /* list_cgi.cpp */
 
 int main( const int argc, const char **argv)
