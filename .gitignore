@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+list_gps
+names
+test_gps
+list_gps.cgi
+
+*.sp3
+*.EPH
+*.EPH_5D
+finals.all
