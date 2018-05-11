@@ -44,6 +44,7 @@ const char *imprecise_position_message =
 static int get_observer_loc( mpc_code_t *cdata, const char *code)
 {
    int rval = -1, i;
+   static bool imprecision_warning_shown = false;
 
    for( i = 0; i < 3 && rval; i++)
       {
@@ -60,9 +61,12 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
                      get_mpc_code_info( cdata, buff) == 3)
                {
                rval = 0;         /* we got it */
-               if( buff[4] != '!')
+               if( buff[4] != '!' && !imprecision_warning_shown)
                   if( buff[12] == ' ' || buff[20] == ' ' || buff[29] == ' ')
+                     {
+                     imprecision_warning_shown = true;
                      printf( "%s", imprecise_position_message);
+                     }
                if( !memcmp( code, "568", 3))
                   printf( "\nSpecial fix for Mauna Kea observers:  use 'codes' for specific\n"
                           "telescopes such as CFH (sic),  2.2,  etc.  Full list is at\n\n"
@@ -489,7 +493,12 @@ E12 : 2.05 x 2.05 deg.
 10K cameras:
 G96 - May 2016 - present: 2.2 x 2.2 deg.
 703 - Dec. 2016 - present: 4.4 x 4.4 deg.
-*/
+
+(691) Spacewatch size roughly from MPC sky coverage files,  plus
+some info from Bob McMillan.  The actual shape is a little more
+complicated than this -- it's a mosaic of eight chips --  but
+the 1.85 x 1.73 degree rectangle is close enough to do a rough
+cut as to whether we got the object.  */
 
 static void get_field_size( double *width, double *height, const double jd,
                         const char *obs_code)
@@ -498,8 +507,13 @@ static void get_field_size( double *width, double *height, const double jd,
    const double may_26_2016 = 2457534.5;
    static char bad_code[10];
 
+   *height = 0.;
    switch( *obs_code)
       {
+      case '6':         /* Spacewatch */
+         *width = 1.85;
+         *height = 1.73;
+         break;
       case '7':         /* 703 */
          *width = (jd < dec_02_2016 ? 2.85 : 4.4);
          break;
@@ -524,8 +538,10 @@ static void get_field_size( double *width, double *height, const double jd,
             }
          break;
       }
+   if( !*height)           /* square field indicated */
+      *height = *width;
    *width *= PI / 180.;
-   *height = *width;    /* all square fields thus far */
+   *height *= PI / 180.;
 }
 
 #define ASTROMETRY 1
@@ -562,9 +578,11 @@ static void test_astrometry( const char *ifilename)
          ra *= PI / 180.;
          dec *= PI / 180.;
          count++;
+#ifdef CURRENTLY_UNUSED_DEBUGGING_STATEMENTS
          if( count < 10)
             printf( "Looking at %f, %f, JD %f, '%s'\n",
                      ra * 180. / PI, dec * 180. / PI, jd, mpc_code);
+#endif
          }
       else
          {
@@ -597,8 +615,10 @@ static void test_astrometry( const char *ifilename)
          else
             {
             get_field_size( &width, &height, jd, mpc_code);
+#ifdef CURRENTLY_UNUSED_DEBUGGING_STATEMENTS
             if( count < 10)
                printf( "%f x %f deg FOV\n", width * 180. / PI, height * 180. / PI);
+#endif
             height *= radians_to_arcsec / 2.;
             width *= radians_to_arcsec / 2.;
             }
@@ -627,7 +647,7 @@ static void test_astrometry( const char *ifilename)
                const double sin_ang = sin( loc[i].posn_ang);
                const double cos_ang = cos( loc[i].posn_ang);
                const double cross_res = cos_ang * delta_ra + sin_ang * delta_dec;
-               double along_res = cos_ang * delta_ra - sin_ang * delta_dec;
+               double along_res = cos_ang * delta_dec - sin_ang * delta_ra;
 
                along_res /= motion;
                if( data_type == ASTROMETRY)
@@ -660,9 +680,19 @@ static void test_astrometry( const char *ifilename)
                sum_cross, sqrt( sum_cross2 - sum_cross * sum_cross));
       printf( "Avg along-track (timing): %8.4f +/- %.4f seconds\n",
                sum_along, sqrt( sum_along2 - sum_along * sum_along));
+      if( sum_along > 0.)
+         printf( "Positive along-track errors mean your clock was 'behind' the actual time;\n"
+              "i.e.,  the times reported in the astrometry are earlier than the positions\n"
+              "of the GPS satellites would indicate.\n");
+      else
+         printf( "Negative along-track errors mean your clock was 'ahead' of the actual time;\n"
+              "i.e.,  the times reported in the astrometry are later than the positions\n"
+              "of the GPS satellites would indicate.\n");
       }
    fclose( ifile);
 }
+
+/* See 'dailyize.c' for info about 'finals.mix'. */
 
 int dummy_main( const int argc, const char **argv)
 {
@@ -679,7 +709,10 @@ int dummy_main( const int argc, const char **argv)
    mpc_code_t cdata;
    gps_ephem_t loc[MAX_N_GPS_SATS];
    char tbuff[80];
-   int err_code = load_earth_orientation_params( "finals.all");
+   int err_code = load_earth_orientation_params( "finals.mix");
+
+   if( err_code <= 0)
+      err_code = load_earth_orientation_params( "finals.all");
 
    full_ctime( tbuff, curr_t, FULL_CTIME_YMD);
    printf( "Current time = %s UTC\n", tbuff);
