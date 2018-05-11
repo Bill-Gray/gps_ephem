@@ -84,3 +84,6 @@ list_gps.cgi  : list_cgi.cpp list_gps.cpp gps.o
 
 gps.o: gps.cpp
 	$(CC) $(CFLAGS) $(CURLI) -c $<
+
+dailyize: dailyize.c
+	$(CC) $(CFLAGS) -o dailyize dailyize.c
