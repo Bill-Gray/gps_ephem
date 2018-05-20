@@ -476,7 +476,7 @@ static const char *asterisk_message =
 
 static const char *get_arg( const int argc, const char **argv, const int idx)
 {
-   if( argv[idx][2])
+   if( argv[idx][2] || idx == argc - 1)
       return( argv[idx] + 2);
    else
       return( argv[idx + 1]);
