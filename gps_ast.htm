@@ -8,11 +8,12 @@
 <h1> Check GNSS astrometry </h1>
 
 <p> <a href="gps_expl.htm"> Click here for an explanation of what this page
-is and why it exists. </a> </p>
+is and why it exists, </a> and for links to related tools. </p>
 
 <p> Cut and paste astrometry in the
 <a href="http://www.minorplanetcenter.net/iau/info/OpticalObs.html"> MPC's
-80-column MPC format </a> (ADES to follow),  and click 'Process observations'.
+80-column astrometric reporting format </a>  (you can't do <a href="#ades">
+ADES </a> quite yet),  and click 'Process observations'.
 The program will figure out which GNSS satellite(s) you observed and tell you
 how far off you were in along-track seconds and cross-track arcseconds,  for
 each observation.  (The object designations can be anything you like;
@@ -30,7 +31,51 @@ action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want t
 
 <p> There are <a href="tools.htm"> several other tools for asteroid observers</a>
 on this site,  including <a href="gps_find.htm"> a tool to list GNSS satellites
-visible from a given site.</a>
+visible from a given site</a> and <a href="gps_eph.htm"> a tool to generate ephemerides
+for a given satellite. </a> </p>
+
+<h2> <a name="tips"> Tips for high-precision timing </a> </h2>
+
+<p> <i>Usually</i>,  you can just cut-and-paste astrometry into the above form,
+click 'Process Observations',  and you'll get back data on how good your timing
+was.  The precision of the times in the
+<a href="https://www.minorplanetcenter.net/iau/info/OpticalObs.html">
+MPC's optical observation format </a> is a millionth of a day,  or 86.4
+milliseconds.  For most people,  that's enough precision. </p>
+
+<p> But it's not enough for everybody.  Somewhat to my surprise,  I've encountered
+situations where people are testing timing down to the ten-millisecond level.
+If you're one of them,  you'll have to go beyond the MPC's format. </p>
+
+<p> <a href="https://www.projectpluto.com/pluto/mpecs/navst43.htm"> Click here
+for an example of extended-precision observations. </a>  Here's the first observation
+in that example,  shown first in the way MPC would expect (to six decimal places
+in the day) and then to nine places,  and finally in hour/minute/second form
+to millisecond precision.  Note that because all the data has to fit in the
+columns assigned for the date/time,  spaces and colons get squeezed out. </p>
+
+<pre>
+     NAVST43  C2011 10 26.81807021 18 13.88 +13 00 09.1          12.8 V      Ce1
+     NAVST43  CK111026.81807023021 18 13.88 +13 00 09.1          12.8 V      Ce1
+     NAVST43  CK111026:19380126821 18 13.88 +13 00 09.1          12.8 V      Ce1
+</pre>
+
+<p> These all refer to the time 2011 October 26.818070230 = 2011 Oct 26 19:38:01.268
+<a href="glossary.htm#UT">UTC</a>. The Minor Planet Center will accept only the
+first of these,  rounded to the nearest millionth of a day.  This tool, and others on this site,  will accept any of the
+three formats. </p>
+
+<p> <a name="ades"> </a> <b> ADES: </b>
+ I should note that the ideal way around this would be to use the new
+<a href="https://www.minorplanetcenter.net/iau/info/ADES.html"> ADES format
+for reporting astrometric observations. </a>  Among other benefits,  ADES
+allows you to provide as many digits as needed for times and other data .
+I expect to take this route (and am working on doing so).  You'll be able
+to upload either 80-column or ADES data,  or even a mix of these,  and
+this tool (and <a href="tools.htm"> others on this site</a>) will figure
+out what you've provided.  But at present,  you have to use the above
+extended-precision formats if your observations are really that accurate.
+</p>
 
 <h2> <a name="contact"> Contact info </a> </h2>
 
