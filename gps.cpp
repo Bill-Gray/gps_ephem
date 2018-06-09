@@ -289,6 +289,15 @@ coverage,  and you see that we might get data in any of eight files. */
 
 bool use_mgex_data = true;
 
+/* As of 2018 Jun 9,  the MGEX data actually started in GPS week 1680
+and the IGU ("ultra-rapid") predictive CDDIS data in week 1080.  I've
+backed both up by about a year in case other data turns up.  This
+check could be skipped completely,  but I figure this avoids a certain
+amount of requests for files that almost surely do not exist. */
+
+#define MGEX_START_WEEK 1630
+#define IGU_START_WEEK 1030
+
 static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             const bool fetch_files)
 {
@@ -301,7 +310,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    while( i < 2200 && start_of_year( i + 1) < day)
       i++;
 
-   if( use_mgex_data)
+   if( use_mgex_data && day > MGEX_START_WEEK * 7)
       {
       snprintf( filename, sizeof( filename), "gbm%04d%d.sp3.Z", day / 7, day % 7);
       snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/mgex/%4d/%s",
@@ -353,7 +362,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
          printf( "get_cached_posns: %p\n", (void *)rval);
       }
 #endif         /* #ifdef UNIBE_BASE_URL */
-   for( i = 0; !rval && i < 8; i++)
+   for( i = 0; day > IGU_START_WEEK * 7 && !rval && i < 8; i++)
       {
       const int tglumph = glumph + (i - 3) * glumphs_per_day / 4;
       const int day = tglumph / glumphs_per_day;
