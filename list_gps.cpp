@@ -547,6 +547,10 @@ static void get_field_size( double *width, double *height, const double jd,
 #define ASTROMETRY 1
 #define FIELD_DATA 2
 
+const double start_gps_jd = 2448793.500000;           /* 1992 Jun 20  0:00:00 UTC */
+double min_jd = start_gps_jd, max_jd = start_gps_jd + 365. * 100.;
+            /* In 2092,  somebody may have to revise this */
+
 static void test_astrometry( const char *ifilename)
 {
    FILE *ifile = fopen( ifilename, "rb");
@@ -563,7 +567,12 @@ static void test_astrometry( const char *ifilename)
       double altitude_adjustment = 0.;
       char mpc_code[4], time_str[25];
       static int count;
+      size_t i;
 
+      if( !memcmp( buff, "COM ignore obs", 14))
+         while( fgets_trimmed( buff, sizeof( buff), ifile))
+            if( !memcmp( buff, "COM end ignore obs", 18))
+               break;
       if( !memcmp( buff, "COM MGEX", 8))
          {
          extern bool use_mgex_data;
@@ -571,7 +580,10 @@ static void test_astrometry( const char *ifilename)
          use_mgex_data = false;
          printf( "Not using MGEX data\n");
          }
-      if( sscanf( buff, "%lf,%lf,%23s,%3s", &ra, &dec, time_str, mpc_code) == 4)
+      for( i = 0; buff[i]; i++)
+         if( buff[i] == ',')
+            buff[i] = ' ';
+      if( sscanf( buff, "%lf %lf %23s %3s", &ra, &dec, time_str, mpc_code) == 4)
          {
          jd = get_time_from_string( 0, time_str, FULL_CTIME_YMD, NULL);
          data_type = FIELD_DATA;
@@ -601,7 +613,7 @@ static void test_astrometry( const char *ifilename)
             data_type = ASTROMETRY;
             }
          }
-      if( jd)
+      if( jd > min_jd && jd < max_jd)
          {
          mpc_code_t cdata;
          gps_ephem_t loc[MAX_N_GPS_SATS];
@@ -657,7 +669,7 @@ static void test_astrometry( const char *ifilename)
                   }
                else
                   {
-                  printf( "%s", buff);
+                  printf( "%s ", time_str);
                   display_satellite_info( loc + i, true);
                   }
                n_found++;
@@ -740,6 +752,58 @@ int dummy_main( const int argc, const char **argv)
       printf( "Earth rotation parameter file date %s\n", tbuff);
       }
 
+   for( i = 3; i < argc; i++)
+      if( argv[i][0] == '-')
+         {
+         const char *arg = get_arg( argc, argv, i);
+
+         switch( argv[i][1])
+            {
+            case 'a': case 'A':
+               minimum_altitude = atof( arg) * PI / 180.;
+               break;
+            case 'd': case 'D':
+               show_decimal_degrees = true;
+               break;
+            case 'i': case 'I':
+               ephem_step = arg;
+               break;
+            case 'l':
+               min_jd = get_time_from_string( curr_t, arg, FULL_CTIME_YMD,
+                                 NULL);
+               printf( "Min JD reset to %f\n", min_jd);
+               break;
+            case 'n': case 'N':
+               n_ephem_steps = atoi( arg);
+               break;
+            case 'o':
+               ephem_target = arg;
+               break;
+            case 's': case 'S':
+               sort_order = atoi( arg);
+               break;
+            case 't': case 'T':
+               tle_usage = atoi( arg);
+               break;
+            case 'u':
+               max_jd = get_time_from_string( curr_t, arg, FULL_CTIME_YMD,
+                                 NULL);
+               break;
+            case 'v': case 'V':
+               {
+               extern int gps_verbose;
+
+               gps_verbose = 1;
+               }
+               break;
+            case 'z':
+               creating_fake_astrometry = true;
+               break;
+            default:
+               printf( "Command line option '%s' not understood\n", argv[i]);
+               break;
+            }
+         }
    if( argc >= 2 && argv[1][0] == '-' && argv[1][1] == 'f')
       {
       test_astrometry( get_arg( argc, argv, 1));
@@ -768,49 +832,6 @@ int dummy_main( const int argc, const char **argv)
       use_mgex_data = false;
       observatory_code[i] = '\0';
       }
-   for( i = 3; i < argc; i++)
-      if( argv[i][0] == '-')
-         {
-         const char *arg = get_arg( argc, argv, i);
-
-         switch( argv[i][1])
-            {
-            case 'a': case 'A':
-               minimum_altitude = atof( arg) * PI / 180.;
-               break;
-            case 'd': case 'D':
-               show_decimal_degrees = true;
-               break;
-            case 'i': case 'I':
-               ephem_step = arg;
-               break;
-            case 'n': case 'N':
-               n_ephem_steps = atoi( arg);
-               break;
-            case 'o':
-               ephem_target = arg;
-               break;
-            case 's': case 'S':
-               sort_order = atoi( arg);
-               break;
-            case 't': case 'T':
-               tle_usage = atoi( arg);
-               break;
-            case 'v': case 'V':
-               {
-               extern int gps_verbose;
-
-               gps_verbose = 1;
-               }
-               break;
-            case 'z':
-               creating_fake_astrometry = true;
-               break;
-            default:
-               printf( "Command line option '%s' not understood\n", argv[i]);
-               break;
-            }
-         }
    full_ctime( tbuff, utc, FULL_CTIME_YMD | FULL_CTIME_MILLISECS);
    printf( "GPS positions for JD %f = %s UTC\n", utc, tbuff);
    if( utc > curr_t + 4.)
@@ -818,7 +839,7 @@ int dummy_main( const int argc, const char **argv)
       printf( "Predictions are only available for about four days in advance.\n");
       return( ERR_CODE_TOO_FAR_IN_FUTURE);
       }
-   if( utc < 2448793.500000)     /* 1992 Jun 20  0:00:00 UTC */
+   if( utc < start_gps_jd)     /* 1992 Jun 20  0:00:00 UTC */
       {
       printf( "GPS/GLONASS ephemerides only extend back to 1992 June 20.\n");
       return( ERR_CODE_TOO_FAR_IN_PAST);
