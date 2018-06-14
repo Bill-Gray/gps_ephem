@@ -514,6 +514,7 @@ static void get_field_size( double *width, double *height, const double jd,
 {
    const double dec_02_2016 = 2457724.5;
    const double may_26_2016 = 2457534.5;
+   const double jun_24_2005 = 2453545.5;     /* see J95 */
    static char bad_code[10];
 
    *height = 0.;
@@ -542,6 +543,9 @@ static void get_field_size( double *width, double *height, const double jd,
          break;
       case 'I':         /* I52:  33' field of view;  some loss in corners */
          *width = 33. / 60.;
+         break;
+      case 'J':         /* J95:  25' to 2005 jun 22, 18' for 2005 jun 27 on */
+         *width = (jd < jun_24_2005 ? 25. / 60. : 18. / 60.);
          break;
       case 'V':         /* V06:  580" field of view */
          *width = 580. / 3600.;
