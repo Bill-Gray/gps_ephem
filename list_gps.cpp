@@ -579,7 +579,8 @@ static void test_astrometry( const char *ifilename)
    double sum_along = 0., sum_cross = 0.;
    double sum_along2 = 0., sum_cross2 = 0.;
    int n_found = 0;
-   int data_type = 0;
+   int data_type = 0, addenda_start;
+   double exposure = 0., tilt = 0.;
 
    assert( ifile);
    while( fgets( buff, sizeof( buff), ifile))
@@ -594,6 +595,10 @@ static void test_astrometry( const char *ifilename)
          while( fgets_trimmed( buff, sizeof( buff), ifile))
             if( !memcmp( buff, "COM end ignore obs", 18))
                break;
+      if( !memcmp( buff, "# Tilt: ", 8))
+         tilt = atof( buff + 8) * PI / 180.;
+      if( !memcmp( buff, "# Exposure: ", 12))
+         exposure = atof( buff + 12) / seconds_per_day;
       if( !memcmp( buff, "COM MGEX", 8))
          {
          extern bool use_mgex_data;
@@ -604,7 +609,7 @@ static void test_astrometry( const char *ifilename)
       for( i = 0; buff[i]; i++)
          if( buff[i] == ',')
             buff[i] = ' ';
-      if( sscanf( buff, "%lf %lf %23s %3s", &ra, &dec, time_str, mpc_code) == 4)
+      if( sscanf( buff, "%lf %lf %23s %3s%n", &ra, &dec, time_str, mpc_code, &addenda_start) == 4)
          {
          jd = get_time_from_string( 0, time_str, FULL_CTIME_YMD, NULL);
          data_type = FIELD_DATA;
@@ -638,9 +643,9 @@ static void test_astrometry( const char *ifilename)
          {
          mpc_code_t cdata;
          gps_ephem_t loc[MAX_N_GPS_SATS];
-         int i, n_sats;
+         int i, n_sats, pass;
          const double earth_radius = 6378140.;  /* equatorial, in meters */
-         const double TOL = 300.;                /* five arcmin */
+         const double TOL = 600.;                /* ten arcmin */
          double width, height;
          const double radians_to_arcsec = 3600. * 180. / PI;
          if( data_type == ASTROMETRY)
@@ -661,43 +666,55 @@ static void test_astrometry( const char *ifilename)
          cdata.rho_sin_phi *= 1. + altitude_adjustment / earth_radius;
          if( data_type == ASTROMETRY)
             printf( "%s", buff);
-         n_sats = compute_gps_satellite_locations( loc, jd, &cdata);
-         for( i = 0; i < n_sats; i++)
+         for( pass = 0; pass < (exposure ? 2 : 1); pass++)
             {
-            double delta_dec = dec - loc[i].dec;
-            double delta_ra = ra - loc[i].ra;
-
-            while( delta_ra > PI)
-               delta_ra -= PI + PI;
-            while( delta_ra < -PI)
-               delta_ra += PI + PI;
-            delta_ra  *= radians_to_arcsec;
-            delta_dec *= radians_to_arcsec;
-            delta_ra *= cos( dec);
-            if( fabs( delta_dec) < width && fabs( delta_ra) < height)
+            n_sats = compute_gps_satellite_locations( loc,
+                           jd + ((double)pass - 0.5) * exposure, &cdata);
+            for( i = 0; i < n_sats; i++)
                {
-               const double motion = loc[i].motion * radians_to_arcsec;
-               const double sin_ang = sin( loc[i].posn_ang);
-               const double cos_ang = cos( loc[i].posn_ang);
-               const double cross_res = cos_ang * delta_ra + sin_ang * delta_dec;
-               double along_res = cos_ang * delta_dec - sin_ang * delta_ra;
+               double delta_dec = dec - loc[i].dec;
+               double delta_ra = ra - loc[i].ra;
 
-               along_res /= motion;
-               if( data_type == ASTROMETRY)
+               while( delta_ra > PI)
+                  delta_ra -= PI + PI;
+               while( delta_ra < -PI)
+                  delta_ra += PI + PI;
+               delta_ra  *= radians_to_arcsec;
+               delta_dec *= radians_to_arcsec;
+               delta_ra *= cos( dec);
+               if( tilt)
                   {
-                  printf( "    xresid %6.2f\"  along %8.4fs  ", cross_res, along_res);
-                  printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
+                  const double tval = cos( tilt) * delta_ra - sin( tilt) * delta_dec;
+
+                  delta_dec = cos( tilt) * delta_dec - sin( tilt) * delta_ra;
+                  delta_ra = tval;
                   }
-               else
+               if( fabs( delta_dec) < width && fabs( delta_ra) < height)
                   {
-                  printf( "%s ", time_str);
-                  display_satellite_info( loc + i, true);
+                  const double motion = loc[i].motion * radians_to_arcsec;
+                  const double sin_ang = sin( loc[i].posn_ang);
+                  const double cos_ang = cos( loc[i].posn_ang);
+                  const double cross_res = cos_ang * delta_ra + sin_ang * delta_dec;
+                  double along_res = cos_ang * delta_dec - sin_ang * delta_ra;
+
+                  along_res /= motion;
+                  if( data_type == ASTROMETRY)
+                     {
+                     printf( "    xresid %6.2f\"  along %8.4fs  ", cross_res, along_res);
+                     printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
+                     }
+                  else
+                     {
+                     printf( "%s ", time_str);
+                     display_satellite_info( loc + i, true);
+                     printf( "%s", buff + addenda_start);
+                     }
+                  n_found++;
+                  sum_along += along_res;
+                  sum_along2 += along_res * along_res;
+                  sum_cross += cross_res;
+                  sum_cross2 += cross_res * cross_res;
                   }
-               n_found++;
-               sum_along += along_res;
-               sum_along2 += along_res * along_res;
-               sum_cross += cross_res;
-               sum_cross2 += cross_res * cross_res;
                }
             }
          }
