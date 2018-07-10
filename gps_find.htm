@@ -93,16 +93,21 @@ I'd suggest getting satellites with high elongation that aren't marked 'Sha'
 <p> Jaime recommends getting images of multiple satellites at multiple times,
  to help detect random timing errors.
 
-<p> <b> Accuracy</b> appears to be about an arcsecond,  which corresponds to
-about 40 milliseconds of motion.  I'm working on improving this.  The satellites
-have positions known to within a few centimeters.  Of course,  that's the position
-of the antenna;  if the center of light measured on a CCD is,  say,  a meter
-away,  that would lead about half a millisecond of error (the satellites move at
-about 2000 meters a second).  I'm not sure why we aren't at something close to that
-level of accuracy already. </p>
+<p> <b> Accuracy</b> appears to be at least down to 0.2 arcsecond,  or about
+10 milliseconds of motion.  (Which is to say,  you could correct your timing
+to that level.)  In theory,  it's better than that,  but I don't really have
+a way to test it except by matching it to observations. The best observations
+thus far have led to timing and positions consistent to that level.
 
-<p> <b> Source code</b>,  of a somewhat rough nature at this point,  is
-now <a href="https://github.com/Bill-Gray/gps_ephem"> available at GitHub. </a>
+<p> The satellites have positions known to within a few centimeters.  Of
+course,  that's the position of the antenna;  if the center of light
+measured on a CCD is,  say,  a meter away,  that would lead to about half
+a millisecond of error (the satellites move at about 2000 meters a
+second).  We may be at that level of accuracy,  but I can't really say for
+sure. </p>
+
+<p> <a href="https://github.com/Bill-Gray/gps_ephem">
+<b> Source code</b> (C/C++) is available at GitHub. </a>
 
 <p> <a name="gnss"> <b> 'GNSS' </b> (Global Navigation Satellite System) </a>
 includes GPS,  GLONASS,  Galileo,
