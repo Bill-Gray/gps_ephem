@@ -757,8 +757,8 @@ int dummy_main( const int argc, const char **argv)
           "RA      (J2000)     dec     dist (km)    Azim   Alt Elo  Rate  PA ";
    const double jan_1_1970 = 2440587.5;
    const double curr_t = jan_1_1970 + (double)time( NULL) / seconds_per_day;
-   const double utc = get_time_from_string( curr_t, argv[1], FULL_CTIME_YMD,
-                                 NULL);
+   const double utc = get_time_from_string( curr_t,
+               (argc > 1 ? argv[1] : "+0"), FULL_CTIME_YMD, NULL);
    int i, n_sats;
    mpc_code_t cdata;
    gps_ephem_t loc[MAX_N_GPS_SATS];
