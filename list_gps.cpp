@@ -668,8 +668,9 @@ static void test_astrometry( const char *ifilename)
             printf( "%s", buff);
          for( pass = 0; pass < (exposure ? 2 : 1); pass++)
             {
-            n_sats = compute_gps_satellite_locations( loc,
-                           jd + ((double)pass - 0.5) * exposure, &cdata);
+            const double jd_new = jd + ((double)pass - 0.5) * exposure;
+
+            n_sats = compute_gps_satellite_locations( loc, jd_new, &cdata);
             for( i = 0; i < n_sats; i++)
                {
                double delta_dec = dec - loc[i].dec;
@@ -705,6 +706,9 @@ static void test_astrometry( const char *ifilename)
                      }
                   else
                      {
+                     full_ctime( time_str, jd_new, FULL_CTIME_YMD
+                                 | FULL_CTIME_MONTHS_AS_DIGITS
+                                 | FULL_CTIME_LEADING_ZEROES);
                      printf( "%s ", time_str);
                      display_satellite_info( loc + i, true);
                      printf( "%s", buff + addenda_start);
@@ -780,7 +784,7 @@ int dummy_main( const int argc, const char **argv)
               "can't be predicted far in advance).  Get a current 'finals.all',  and\n"
               "this error will probably go away.\n\n");
 #endif
-     }
+      }
    else
       {
       const int n_predicted_days = 373;
