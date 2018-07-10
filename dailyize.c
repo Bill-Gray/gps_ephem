@@ -26,16 +26,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 
 /* 'finals.all' contains essentially all EOPs,  but is updated weekly.
 'finals.daily' gives you the last three months and the next three months,
-but is (as the name suggests) updated daily. Ideally,  you'd mix the two.
-The following code does just that.
+but is (as the name suggests) updated daily. Ideally,  you'd mix the two,
+using 'daily' data where you can and 'all' data for everything else.
+The following code does just that,  creating a 'finals.mix' file.
 
-   Both files contain lines of 188 bytes each,  with parameters for one day.
-The code reads the first line of each file;  the difference between their
-MJDs tells us how many lines we can just read straight from 'finals.all' and
-write directly to the output.  Then we do the same thing for 'finals.daily',
-reading but ignoring the corresponding lines from 'finals.all' just so that
-we stay aligned.  Finally,  we read the remaining lines from 'finals.all'
-and output those.
+   Both files contain lines of 188 bytes each,  with each line giving
+parameters for one day. The code reads the first line of each file;  the
+difference between their MJDs tells us how many lines we can just read
+straight from 'finals.all' and write directly to the output.  Then we do
+the same thing for 'finals.daily', reading but ignoring the corresponding
+lines from 'finals.all' just so that we stay aligned.  Finally,  we read
+the remaining lines from 'finals.all' and output those.
+
+   I have a cron job on the projectpluto.com server that downloads
+'finals.all' once a week,  and another that downloads 'finals.daily'
+daily and then runs this program to create the 'finals.mix' file.  The
+various GPS tools then ingest the .mix version.
 
    The various files should,  without question,  be openable.  It
 also should be possible to read 188-byte lines from them.  If it's
