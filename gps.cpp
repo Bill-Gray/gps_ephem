@@ -302,24 +302,45 @@ static int start_of_year( const int year)
    return( 365 * year  + (year - 1) / 4 - 723200);
 }
 
-/* If possible,  we get positions from the IGR ("rapid") file.  If not,
-we look for an IGU ("ultra-rapid") file.  These are slightly less
-accurate (though still within centimeters,  i.e.,  massive overkill
-for my needs),  and cover the preceding and following day.  IGUs are
-provided at six-hour intervals;  combine that with their two-day
-coverage,  and you see that we might get data in any of eight files. */
+/* If possible,  we get positions from the MGEX (Multi-GNSS Experiment)
+files:  see http://mgex.igs.org/ for information about this.  MGEX
+conveniently provides data for (as of mid-2018) GPS,  GLONASS,  Galileo,
+BeiDou,  and QZSS satellites.
 
-/* Base URL for the University of Bern files: */
+   However,  MGEX lags real-time by a week or so,  and only goes back
+to early 2012.  For dates before then (going back to early 1992),  and
+dates within the last week to about five days in the future,  we use
+CODE ephems (Center for Orbit Determination in Europe),  downloaded from
+the University of Berne in Switzerland.  Unfortunately,  they'll only
+get you GPS and GLONASS satellites.  (You'd think the "Europe" part
+would mean they'd include Galileo,  but no.)
+
+   And then,  if all else fails,  we go for the IGU ("ultra-rapid") file.
+These give only GPS satellites.  I don't think those will ever actually
+be used.  I think I added them at a time when access to the CODE data
+was sometimes an iffy prospect.
+
+   Note that we can also use TLEs to get approximate positions for
+Galileo,  BeiDou,  and QZSS satellites;  you can then observe those
+objects,  wait for MGEX data to come out,  and then check your results.
+See the get_gps_positions_from_tle( ) function below.
+
+Base URL for the University of Bern files: */
 
 #define UNIBE_BASE_URL "ftp://ftp.aiub.unibe.ch/CODE/"
 
 bool use_mgex_data = true;
 
 /* As of 2018 Jun 9,  the MGEX data actually started in GPS week 1680
-and the IGU ("ultra-rapid") predictive CDDIS data in week 1080.  I've
-backed both up by about a year in case other data turns up.  This
-check could be skipped completely,  but I figure this avoids a certain
-amount of requests for files that almost surely do not exist. */
+(2012 March 17) and the IGU ("ultra-rapid") predictive CDDIS data in week
+1080 (2000 Sep 16).  I've backed both up by about a year in case other
+data turns up.  This check could be skipped completely,  but I figure this
+avoids a certain amount of requests for files that almost surely do not
+exist.
+
+Note that the MGEX situation is not particularly simple;  could be that
+the 'com' or 'gfm' files rather than the 'gbm' files should be used?
+Or a combination?  Need to investigate this.... */
 
 #define MGEX_START_WEEK 1630
 #define IGU_START_WEEK 1030
