@@ -821,6 +821,13 @@ int dummy_main( const int argc, const char **argv)
             case 'o':
                ephem_target = arg;
                break;
+            case 'p':
+               {
+               extern const char *ephem_data_path;
+
+               ephem_data_path = arg;       /* see 'gps.cpp' */
+               }
+               break;
             case 's': case 'S':
                sort_order = atoi( arg);
                break;

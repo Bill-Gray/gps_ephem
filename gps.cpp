@@ -73,7 +73,7 @@ static void try_to_download( const char *url, const char *filename)
       unlink( filename);
    else if( filename[strlen( filename) - 1] == 'Z')
       {
-      char command[60];
+      char command[160];
 
       snprintf( command, sizeof( command), "gzip -d %s", filename);
       rval = system( command);
@@ -168,6 +168,24 @@ static int read_posns_for_one_glumph( FILE *ifile, double *locs)
    return( 0);
 }
 
+/* By default,  the ephemeris data files (.sp3,  .EPH, .EPH_R, .EPH_5D) will
+be stored in the current directory.  But it can be desirable to have them
+in a different path.  I keep them,  for example,  in ~/gps_eph.  So I run
+
+./list_gps (date/time) (other options) -p ~/gps_eph/
+
+Note the trailing '/'! */
+
+const char *ephem_data_path = "";
+
+static void insert_data_path( char *filename)
+{
+   const size_t len = strlen( ephem_data_path);
+
+   memmove( filename + len, filename, strlen( filename) + 1);
+   memcpy( filename, ephem_data_path, len);
+}
+
 static double *fetch_posns_from_cache( const int glumph)
 {
    int i;
@@ -213,8 +231,8 @@ static void add_posns_to_cache( const int glumph, double *loc)
    memcpy( tptr->posns, loc, sizeof( tptr->posns));
 }
 
-/* The GPS timing system starts on 1980 Jan 7 = MJD 44245.
-Seems to be a one-day offset within the .sp3 files... */
+/* The GPS timing system starts on Monday, 1980 Jan 7 = MJD 44245 = GPS 00001
+(day 1 of week 0).  The 'real' start is Sunday, 1980 Jan 6 = GPS 00000. */
 
 #define GPS_SYSTEM_START 44244.
 
@@ -267,6 +285,14 @@ static double *get_cached_posns( const char *filename, const int glumph)
    return( rval);
 }
 
+static void remove_dot_z( char *filename)
+{
+   char *tptr = strstr( filename, ".Z");
+
+   assert( tptr);
+   *tptr = '\0';
+}
+
 /* Days between (year) Jan 1 and 1980 Jan 7 = MJD 44245,  start of the
 GPS ddddy system.  Should return -6 for year=1980,  360 for year=1981. */
 
@@ -302,7 +328,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             const bool fetch_files)
 {
    int day = glumph / glumphs_per_day, i;
-   char filename[25], command[200];
+   char filename[125], command[200];
    double *rval;
 
    *err_code = 0;
@@ -315,12 +341,13 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       snprintf( filename, sizeof( filename), "gbm%04d%d.sp3.Z", day / 7, day % 7);
       snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/mgex/%4d/%s",
                day / 7, filename);
+      insert_data_path( filename);
       if( gps_verbose)
          printf( "MGEX (multi-GNSS) file: '%s', %d %d: '%s'\n", filename, glumph,
                 glumph - day * glumphs_per_day, command);
       if( fetch_files)
          try_to_download( command, filename);
-      filename[12] = '\0';       /* remove .Z extension */
+      remove_dot_z( filename);
       rval = get_cached_posns( filename, glumph);
       if( rval)
          return( rval);
@@ -329,18 +356,20 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
 #ifdef UNIBE_BASE_URL
    snprintf( filename, sizeof( filename), "COD%04d%d.EPH.Z", day / 7, day % 7);
    snprintf( command, sizeof( command), UNIBE_BASE_URL "%4d/%s", i, filename);
+   insert_data_path( filename);
    if( gps_verbose)
       printf( "Final file: '%s', %d %d: '%s'\n", filename, glumph,
             glumph - day * glumphs_per_day, command);
    if( fetch_files)
       try_to_download( command, filename);
-   filename[12] = '\0';       /* remove .Z extension */
+   remove_dot_z( filename);
    rval = get_cached_posns( filename, glumph);
    if( rval)
       return( rval);
 
-   strcpy( filename + 12, "_R");
+   snprintf( filename, sizeof( filename), "COD%04d%d.EPH_R", day / 7, day % 7);
    snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
+   insert_data_path( filename);
    if( gps_verbose)
       printf( "Rapid file: '%s', %d %d: '%s'\n", filename, glumph,
             glumph - day * glumphs_per_day, command);
@@ -352,6 +381,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       {
       snprintf( filename, sizeof( filename), "COD%04d%d.EPH_5D", day / 7, day % 7);
       snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
+      insert_data_path( filename);
       if( gps_verbose)
           printf("Five-day file: '%s', %d %d: '%s'\n", filename, glumph,
             glumph - day * glumphs_per_day, command);
@@ -374,11 +404,12 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
                   week, day % 7, (hour / 6) * 6);
       snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/%d/%s",
                   week, filename);
+      insert_data_path( filename);
       if( gps_verbose)
          printf( "IGU file: '%s'\n", command);
       if( fetch_files)
          try_to_download( command, filename);
-      filename[15] = '\0';       /* remove .Z extension */
+      remove_dot_z( filename);
       rval = get_cached_posns( filename, glumph);
       if( rval)
          return( rval);
