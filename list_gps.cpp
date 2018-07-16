@@ -861,10 +861,14 @@ int dummy_main( const int argc, const char **argv)
 
    if(  argc < 3)
       {
-      printf( "list_gps (date/time) (MPC station)   (to get a list of sats)\n"
-              "list_gps (date/time) (MPC station) -o(target) -i(ephem step)\n\n"
+      printf( "Usage possibilities are:\n\n"
+              "list_gps (date/time) (MPC station)   (to get a list of sats)\n"
+              "list_gps (date/time) (MPC station) -o(target) -i(ephem step)\n"
+              "list_gps -f (filename)\n\n"
               "-a(alt)     Set minimum altitude (default=0)\n"
               "-d          RA/decs shown in decimal degrees\n"
+              "-f          Filename contains astrometry;  get an evaluation of\n"
+              "            cross/along-track errors\n"
               "-n(#)       Set number of ephemeris steps shown\n"
               "-s(#)       Set sort order\n"
               "-t(#)       Set TLE usage: 1=don't use them, 0=use only TLEs\n"
