@@ -378,7 +378,7 @@ bool asterisk_has_been_shown = false;
 static void display_satellite_info( const gps_ephem_t *loc, const bool show_ids)
 {
    char ra_buff[30], dec_buff[30];
-   const char *ra_dec_fmt = (creating_fake_astrometry ? "%s%c%.11s" :
+   const char *ra_dec_fmt = (creating_fake_astrometry ? "%.12s%c%.11s" :
                                                         "%s %c%s");
 
    if( show_ids)
