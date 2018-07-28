@@ -581,9 +581,11 @@ static void test_astrometry( const char *ifilename)
    int n_found = 0;
    int data_type = 0, addenda_start;
    double exposure = 0., tilt = 0.;
+   void *ades_context = init_ades2mpc( );
 
    assert( ifile);
-   while( fgets( buff, sizeof( buff), ifile))
+   assert( ades_context);
+   while( fgets_with_ades_xlation( buff, sizeof( buff), ades_context, ifile))
       {
       double ra, dec, jd = 0.;
       double altitude_adjustment = 0.;
@@ -723,6 +725,7 @@ static void test_astrometry( const char *ifilename)
             }
          }
       }
+   free_ades2mpc_context( ades_context);
    if( n_found > 1 && data_type == ASTROMETRY)
       {
       printf( "\n%d observations found\n\n", n_found);
@@ -745,6 +748,9 @@ static void test_astrometry( const char *ifilename)
       }
    fclose( ifile);
 }
+
+const char *google_map_url =
+   "<a title='Click for map' href='http://maps.google.com/maps?q=%.5f,%.5f'>";
 
 /* See 'dailyize.c' for info about 'finals.mix'. */
 
@@ -914,6 +920,12 @@ int dummy_main( const int argc, const char **argv)
    printf( "Observatory (%s) %s", observatory_code, cdata.name);
    printf( "Longitude %f, latitude %f  alt %.2f m\n",
             cdata.lon * (180. / PI), cdata.lat * (180. / PI), cdata.alt);
+#ifdef CGI_VERSION
+   printf( google_map_url, cdata.lat * (180. / PI), cdata.lon * (180. / PI));
+   printf( "Click here for a Google Map for this site.</a>  If you have doubts\n");
+   printf( "about the lat/lon/alt for this observatory,  check the above.  Google\n");
+   printf( "Maps is usually right to about five or ten meters.\n");
+#endif
 
    if( ephem_target && ephem_step)
       {
