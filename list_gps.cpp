@@ -71,7 +71,7 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
                   printf( "\nSpecial fix for Mauna Kea observers:  use 'codes' for specific\n"
                           "telescopes such as CFH (sic),  2.2,  etc.  Full list is at\n\n"
 #ifdef CGI_VERSION
-   "<a href=\"https://github.com/Bill-Gray/find_orb/blob/master/rovers.txt#L161\">"
+   "<a href='https://github.com/Bill-Gray/find_orb/blob/master/rovers.txt#L161'>"
 #endif
                           "https://github.com/Bill-Gray/find_orb/blob/master/rovers.txt#L161"
 #ifdef CGI_VERSION
@@ -468,7 +468,7 @@ static const char *asterisk_message =
    "two).  Observe them and try to get ephemerides again a few days later,\n"
    "and precise positions will probably be available.\n"
 #ifdef CGI_VERSION
-   "<a href=\"https://www.projectpluto.com/gps_expl.htm#tles\">"
+   "<a href='https://www.projectpluto.com/gps_expl.htm#tles'>"
    "Click here for more information.</a>\n";
 #else
    "Visit https://www.projectpluto.com/gps_expl.htm#tles for more info.\n";
@@ -750,7 +750,7 @@ static void test_astrometry( const char *ifilename)
 }
 
 const char *google_map_url =
-   "<a title='Click for map' href='http://maps.google.com/maps?q=%.5f,%.5f'>";
+   "<a title='Click for map' href='http://maps.google.com/maps?q=%+.5f,%+.5f'>";
 
 /* See 'dailyize.c' for info about 'finals.mix'. */
 
@@ -918,6 +918,8 @@ int dummy_main( const int argc, const char **argv)
       return( err_code);
 
    printf( "Observatory (%s) %s", observatory_code, cdata.name);
+   if( cdata.lon > PI)
+      cdata.lon -= PI + PI;
    printf( "Longitude %f, latitude %f  alt %.2f m\n",
             cdata.lon * (180. / PI), cdata.lat * (180. / PI), cdata.alt);
 #ifdef CGI_VERSION
