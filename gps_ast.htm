@@ -12,8 +12,8 @@ is and why it exists, </a> and for links to related tools. </p>
 
 <p> Cut and paste astrometry in the
 <a href="http://www.minorplanetcenter.net/iau/info/OpticalObs.html"> MPC's
-80-column astrometric reporting format </a>  (you can't do <a href="#ades">
-ADES </a> quite yet),  and click 'Process observations'.
+80-column astrometric reporting format </a> and/or in <a href="#tips">
+ADES </a> format (PSV and/or XML),  and click 'Process observations'.
 The program will figure out which GNSS satellite(s) you observed and tell you
 how far off you were in along-track seconds and cross-track arcseconds,  for
 each observation.  (The object designations can be anything you like;
@@ -47,7 +47,14 @@ milliseconds.  For most people,  that's enough precision. </p>
 situations where people are testing timing down to the ten-millisecond level.
 If you're one of them,  you'll have to go beyond the MPC's format. </p>
 
-<p> <a href="https://www.projectpluto.com/pluto/mpecs/navst43.htm"> Click here
+<p> There are two different ways to do so.  You can provide data in the new
+<a href="https://www.minorplanetcenter.net/iau/info/ADES.html">
+ADES format</a>,  in either XML or PSV format.  <a href="astromet.htm">
+Click here for details on astrometric data formats accepted by this tool.</a>
+
+<p> If you aren't ADES-ready yet,  you can just modify the date/time shown
+in the MPC formatted record to include extra precision.
+<a href="https://www.projectpluto.com/pluto/mpecs/navst43.htm"> Click here
 for an example of extended-precision observations. </a>  Here's the first observation
 in that example,  shown first in the way MPC would expect (to six decimal places
 in the day) and then to nine places,  and finally in hour/minute/second form
@@ -64,18 +71,6 @@ columns assigned for the date/time,  spaces and colons get squeezed out. </p>
 <a href="glossary.htm#UT">UTC</a>. The Minor Planet Center will accept only the
 first of these,  rounded to the nearest millionth of a day.  This tool, and others on this site,  will accept any of the
 three formats. </p>
-
-<p> <a name="ades"> </a> <b> ADES: </b>
- I should note that the ideal way around this would be to use the new
-<a href="https://www.minorplanetcenter.net/iau/info/ADES.html"> ADES format
-for reporting astrometric observations. </a>  Among other benefits,  ADES
-allows you to provide as many digits as needed for times and other data .
-I expect to take this route (and am working on doing so).  You'll be able
-to upload either 80-column or ADES data,  or even a mix of these,  and
-this tool (and <a href="tools.htm"> others on this site</a>) will figure
-out what you've provided.  But at present,  you have to use the above
-extended-precision formats if your observations are really that accurate.
-</p>
 
 <h2> <a name="contact"> Contact info </a> </h2>
 
