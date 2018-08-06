@@ -611,20 +611,7 @@ static void test_astrometry( const char *ifilename)
       for( i = 0; buff[i]; i++)
          if( buff[i] == ',')
             buff[i] = ' ';
-      if( sscanf( buff, "%lf %lf %23s %3s%n", &ra, &dec, time_str, mpc_code, &addenda_start) == 4)
-         {
-         jd = get_time_from_string( 0, time_str, FULL_CTIME_YMD, NULL);
-         data_type = FIELD_DATA;
-         ra *= PI / 180.;
-         dec *= PI / 180.;
-         count++;
-#ifdef CURRENTLY_UNUSED_DEBUGGING_STATEMENTS
-         if( count < 10)
-            printf( "Looking at %f, %f, JD %f, '%s'\n",
-                     ra * 180. / PI, dec * 180. / PI, jd, mpc_code);
-#endif
-         }
-      else
+      if( strlen( buff) >= 80)
          {
          const char removed_char = buff[80];
 
@@ -637,9 +624,18 @@ static void test_astrometry( const char *ifilename)
             get_ra_dec_from_mpc_report( buff, NULL, &ra, NULL,
                                               NULL, &dec, NULL);
             strcpy( mpc_code, buff + 77);
-            buff[80] = removed_char;
             data_type = ASTROMETRY;
             }
+         buff[80] = removed_char;
+         }
+      if( data_type != ASTROMETRY && sscanf( buff, "%lf %lf %23s %3s%n",
+                    &ra, &dec, time_str, mpc_code, &addenda_start) == 4)
+         {
+         jd = get_time_from_string( 0, time_str, FULL_CTIME_YMD, NULL);
+         data_type = FIELD_DATA;
+         ra *= PI / 180.;
+         dec *= PI / 180.;
+         count++;
          }
       if( jd > min_jd && jd < max_jd)
          {
