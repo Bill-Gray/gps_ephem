@@ -172,18 +172,21 @@ static int read_posns_for_one_glumph( FILE *ifile, double *locs)
 be stored in the current directory.  But it can be desirable to have them
 in a different path.  I keep them,  for example,  in ~/gps_eph.  So I run
 
-./list_gps (date/time) (other options) -p ~/gps_eph/
-
-Note the trailing '/'! */
+./list_gps (date/time) (other options) -p ~/gps_eph               */
 
 const char *ephem_data_path = "";
 
 static void insert_data_path( char *filename)
 {
-   const size_t len = strlen( ephem_data_path);
+   size_t len = strlen( ephem_data_path);
+   const bool add_trailing_slash = (len && ephem_data_path[len - 1] != '/');
 
+   if( add_trailing_slash)
+      len++;
    memmove( filename + len, filename, strlen( filename) + 1);
    memcpy( filename, ephem_data_path, len);
+   if( add_trailing_slash)
+      filename[len - 1] = '/';
 }
 
 static double *fetch_posns_from_cache( const int glumph)
