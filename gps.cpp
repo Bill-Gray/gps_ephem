@@ -617,9 +617,16 @@ char **load_file_into_memory( const char *filename, size_t *n_lines)
 /* Used for cross-designations/identifications.  This looks through the file
 'names.txt' (see 'names.cpp' for a discussion of how this was made).  If the
 search string is three characters,  it's assumed to be a letter/number/number
-designator and we look for that text.  Otherwise,  it's assumed to be a
-six-character international YYNNNletter designation,  and we look for that
-instead.  A pointer to the relevant line from 'names.txt' is returned. */
+GNSS designator and we look for that text.  If it's four characters,  we look
+for the alternative GNSS designation of a letter and three-digit number.  If
+it's nine characters,  we look for a YYYY-NNNA international designation
+match.  Otherwise,  it's assumed to be a six-character international
+YYNNNletter designation,  and we look for that instead.
+
+   For the YYNNNletter form,  the length is deliberately not checked;  we
+may be testing an un-truncated line from a TLE.
+
+   A pointer to the relevant line from 'names.txt' is returned. */
 
 const char *get_name_data( const char *search_str, const int mjd)
 {
@@ -642,14 +649,28 @@ const char *get_name_data( const char *search_str, const int mjd)
       assert( lines);
       while( lines[i] && !rval)
          {
-         const int ids_match = (search_len == 3 ?
-                     !memcmp( search_str, lines[i] + 12, 3)
-                   : !memcmp( search_str, lines[i] + 23, 2)
-                           && !memcmp( search_str + 2, lines[i] + 26, 4));
+         int ids_match;
+         char *line = lines[i];
+         const int start_mjd = atoi( line), end_mjd = atoi( line + 6);
 
-         if( ids_match &&
-                mjd >= atoi( lines[i]) && mjd <= atoi( lines[i] + 6))
-            rval = lines[i];
+         switch( search_len)
+            {
+            case 3:              /* GNSS letter-digit-digit identifier */
+               ids_match = !memcmp( search_str, line + 12, 3);
+               break;
+            case 4:              /* alternative letter-three-digits */
+               ids_match = !memcmp( search_str, line + 16, 4);
+               break;
+            case 9:              /* YYYY-NNNA international designation */
+               ids_match = !memcmp( search_str, line + 21, 9);
+               break;
+            default:             /* Assume YYNNNA 'short form' int'l */
+               ids_match = (!memcmp( search_str, line + 23, 2)
+                           && !memcmp( search_str + 2, line + 26, 4));
+               break;
+            }
+         if( ids_match && mjd >= start_mjd && mjd <= end_mjd)
+            rval = line;
          i++;
          }
       }
