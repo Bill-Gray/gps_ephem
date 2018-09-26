@@ -646,6 +646,8 @@ static void test_astrometry( const char *ifilename)
          const double TOL = 600.;                /* ten arcmin */
          double width, height;
          const double radians_to_arcsec = 3600. * 180. / PI;
+         bool match_found = false;
+
          if( data_type == ASTROMETRY)
             height = width = TOL;
          else
@@ -712,6 +714,7 @@ static void test_astrometry( const char *ifilename)
                      printf( "%s", buff + addenda_start);
                      }
                   n_found++;
+                  match_found = true;
                   sum_along += along_res;
                   sum_along2 += along_res * along_res;
                   sum_cross += cross_res;
@@ -719,6 +722,8 @@ static void test_astrometry( const char *ifilename)
                   }
                }
             }
+         if( data_type == ASTROMETRY && !match_found)
+            printf( "   (no matching satellite found)\n");
          }
       }
    free_ades2mpc_context( ades_context);
