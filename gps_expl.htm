@@ -133,6 +133,45 @@ and altitude</a> and I'll either correct the MPC's position or add
 an entirely new "MPC code" (unofficial,  of course!) so you can get
 correct data. </p>
 
+<h2> <a name="desigs"> Designations for GNSS satellites </a> </h2>
+
+<p> There are,  depending on how you look at it,  up to four different
+schemes by which GNSS satellites are designated,  making it sometimes
+difficult to know about which satellite one is speaking. </p>
+
+<p> &bull; LNN - letter and two digits.  The letter will be G for
+GPS, R for GLONASS, C for BeiDou,  E for Galileo,  J for QZSS
+(Japanese system),  or I for INSS,  with other letters doubtless to
+be added as other countries put up their satellites. </p>
+
+<p> For GPS satellites,  the two digits refer to the pseudo-random
+number (PRN) sequence used by that satellite.  Some re-use occurs here,
+so (for example) G06 first was given to the satellite G003 = 1978-093A;
+in March 1994,  the designation was passed on to G036 = 1994-016A;
+in March 2014,  it was passed on to G049 = 2009-014A;
+in May 2014,  it was again passed on to G067 = 2014-026A.  So,
+one designation,  but used by four satellites at different times. </p>
+
+<p> Because of these reassignments,  the LNN scheme has the drawback
+that you don't really know which satellite is meant,  unless you have
+a date as well.  However,  it's widely used in the GNSS community. </p>
+
+<p> &bull; LNNN - letter and three digits.  The letter will be the
+same as for the above system;  the three digits will be different.
+This appears to be satellite-specific,  and isn't passed around the
+way the letter/two-digit designations are. </p>
+
+<p> &bull; YYYY-NNNL - year,  number,  letter.  This is the "international"
+satellite designation (of a sort used for all satellites,  not just
+GNSS ones.)  It gives the year of launch,  followed by the number of
+the launch within the year.  The letter specifies a particular piece from
+that launch (there might be,  say,  an A and a B piece that are satellites
+delivered by that launch,  and a C piece which is the booster left as
+junk from the launch.) </p>
+
+<p> &bull; YYNNNL : the international designation is frequently abbreviated
+to a two-digit year with no dash. </p>
+
 <h2> <a name="to_do"> Remaining things to do </a> </h2>
 
 <p> &bull;  I've written code to do precovery searches for GNSS
