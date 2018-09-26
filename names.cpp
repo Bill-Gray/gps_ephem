@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <time.h>
 #include "watdefs.h"
 #include "date.h"
 
@@ -100,6 +101,7 @@ int main( const int argc, const char **argv)
    FILE *ifile = fopen( "I14.ATX", "rb");
    char name[BUFF_SIZE], from[BUFF_SIZE], until[BUFF_SIZE], buff[BUFF_SIZE];
    bool done = false;
+   time_t t0 = time( NULL);
 
    if( !ifile)
       {
@@ -110,7 +112,7 @@ int main( const int argc, const char **argv)
    *name = '\0';
    memset( from, 0, sizeof( from));
    memset( until, 0, sizeof( until));
-   printf( "#  See 'names.cpp'\n");
+   printf( "#  See 'names.cpp'. Run at %s", ctime( &t0));
    while( !done && fgets( buff, sizeof( buff), ifile))
       {
       if( !memcmp( buff + 60, "TYPE / SERIAL NO", 16))
