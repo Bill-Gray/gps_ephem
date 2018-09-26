@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include "mpc_func.h"
 #include "gps.h"
 
+const char *get_name_data( const char *search_str, const int mjd); /* gps.c */
 static char *fgets_trimmed( char *buff, const size_t max_bytes, FILE *ifile);
 
 #define EARTH_SEMIMAJOR_AXIS 6378.137
@@ -763,6 +764,7 @@ const char *google_map_url =
 int dummy_main( const int argc, const char **argv)
 {
    const char *ephem_step = NULL, *ephem_target = NULL;
+   bool desig_not_found = false;
    int n_ephem_steps = 20;
    char observatory_code[20];
    const char *legend =
@@ -831,7 +833,25 @@ int dummy_main( const int argc, const char **argv)
                n_ephem_steps = atoi( arg);
                break;
             case 'o':
-               ephem_target = arg;
+               ephem_target = get_name_data( arg, (int)( utc - 2400000.5));
+               if( !ephem_target)
+                  {
+                  printf( "SATELLITE '%s' NOT FOUND\n", arg);
+                  printf( "Designations can be of any of these three forms:\n"
+                          "   YYYY-NNNL   (International designation : year,  three digits,  a letter)\n"
+                          "   YYNNNL      ('short form' international,  with a two-digit year)\n"
+                          "   LNN         (GNSS designation)\n"
+                          "   LNNN        (Alternative,  rarely used system for GNSS designation)\n"
+#ifdef CGI_VERSION
+   "<a href='https://www.projectpluto.com/gps_expl.htm#desigs'>"
+   "Click here for more information.</a>\n");
+#else
+   "   See https://www.projectpluto.com/gps_expl.htm#desigs for details.\n");
+#endif
+                  desig_not_found = true;
+                  }
+               else
+                  ephem_target += 12;     /* skip MJD range data at start */
                break;
             case 'p':
                {
@@ -984,7 +1004,7 @@ int dummy_main( const int argc, const char **argv)
          n_sats = compute_gps_satellite_locations( loc, curr_utc, &cdata);
 
          for( j = 0; j < n_sats; j++)
-            if( !strcmp( loc[j].obj_desig, ephem_target))
+            if( !memcmp( loc[j].obj_desig, ephem_target, 3))
                {
                got_data = true;
                display_satellite_info( loc + j, false);
@@ -995,7 +1015,7 @@ int dummy_main( const int argc, const char **argv)
             printf( "                Fake %s\n", observatory_code);
          }
       }
-   else        /* just list all the satellites */
+   else if( !desig_not_found)       /* just list all the satellites */
       {
       n_sats = compute_gps_satellite_locations( loc, utc, &cdata);
       sort_sat_info( n_sats, loc, sort_order);
