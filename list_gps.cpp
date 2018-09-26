@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include "mpc_func.h"
 #include "gps.h"
 
+static char *fgets_trimmed( char *buff, const size_t max_bytes, FILE *ifile);
+
 #define EARTH_SEMIMAJOR_AXIS 6378.137
 
 #define PI 3.1415926535897932384626433832795028841971693993751058209749445923
@@ -54,13 +56,16 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
 
       if( ifile)
          {
-         char buff[200];
+         char buff[200], *obs_name;
 
-         while( rval && fgets( buff, sizeof( buff), ifile))
+         while( rval && fgets_trimmed( buff, sizeof( buff), ifile))
             if( !memcmp( buff, code, 3) &&
                      get_mpc_code_info( cdata, buff) == 3)
                {
                rval = 0;         /* we got it */
+               obs_name = (char *)malloc( strlen( cdata->name) + 1);
+               strcpy( obs_name, cdata->name);
+               cdata->name = obs_name;
                if( buff[4] != '!' && !imprecision_warning_shown)
                   if( buff[12] == ' ' || buff[20] == ' ' || buff[29] == ' ')
                      {
@@ -918,7 +923,7 @@ int dummy_main( const int argc, const char **argv)
    if( err_code)
       return( err_code);
 
-   printf( "Observatory (%s) %s", observatory_code, cdata.name);
+   printf( "Observatory (%s) %s\n", observatory_code, cdata.name);
    if( cdata.lon > PI)
       cdata.lon -= PI + PI;
    printf( "Longitude %f, latitude %f  alt %.2f m\n",
