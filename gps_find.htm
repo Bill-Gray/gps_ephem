@@ -28,9 +28,9 @@ observable from your MPC code at a given time. </p>
 <form method="GET" enctype="application/x-www-form-urlencoded"
 action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want to reset the form to the defaults?')">
 
-  <p> Time: <input name="time" id="time" maxlength="40" size="40"> UTC </p>
-  <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="9" size="9">
-  <p> Minimum altitude: <input name="min_alt" id="min_alt" maxlength="5" size="5" value="10">
+  <p> <a href="#time">Time</a>: <input name="time" id="time" maxlength="40" size="40" placeholder="many formats accepted; see below"> UTC </p>
+  <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="9" size="13" placeholder="Three characters">
+  <p> Minimum altitude: <input name="min_alt" id="min_alt" maxlength="5" size="5" value="10" placeholder="-90 to 90">
 
   <p> Sort order: <br>
 <input type="radio" name="sort" value="1" checked="checked"> Elongation from sun  <br>
@@ -52,7 +52,7 @@ for a particular GNSS satellite. </a> </p>
 
 <h2> <a name="tips"> Tips: </a> </h2>
 
-<p> <b> Time</b> can be in almost any human-recognizable form,  such as <br>
+<p> <b><a name="time"> Time</a></b> can be in almost any human-recognizable form,  such as <br>
 
 </p><pre>
 2017 feb 27 03:14:15.9   feb 27 2017 03:14:15.9   27.314159/2    (assumed to be current year)

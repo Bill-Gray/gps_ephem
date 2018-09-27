@@ -24,7 +24,9 @@ deviations. </p>
 <form method="GET" enctype="application/x-www-form-urlencoded"
 action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want to reset the form to the defaults?')">
 
-<p><textarea name="ast" id="ast" cols=90 rows=10></textarea>
+<p><textarea name="ast" id="ast" cols=90 rows=10
+      placeholder="Paste astrometry in 80-column, XML ADES, and/or PSV ADES here. Details below.">
+</textarea>
 
 <p><input value=" Process observations " type="submit"> <input value=" Reset " type="reset">
 </p><hr> </form>
