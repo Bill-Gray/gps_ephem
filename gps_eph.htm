@@ -21,9 +21,9 @@ satellites are visible from your site. </a> </p>
 <form method="GET" enctype="application/x-www-form-urlencoded"
 action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want to reset the form to the defaults?')">
 
-  <p> Satellite ID (e.g., G03, R15): <input name="obj" id="obj" maxlength="10" size="10" value="">
-  <p> Time: <input name="time" id="time" maxlength="40" size="40"> UTC </p>
-  <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="8" size="8">
+  <p> <a href="#desig">Satellite ID</a>: <input name="obj" id="obj" maxlength="11" size="23" value="" placeholder="Usually letter and two digits">
+  <p> <a href="#time">Time</a>: <input name="time" id="time" maxlength="40" size="40" placeholder="many formats accepted; see below"> UTC </p>
+  <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="8" size="13" placeholder="Three characters">
   <p> Step size: <input name="step" id="step" maxlength="10" size="10" value="1m">
   <p> Number of ephemeris steps: <input name="n_steps" id="n_steps" maxlength="10" size="10" value="20">
 <br>
@@ -41,7 +41,7 @@ visible from a given site.</a>
 
 <h2> <a name="tips"> Tips: </a> </h2>
 
-<p> <b> Time</b> can be in almost any human-recognizable form,  such as <br>
+<p> <b> <a name="time"> Time </a> </b> can be in almost any human-recognizable form,  such as <br>
 
 </p><pre>
 2017 feb 27 03:14:15.9   feb 27 2017 03:14:15.9   27.314159/2    (assumed to be current year)
@@ -60,10 +60,11 @@ five days from now.  <i>Note</i> that unfortunately,  ephemerides for Galileo,
 QZSS,  and BeiDou only run up to about a day ago;  from that point on,  all
 we've got are ephems for GPS and GLONASS.  I'm working on this. </p>
 
-<p> <b> Satellite IDs </b> with 'G' followed by two digits are GPS satellites.  Those
-with 'R' followed by two digits are (Russian) GLONASS satellites.  'E'
-is for the (European) Galileo satellites,  'J' for the (Japanese) QZSS,
-and 'C' the (Chinese) BeiDou satellites. </p>
+<p> <b> <a name="desig">Satellite IDs:</a> </b> This can be entered in any
+of four systems.  You can <a href="gps_expl.htm#desigs"> click here for an
+explanation of all four designation systems.</a>  Note that the most
+commonly used designations consist of a letter G, R, C, J,  or I,  followed
+by two digits. </p>
 
 <p> <a name="mpc_code"> <b> MPC observatory code: </b> </a> This should be a
 three-character code from
