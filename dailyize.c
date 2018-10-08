@@ -83,13 +83,13 @@ int main( const int argc, const char **argv)
 {
    FILE *all = err_fopen( "finals.all", "rb");
    FILE *daily = err_fopen( "finals.daily", "rb");
-   FILE *ofile = err_fopen( "finals.mix", "wb");
-   int mjd1, mjd2;
+   FILE *ofile;
+   int mjd1 = 41684, mjd2;
    char buff[200];
+   const char *start_of_finals_dot_all = "73 1 2 41684.00 I  0";
 
    err_fgets( buff, sizeof( buff), all);
-   mjd1 = atoi( buff + 7);
-   assert( mjd1 > 41600);
+   assert( !memcmp( buff, start_of_finals_dot_all, 20));
    fseek( all, 0L, SEEK_SET);
 
    err_fgets( buff, sizeof( buff), daily);
@@ -97,6 +97,7 @@ int main( const int argc, const char **argv)
    assert( mjd2 > 58150);
    assert( mjd2 > mjd1);
    fseek( daily, 0L, SEEK_SET);
+   ofile = err_fopen( "finals.mix", "wb");
    while( mjd1++ < mjd2)
       {
       err_fgets( buff, sizeof( buff), all);
