@@ -24,8 +24,8 @@ action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want t
   <p> <a href="#desig">Satellite ID</a>: <input name="obj" id="obj" maxlength="11" size="23" value="" placeholder="Usually letter and two digits">
   <p> <a href="#time">Time</a>: <input name="time" id="time" maxlength="40" size="40" placeholder="many formats accepted; see below"> UTC </p>
   <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="8" size="13" placeholder="Three characters">
-  <p> Step size: <input name="step" id="step" maxlength="10" size="10" value="1m">
-  <p> Number of ephemeris steps: <input name="n_steps" id="n_steps" maxlength="10" size="10" value="20">
+  <p> Step size: <input name="step" id="step" maxlength="10" size="13" placeholder="1m, 10s, .001d, etc." value="1m">
+  <p> Number of ephemeris steps: <input name="n_steps" id="n_steps" maxlength="10" size="10" placeholder="Positive integer" value="20">
 <br>
 <input type="radio" name="ang_fmt" value="0" checked="checked"> RA/dec in base 60 (Babylonian) <br>
 <input type="radio" name="ang_fmt" value="1"                  > RA/dec in decimal degrees <br>
@@ -60,11 +60,12 @@ five days from now.  <i>Note</i> that unfortunately,  ephemerides for Galileo,
 QZSS,  and BeiDou only run up to about a day ago;  from that point on,  all
 we've got are ephems for GPS and GLONASS.  I'm working on this. </p>
 
-<p> <b> <a name="desig">Satellite IDs:</a> </b> This can be entered in any
-of four systems.  You can <a href="gps_expl.htm#desigs"> click here for an
-explanation of all four designation systems.</a>  Note that the most
-commonly used designations consist of a letter G, R, C, J,  or I,  followed
-by two digits. </p>
+<p> <b> <a name="desig">Satellite IDs:</a> </b>  <i>Usually</i>,  the
+designation will be one of the letters G, R, C, J, or I,  followed by two
+digits,  but there are three other systems in use.  You can use any of
+them;  the software will figure out which one you meant. You can <a
+href="gps_expl.htm#desigs"> click here for an explanation of all four
+designation systems.</a>  </p>
 
 <p> <a name="mpc_code"> <b> MPC observatory code: </b> </a> This should be a
 three-character code from
