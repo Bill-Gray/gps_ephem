@@ -620,8 +620,9 @@ search string is three characters,  it's assumed to be a letter/number/number
 GNSS designator and we look for that text.  If it's four characters,  we look
 for the alternative GNSS designation of a letter and three-digit number.  If
 it's nine characters,  we look for a YYYY-NNNA international designation
-match.  Otherwise,  it's assumed to be a six-character international
-YYNNNletter designation,  and we look for that instead.
+match.  If it's five digits,  we look for a NORAD number match. Otherwise,
+it's assumed to be a six-character international YYNNNletter designation,
+and we look for that instead.
 
    For the YYNNNletter form,  the length is deliberately not checked;  we
 may be testing an un-truncated line from a TLE.
@@ -661,6 +662,9 @@ const char *get_name_data( const char *search_str, const int mjd)
             case 4:              /* alternative letter-three-digits */
                ids_match = !memcmp( search_str, line + 16, 4);
                break;
+            case 5:              /* NORAD five-digit desig */
+               ids_match = !memcmp( search_str, line + 31, 5);
+               break;
             case 9:              /* YYYY-NNNA international designation */
                ids_match = !memcmp( search_str, line + 21, 9);
                break;
@@ -694,10 +698,9 @@ static int extract_gnss_tles( const char *tle_filename, const int mjd_gps)
    while( fgets( line2, sizeof( line2), ifile))
       {
       tle_t tle;
-      const char *name_line;
 
       if( *line2 == '2' && *line1 == '1'
-               && (name_line = get_name_data( line1 + 9, (int)mjd_gps)) != NULL
+               && get_name_data( line1 + 9, (int)mjd_gps) != NULL
                && parse_elements( line1, line2, &tle) >= 0)
          fprintf( ofile, "%s%s%s", line0, line1, line2);
       strcpy( line0, line1);

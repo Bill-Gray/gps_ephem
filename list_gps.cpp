@@ -123,6 +123,7 @@ static void compute_aberration( const double t_cen, double *ra, double *dec)
 }
 
 static bool show_decimal_degrees = false;
+static bool is_topocentric;
 
 static const char *show_base_60( const double ival, char *buff, const int is_ra)
 {
@@ -163,6 +164,7 @@ typedef struct
    double ra, dec, alt, az, elong;
    double motion, posn_ang;
    bool in_shadow, is_from_tle;
+   int norad;
 } gps_ephem_t;
 
 static void set_ra_dec( gps_ephem_t *loc, const double year)
@@ -233,7 +235,8 @@ static void set_designations( const size_t n_sats, gps_ephem_t *loc,
                   {
                   memcpy( loc[i].international_desig, buff + 21, 9);
                   loc[i].international_desig[9] = '\0';
-                  strcpy( loc[i].type, buff + 31);
+                  strcpy( loc[i].type, buff + 37);
+                  loc[i].norad = atoi( buff + 31);
                   }
       fclose( ifile);
       }
@@ -404,8 +407,9 @@ static void display_satellite_info( const gps_ephem_t *loc, const bool show_ids)
       {
       if( show_decimal_degrees)
          printf( " ");
-      printf( "  %.5f %6.1f%6.1f", loc->topo_r,
-                   loc->az * 180. / PI, loc->alt * 180. / PI);
+      printf( "  %.5f", loc->topo_r);
+      if( is_topocentric)
+         printf( " %6.1f%6.1f", loc->az * 180. / PI, loc->alt * 180. / PI);
       if( loc->in_shadow)
          printf( " Sha");
       else
@@ -769,6 +773,8 @@ int dummy_main( const int argc, const char **argv)
    char observatory_code[20];
    const char *legend =
           "RA      (J2000)     dec     dist (km)    Azim   Alt Elo  Rate  PA ";
+   const char *geocentric_legend =
+          "RA      (J2000)     dec     dist (km)  Elo  Rate  PA ";
    const double jan_1_1970 = 2440587.5;
    const double curr_t = jan_1_1970 + (double)time( NULL) / seconds_per_day;
    const double utc = get_time_from_string( curr_t,
@@ -946,14 +952,20 @@ int dummy_main( const int argc, const char **argv)
    printf( "Observatory (%s) %s\n", observatory_code, cdata.name);
    if( cdata.lon > PI)
       cdata.lon -= PI + PI;
-   printf( "Longitude %f, latitude %f  alt %.2f m\n",
+   is_topocentric = (cdata.rho_cos_phi || cdata.rho_sin_phi);
+   if( is_topocentric)
+      {
+      printf( "Longitude %f, latitude %f  alt %.2f m\n",
             cdata.lon * (180. / PI), cdata.lat * (180. / PI), cdata.alt);
 #ifdef CGI_VERSION
-   printf( google_map_url, cdata.lat * (180. / PI), cdata.lon * (180. / PI));
-   printf( "Click here for a Google Map for this site.</a>  If you have doubts\n");
-   printf( "about the lat/lon/alt for this observatory,  check the above.  Google\n");
-   printf( "Maps is usually right to about five or ten meters.\n");
+      printf( google_map_url, cdata.lat * (180. / PI), cdata.lon * (180. / PI));
+      printf( "Click here for a Google Map for this site.</a>  If you have doubts\n");
+      printf( "about the lat/lon/alt for this observatory,  check the above.  Google\n");
+      printf( "Maps is usually right to about five or ten meters.\n");
 #endif
+      }
+   else
+      legend = geocentric_legend;
 
    if( ephem_target && ephem_step)
       {
@@ -1021,7 +1033,7 @@ int dummy_main( const int argc, const char **argv)
       sort_sat_info( n_sats, loc, sort_order);
       printf( " Nr:    %s   Desig\n", legend);
       for( i = 0; i < n_sats; i++)
-         if( loc[i].alt > minimum_altitude)
+         if( loc[i].alt > minimum_altitude || !is_topocentric)
             display_satellite_info( loc + i, true);
       }
    load_earth_orientation_params( NULL);   /* free up memory */
