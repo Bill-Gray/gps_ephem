@@ -128,8 +128,9 @@ static const char *beidou_and_qzs =
    "00000 99999 C10      2011-073A 37948 Beidou 10\n"      /* Compass-IGSO5 : 55 incl, 95 E */
    "00000 99999 C11      2012-018A 38250 Beidou 12\n"      /* Compass-M3: slot A07         */
    "00000 99999 C12      2012-018B 38251 Beidou 13\n"      /* Compass-M4: slot A08         */
-   "00000 99999 C13      2016-021A 41434 Beidou IGSO-6\n"   /* Compass-IGSO6 : 55 incl, 95 E */
-   "00000 99999 C14      2012-050B 38775 Beidou 15\n"        /* Compass-M6: slot B04         */
+   "00000 99999 C13      2016-021A 41434 Beidou IGSO-6\n"  /* Compass-IGSO6 : 55 incl, 95 E */
+   "00000 99999 C14      2012-050B 38775 Beidou 15\n"      /* Compass-M6: slot B04         */
+   "00000 99999 C16      2018-057A 43539 Beidou IGSO-7\n"  /* Compass-M6: slot B04         */
    "00000 99999 J01      2010-045A 37158 QZS-1 (MICHIBIKI)\n"
    "00000 99999 J02      2017-028A 42738 QZS-2\n"
    "00000 99999 J03      2017-062A 42965 QZS-4\n"
