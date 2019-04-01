@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <math.h>
+#include <ctype.h>
 #include "gps.h"
 #include "watdefs.h"
 #include "afuncs.h"
@@ -71,7 +72,7 @@ static void try_to_download( const char *url, const char *filename)
       printf( "Download '%s': %d, %ld bytes\n", url, rval, total_written);
    if( rval || total_written < 500)      /* just got an error message */
       unlink( filename);
-   else if( filename[strlen( filename) - 1] == 'Z')
+   else if( toupper( filename[strlen( filename) - 1]) == 'Z')
       {
       char command[160];
 
@@ -292,6 +293,8 @@ static void remove_dot_z( char *filename)
 {
    char *tptr = strstr( filename, ".Z");
 
+   if( !tptr)
+      tptr = strstr( filename, ".gz");
    assert( tptr);
    *tptr = '\0';
 }
@@ -305,10 +308,17 @@ static int start_of_year( const int year)
    return( 365 * year  + (year - 1) / 4 - 723200);
 }
 
+/* .gbm files were discontinued after week 2038,  a.k.a. late in
+January 2019. */
+
+#define GBM_OBSOLESCENCE_WEEK  2038
+
 /* If possible,  we get positions from the MGEX (Multi-GNSS Experiment)
 files:  see http://mgex.igs.org/ for information about this.  MGEX
 conveniently provides data for (as of mid-2018) GPS,  GLONASS,  Galileo,
-BeiDou,  and QZSS satellites.
+BeiDou,  and QZSS satellites.   These are 'gbm' files for dates before
+January 2019;  after that,  they were replaced with GFZ data (German
+Research Centre for Geosciences).
 
    However,  MGEX lags real-time by a week or so,  and only goes back
 to early 2012.  For dates before then (going back to early 1992),  and
@@ -352,6 +362,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             const bool fetch_files)
 {
    int day = glumph / glumphs_per_day, i;
+   int day_of_year, week = day / 7;
    char filename[125], command[200];
    double *rval;
 
@@ -359,12 +370,16 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    i = 1980;
    while( i < 2200 && start_of_year( i + 1) < day)
       i++;
-
+   day_of_year = day - start_of_year( i);
    if( use_mgex_data && day > MGEX_START_WEEK * 7)
       {
-      snprintf( filename, sizeof( filename), "gbm%04d%d.sp3.Z", day / 7, day % 7);
+      if( week < GBM_OBSOLESCENCE_WEEK)
+         snprintf( filename, sizeof( filename), "gbm%04d%d.sp3.Z", week, day % 7);
+      else
+         snprintf( filename, sizeof( filename), "GFZ0MGXRAP_%d%03d0000_01D_05M_ORB.SP3.gz",
+                           i, day_of_year);
       snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/mgex/%4d/%s",
-               day / 7, filename);
+               week, filename);
       insert_data_path( filename);
       if( gps_verbose)
          printf( "MGEX (multi-GNSS) file: '%s', %d %d: '%s'\n", filename, glumph,
@@ -378,7 +393,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       }
 
 #ifdef UNIBE_BASE_URL
-   snprintf( filename, sizeof( filename), "COD%04d%d.EPH.Z", day / 7, day % 7);
+   snprintf( filename, sizeof( filename), "COD%04d%d.EPH.Z", week, day % 7);
    snprintf( command, sizeof( command), UNIBE_BASE_URL "%4d/%s", i, filename);
    insert_data_path( filename);
    if( gps_verbose)
@@ -391,7 +406,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    if( rval)
       return( rval);
 
-   snprintf( filename, sizeof( filename), "COD%04d%d.EPH_R", day / 7, day % 7);
+   snprintf( filename, sizeof( filename), "COD%04d%d.EPH_R", week, day % 7);
    snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
    insert_data_path( filename);
    if( gps_verbose)
@@ -403,7 +418,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
 
    for( i = 0; !rval && i < 5; i++, day--)
       {
-      snprintf( filename, sizeof( filename), "COD%04d%d.EPH_5D", day / 7, day % 7);
+      snprintf( filename, sizeof( filename), "COD%04d%d.EPH_5D", week, day % 7);
       snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
       insert_data_path( filename);
       if( gps_verbose)
@@ -420,10 +435,10 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       {
       const int tglumph = glumph + (i - 3) * glumphs_per_day / 4;
       const int day = tglumph / glumphs_per_day;
-      const int week = day / 7;
       const int glumphs_per_hour = 4;
       const int hour = (tglumph % glumphs_per_day) / glumphs_per_hour;
 
+      week = day / 7;
       snprintf( filename, sizeof( filename), "igu%d%d_%02d.sp3.Z",
                   week, day % 7, (hour / 6) * 6);
       snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/%d/%s",
