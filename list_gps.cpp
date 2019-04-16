@@ -711,7 +711,7 @@ static void test_astrometry( const char *ifilename)
                   along_res /= motion;
                   if( data_type == ASTROMETRY)
                      {
-                     printf( "    xresid %6.2f\"  along %8.4fs  ", cross_res, along_res);
+                     printf( "    xresid %8.4f\"  along %10.6fs  ", cross_res, along_res);
                      printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
                      }
                   else
