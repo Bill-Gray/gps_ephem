@@ -626,6 +626,7 @@ static void test_astrometry( const char *ifilename)
    int data_type = 0, addenda_start;
    double exposure = 0., tilt = 0.;
    void *ades_context = init_ades2mpc( );
+   unsigned n_five_digit_times = 0;
 
    assert( ifile);
    assert( ades_context);
@@ -658,17 +659,20 @@ static void test_astrometry( const char *ifilename)
       if( strlen( buff) >= 80)
          {
          const char removed_char = buff[80];
+         unsigned time_format;
 
          if( strlen( buff) > 81 && (buff[80] == '+' || buff[80] == '-'))
             altitude_adjustment = atof( buff + 80);
          buff[80] = '\0';
-         jd = extract_date_from_mpc_report( buff, NULL);
+         jd = extract_date_from_mpc_report( buff, &time_format);
          if( jd)
             {
             get_ra_dec_from_mpc_report( buff, NULL, &ra, NULL,
                                               NULL, &dec, NULL);
             strcpy( mpc_code, buff + 77);
             data_type = ASTROMETRY;
+            if( time_format == 5)
+               n_five_digit_times++;
             }
          buff[80] = removed_char;
          }
@@ -791,6 +795,20 @@ static void test_astrometry( const char *ifilename)
               "i.e.,  the times reported in the astrometry are later than the positions\n"
               "of the GPS satellites would indicate.\n");
       }
+   if( n_five_digit_times)
+      printf( "\nWARNING : %u of your observations had times given to five digits.\n"
+              "This isn't terrible,  but it does limit those times to have a precision\n"
+              "of 0.864 seconds.  Record a sixth digit to get 86.4 millisecond precision.\n"
+              "Or (preferred solution) use the ADES format.\n"
+#ifdef CGI_VERSION
+              "<a href='https://www.projectpluto.com/gps_ast.htm#tips'>"
+              "Click here for information about increasing the reported precision.</a>\n"
+#else
+              "Visit https://www.projectpluto.com/gps_ast.htm#tips for information\n"
+              "about increasing the reported timing precision."
+#endif
+               , n_five_digit_times);
+
    fclose( ifile);
 }
 
@@ -884,10 +902,11 @@ int dummy_main( const int argc, const char **argv)
                           "   LNNN        (Alternative,  rarely used system for GNSS designation)\n"
 #ifdef CGI_VERSION
    "<a href='https://www.projectpluto.com/gps_expl.htm#desigs'>"
-   "Click here for more information.</a>\n");
+   "Click here for more information.</a>\n"
 #else
-   "   See https://www.projectpluto.com/gps_expl.htm#desigs for details.\n");
+   "   See https://www.projectpluto.com/gps_expl.htm#desigs for details.\n"
 #endif
+                                                               );
                   desig_not_found = true;
                   }
                else
