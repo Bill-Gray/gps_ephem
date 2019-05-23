@@ -43,11 +43,19 @@ click 'Process Observations',  and you'll get back data on how good your timing
 was.  The precision of the times in the
 <a href="https://www.minorplanetcenter.net/iau/info/OpticalObs.html">
 MPC's optical observation format </a> is a millionth of a day,  or 86.4
-milliseconds.  For most people,  that's enough precision. </p>
+milliseconds.  (<i>If</i> you specify the time to six places!  If you
+only give five places -- which many people do -- the precision is a measly
+0.864 seconds,  and the software will warn you about that.) </p>
 
-<p> But it's not enough for everybody.  Somewhat to my surprise,  I've encountered
+<p> For most people, "microday" precision is good enough. <a href="#requirements">
+(Click here for a discussion of what 'good enough' timing means.) </a>
+But even that is not enough for everybody.  Somewhat to my surprise,  I've encountered
 situations where people are testing timing down to the ten-millisecond level.
-If you're one of them,  you'll have to go beyond the MPC's format. </p>
+In some cases,  it's curiosity.  Others really have data so precise,  on
+objects moving so quickly,  that the motion over 0.01 seconds would cause
+a noticeable error. </p>
+
+<p> If you're one of these people,  you'll have to go beyond the MPC's format. </p>
 
 <p> There are two different ways to do so.  You can provide data in the new
 <a href="https://www.minorplanetcenter.net/iau/info/ADES.html">
@@ -73,6 +81,56 @@ columns assigned for the date/time,  spaces and colons get squeezed out. </p>
 <a href="glossary.htm#UT">UTC</a>. The Minor Planet Center will accept only the
 first of these,  rounded to the nearest millionth of a day.  This tool, and others on this site,  will accept any of the
 three formats. </p>
+
+<h2> <a name="requirements"> How good does your timing really have to be,  anyway? </a> </h2>
+
+<p> The level of timing accuracy for which you strive depends
+mostly on how good the positions from your astrometry are,  and
+how fast the objects you move are. </p>
+
+<p> If your astrometry is good to about half an arcsecond,  and you're
+observing an object moving at 3" per second,  then having your timing
+off by 1/6 of a second would contribute about the same amount of error
+as your positional measurement does.  So you'd really like to have your
+timing be at least that good.  (And if you're using the "traditional"
+80-column MPC format,  you should specify the time to six decimal places.) </p>
+
+<p> The reality is that timing is often not all that hugely important.
+Most objects are slow-movers.  If you're only observing main-belt or
+more distant objects,  you can have significant timing errors and not
+notice them.   The problem is that when you <i>do</i>
+encounter a fast-moving NEO,  the timing becomes <i>very</i> important. </p>
+
+<p> There's another subtle aspect of timing errors that deserves mention :
+they tend to be systematic.  In the above instance,  if your timing is
+1/6 second late on your first observation of the evening,  it'll probably
+be about that late for subsequent observations as well.  Instead of
+cancelling out as you get more data,  as random observational errors
+ought to,  your errors will remain undiminished. </p>
+
+<p> My recommended procedure would be to observe some GNSS satellites,
+and then feed the astrometry through this page.  If it tells you that
+your timing is off by,  say,  1.4 +/- 0.3 seconds,  do some analysis
+to see why that's happening.  (Maybe you aren't actually synching to
+NTP?  Maybe there's a software issue?  Etc.) </p>
+
+<p> If that error seems entirely reasonable to you,  and repeats
+consistently,  then adjust all your observational timings by 1.4 seconds.
+And then,  if you can submit your data in the
+<a href="https://www.minorplanetcenter.net/iau/info/ADES.html"> ADES
+format </a> (which most software now can),  make sure that the
+<tt>rmsTime</tt> field in your submissions is 0.3 seconds. </p>
+
+<p> Properly written orbit determination software will make use
+of <tt>rmsTime</tt>.  Us orbit guys are fine with the fact that your
+timing isn't perfect.  But we really need to know just <i>how</i>
+imperfect it is.  A timing error of 0.1 seconds might be perfectly
+reasonable (if you didn't expect to do better than about +/- 0.3
+seconds anyway).  Or it could flag a bad observation,  if you
+really expected to be good to +/- 0.01 second (some video observations
+are good to that level).  But those of us computing orbits from your
+data do want that <tt>rmsTime</tt> information.  (We currently almost
+never get it.) </p>
 
 <h2> <a name="contact"> Contact info </a> </h2>
 
