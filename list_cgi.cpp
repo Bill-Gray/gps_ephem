@@ -74,8 +74,8 @@ int main( const int argc, const char **argv)
    setvbuf( lock_file, NULL, _IONBF, 0);
    fprintf( lock_file, "Current time %s", ctime( &t0));
    fprintf( lock_file, "Input '%s'\n", idata);
-   avoid_runaway_process( 15);
-   fprintf( lock_file, "15-second limit set\n");
+   avoid_runaway_process( 300);
+   fprintf( lock_file, "300-second limit set\n");
    args[0] = NULL;
    args[1] = time_text;
    args[2] = observatory_code;
@@ -91,6 +91,8 @@ int main( const int argc, const char **argv)
          option = 'a';
       if( !strcmp( field, "sort") && strlen( buff) < 10)
          option = 's';
+      if( !strcmp( field, "relocate") && strlen( buff) < 60)
+         option = 'r';
       if( !strcmp( field, "n_steps") && strlen( buff) < 10)
          option = 'n';
       if( !strcmp( field, "ang_fmt") && *buff == '1')

@@ -44,10 +44,44 @@ const char *imprecise_position_message =
   "using GPS or mapping software,  and sending that to the MPC and to me at\n"
   "pluto (at) projectpluto (dot) com.\n";
 
+const char *relocation;
+
 static int get_observer_loc( mpc_code_t *cdata, const char *code)
 {
    int rval = -1, i;
    static bool imprecision_warning_shown = false;
+
+   if( relocation)
+      {
+      static bool relocation_message_shown = false;
+      double lat, lon, alt;
+      const int n_fields = sscanf( relocation, "%lf,%lf,%lf", &lat, &lon, &alt);
+
+      if( n_fields != 3)
+         {
+         if( !relocation_message_shown)
+            printf( "Relocation text must be latitude,longitude,altitude\n");
+         }
+      else
+         {
+         char buff[200];
+
+         snprintf( buff, sizeof( buff), "%.3s !%+13.8f   %+12.8f   %8.2f    Relocated",
+                     code, lon, lat, alt);
+         rval = get_mpc_code_info( cdata, buff);
+         if( rval != 3)
+            printf( "Didn't understand relocation '%s'\n", buff);
+         else if( !relocation_message_shown)
+            printf( "Repositioned: latitude %.8f, longitude %.8f%c, alt %f meters above ellipsoid\n",
+                           cdata->lat * 180. / PI,
+                           fabs( cdata->lon) * 180. / PI,
+                           (cdata->lon > 0. ? 'E' : 'W'),
+                           cdata->alt);
+
+         }
+      relocation_message_shown = true;
+      return( rval);
+      }
 
    for( i = 0; i < 3 && rval; i++)
       {
@@ -814,7 +848,7 @@ int dummy_main( const int argc, const char **argv)
       printf( "Earth rotation parameter file date %s\n", tbuff);
       }
 
-   for( i = 3; i < argc; i++)
+   for( i = 2; i < argc; i++)
       if( argv[i][0] == '-')
          {
          const char *arg = get_arg( argc, argv, i);
@@ -865,6 +899,9 @@ int dummy_main( const int argc, const char **argv)
 
                ephem_data_path = arg;       /* see 'gps.cpp' */
                }
+               break;
+            case 'r':
+               relocation = arg;
                break;
             case 's': case 'S':
                sort_order = atoi( arg);
