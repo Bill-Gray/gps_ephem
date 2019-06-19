@@ -39,11 +39,11 @@ to cross-referencing .sp3 designations (G01,  in the above case)
 to international designations (1992-079A,  in the above case,
 for dates from 1992 Nov 22 = MJD 48948 to 2008 Oct 17 = MJD 54756.)
 
-The results are written to 'names.txt' and used in 'list_gps.cpp'.
-The above example for G01 = 1992-079A gets written as :
+The international designation is then cross-referenced to a five-digit NORAD
+one.   The results are written to 'names.txt' and used in 'list_gps.cpp'.
+The above example for G01 = 1992-079A = NORAD 22231 gets written as :
 
-48948 54756 G01 G032 1992-079A BLOCK IIA
-
+48948 54756 G01 G032 1992-079A 22231 BLOCK IIA
 */
 
 #define BUFF_SIZE 100
@@ -65,6 +65,15 @@ static void output_mjd( const char *date)
 }
 
 #define MAX_REMAPS 100000
+
+/* I14.ATX has international (YYYY-NNNA) designations,  but not the NORAD
+five-digit designations.  Those are gathered from Jonathan McDowell's
+"master satellite list",  updated "every few months",  at
+
+http://www.planet4589.org/space/log/satcat.txt
+
+   and is currently hard-coded to be in a particular place on my hard drive.
+*/
 
 static int get_norad_number( const char *intl_id)
 {
