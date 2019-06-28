@@ -276,13 +276,6 @@ static void set_designations( const size_t n_sats, gps_ephem_t *loc,
       }
 }
 
-static double curr_jd( void)
-{
-   const double jd_1970 = 2440587.5;
-
-   return( jd_1970 + (double)time( NULL) / seconds_per_day);
-}
-
 #define USE_TLES_ONLY         0
 #define USE_SP3_ONLY          1
 #define USE_TLES_AND_SP3      2
@@ -342,7 +335,7 @@ static int compute_gps_satellite_locations_minus_motion( gps_ephem_t *locs,
       }
 
    if( tle_usage != USE_SP3_ONLY)
-      if( curr_jd( ) < jd_utc + 3. || tle_usage == USE_TLES_ONLY)
+/*    if( curr_jd( ) < jd_utc + 3. || tle_usage == USE_TLES_ONLY)    */
 #ifdef CGI_VERSION
          get_gps_positions_from_tle( "../../tles/all_tle.txt", sat_locs,
                      gps_time - 2400000.5);
