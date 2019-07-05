@@ -53,7 +53,7 @@ static int grab_file( const char *url, const char *outfilename,
         fclose(fp);
         if( res) {
            if( gps_verbose)
-              fprintf( stderr, "Curl fail %d (%s)\n", res, errbuff);
+              printf( "Curl fail %d (%s)\n", res, errbuff);
            unlink( outfilename);
            return( FETCH_CURL_PERFORM_FAILED);
            }
