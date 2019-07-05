@@ -40,20 +40,20 @@ static int grab_file( const char *url, const char *outfilename,
 
     if (curl) {
         FILE *fp = fopen( outfilename, (append ? "ab" : "wb"));
-//      const time_t t0 = time( NULL);
+        char errbuff[CURL_ERROR_SIZE];
 
         if( !fp)
             return( FETCH_FOPEN_FAILED);
-//      fprintf( fp, "%ld (%.24s) %s\n", (long)t0, ctime( &t0), url);
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuff);
         CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
         fclose(fp);
         if( res) {
            if( gps_verbose)
-              printf( "Curl fail %d\n", res);
+              fprintf( stderr, "Curl fail %d (%s)\n", res, errbuff);
            unlink( outfilename);
            return( FETCH_CURL_PERFORM_FAILED);
            }
@@ -65,11 +65,12 @@ static int grab_file( const char *url, const char *outfilename,
 static void try_to_download( const char *url, const char *filename)
 {
    int rval;
+   const time_t t0 = time( NULL);
 
    total_written = 0;
    rval = grab_file( url, filename, false);
    if( gps_verbose)
-      printf( "Download '%s': %d, %ld bytes\n", url, rval, total_written);
+      printf( "Download '%s': %d, %ld bytes, %.24s\n", url, rval, total_written, ctime( &t0));
    if( rval || total_written < 500)      /* just got an error message */
       unlink( filename);
    else if( toupper( filename[strlen( filename) - 1]) == 'Z')
