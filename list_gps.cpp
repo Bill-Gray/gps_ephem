@@ -304,7 +304,9 @@ static int compute_gps_satellite_locations_minus_motion( gps_ephem_t *locs,
    if( err_code)
       {
       printf( "Precession failed: err code %d\n", err_code);
-      return( err_code);
+      printf( "Either you're trying to predict too far into the future,  or\n");
+      printf( "the Earth orientation data is out of date and needs to be updated.\n");
+      return( -1);
       }
 
    alt_az_matrix[0] = -cos( cdata->lon) * sin( cdata->lat);
@@ -390,21 +392,25 @@ Resulting motion is therefore in radians/second. */
 static int compute_gps_satellite_locations( gps_ephem_t *locs,
          const double jd_utc, const mpc_code_t *cdata)
 {
-   gps_ephem_t locs2[MAX_N_GPS_SATS];
    const int n_sats = compute_gps_satellite_locations_minus_motion(
                         locs, jd_utc, cdata);
-   const int n_sats2 = compute_gps_satellite_locations_minus_motion(
-                        locs2, jd_utc + 1. / seconds_per_day, cdata);
-   int i;
 
-   if( n_sats != n_sats2)
+   if( n_sats > 0)
       {
-      printf( "Internal error: n_sats = %d, n_sats2 = %d\n", n_sats, n_sats2);
-      return( 0);
+      gps_ephem_t locs2[MAX_N_GPS_SATS];
+      int i;
+      const int n_sats2 = compute_gps_satellite_locations_minus_motion(
+                        locs2, jd_utc + 1. / seconds_per_day, cdata);
+
+      if( n_sats != n_sats2)
+         {
+         printf( "Internal error: n_sats = %d, n_sats2 = %d\n", n_sats, n_sats2);
+         return( 0);
+         }
+      for( i = 0; i < n_sats; i++)
+         calc_dist_and_posn_ang( &locs[i].ra, &locs2[i].ra, &locs[i].motion, &locs[i].posn_ang);
+      set_designations( n_sats, locs, (int)( jd_utc - 2400000.5));
       }
-   for( i = 0; i < n_sats; i++)
-      calc_dist_and_posn_ang( &locs[i].ra, &locs2[i].ra, &locs[i].motion, &locs[i].posn_ang);
-   set_designations( n_sats, locs, (int)( jd_utc - 2400000.5));
    return( n_sats);
 }
 
@@ -974,11 +980,13 @@ int dummy_main( const int argc, const char **argv)
       }
    full_ctime( tbuff, utc, FULL_CTIME_YMD | FULL_CTIME_MILLISECS);
    printf( "GPS positions for JD %f = %s UTC\n", utc, tbuff);
+#ifdef NOW_OBSOLETE_I_THINK
    if( utc > curr_t + 7.)
       {
       printf( "Predictions are only available for about a week in advance.\n");
       return( ERR_CODE_TOO_FAR_IN_FUTURE);
       }
+#endif
    if( utc < start_gps_jd)     /* 1992 Jun 20  0:00:00 UTC */
       {
       printf( "GPS/GLONASS ephemerides only extend back to 1992 June 20.\n");
