@@ -352,12 +352,16 @@ data turns up.  This check could be skipped completely,  but I figure this
 avoids a certain amount of requests for files that almost surely do not
 exist.
 
-Note that the MGEX situation is not particularly simple;  could be that
-the 'com' or 'gfm' files rather than the 'gbm' files should be used?
-Or a combination?  Need to investigate this.... */
+In a similar vein,  the CODwwwwd.EPH files only come up within a week or
+so of the present,  and the .EPH_5D files start after that and proceed
+a day or two into the future.  So we compute 'curr_day' and compare
+against that,  with some extra margin because the limits appear to vary.
+We'll sometimes check for files that don't actually exist yet/existed
+and have been removed.        */
 
 #define MGEX_START_WEEK 1630
 #define IGU_START_WEEK 1030
+#define UNIBE_COD_START_WEEK 649
 
 static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             const bool fetch_files)
@@ -366,6 +370,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    int day_of_year, week = day / 7;
    char filename[125], command[200];
    double *rval;
+   const int curr_day = (int)( time( NULL) / 86400) - 3658;
 
    *err_code = 0;
    rval = get_cached_posns( filename, glumph);
@@ -379,7 +384,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    while( i < 2200 && start_of_year( i + 1) < day)
       i++;
    day_of_year = day - start_of_year( i);
-   if( use_mgex_data && day > MGEX_START_WEEK * 7)
+   if( use_mgex_data && day > MGEX_START_WEEK * 7 && day < curr_day)
       {
       if( week < GBM_OBSOLESCENCE_WEEK)
          snprintf( filename, sizeof( filename), "gbm%04d%d.sp3.Z", week, day % 7);
@@ -401,67 +406,70 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       }
 
 #ifdef UNIBE_BASE_URL
-   snprintf( filename, sizeof( filename), "COD%04d%d.EPH.Z", week, day % 7);
-   snprintf( command, sizeof( command), UNIBE_BASE_URL "%4d/%s", i, filename);
-   insert_data_path( filename);
-   if( gps_verbose)
-      printf( "Final file: '%s', %d %d: '%s'\n", filename, glumph,
-            glumph - day * glumphs_per_day, command);
-   if( fetch_files)
-      try_to_download( command, filename);
-   remove_dot_z( filename);
-   rval = get_cached_posns( filename, glumph);
-   if( rval)
-      return( rval);
-
-   snprintf( filename, sizeof( filename), "COD%04d%d.EPH_R", week, day % 7);
-   snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
-   insert_data_path( filename);
-   if( gps_verbose)
-      printf( "Rapid file: '%s', %d %d: '%s'\n", filename, glumph,
-            glumph - day * glumphs_per_day, command);
-   if( fetch_files)
-      try_to_download( command, filename);
-   rval = get_cached_posns( filename, glumph);
-
-   for( i = 0; !rval && i < 5; i++, day--)
+   if( week >= UNIBE_COD_START_WEEK && day <= curr_day + 1)
       {
-      snprintf( filename, sizeof( filename), "COD%04d%d.EPH_5D",
-                     day / 7, day % 7);
-      snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
+      snprintf( filename, sizeof( filename), "COD%04d%d.EPH.Z", week, day % 7);
+      snprintf( command, sizeof( command), UNIBE_BASE_URL "%4d/%s", i, filename);
       insert_data_path( filename);
       if( gps_verbose)
-          printf("Five-day file: '%s', %d %d: '%s'\n", filename, glumph,
-            glumph - day * glumphs_per_day, command);
-      if( fetch_files)
-         try_to_download( command, filename);
-      rval = get_cached_posns( filename, glumph);
-      if( gps_verbose)
-         printf( "get_cached_posns: %p\n", (void *)rval);
-      }
-#endif         /* #ifdef UNIBE_BASE_URL */
-   for( i = 0; day > IGU_START_WEEK * 7 && !rval && i < 8; i++)
-      {
-      const int tglumph = glumph + (i - 3) * glumphs_per_day / 4;
-      const int day = tglumph / glumphs_per_day;
-      const int glumphs_per_hour = 4;
-      const int hour = (tglumph % glumphs_per_day) / glumphs_per_hour;
-
-      week = day / 7;
-      snprintf( filename, sizeof( filename), "igu%d%d_%02d.sp3.Z",
-                  week, day % 7, (hour / 6) * 6);
-      snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/%d/%s",
-                  week, filename);
-      insert_data_path( filename);
-      if( gps_verbose)
-         printf( "IGU file: '%s'\n", command);
+         printf( "Final file: '%s', %d %d: '%s'\n", filename, glumph,
+               glumph - day * glumphs_per_day, command);
       if( fetch_files)
          try_to_download( command, filename);
       remove_dot_z( filename);
       rval = get_cached_posns( filename, glumph);
       if( rval)
          return( rval);
+
+      snprintf( filename, sizeof( filename), "COD%04d%d.EPH_R", week, day % 7);
+      snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
+      insert_data_path( filename);
+      if( gps_verbose)
+         printf( "Rapid file: '%s', %d %d: '%s'\n", filename, glumph,
+               glumph - day * glumphs_per_day, command);
+      if( fetch_files)
+         try_to_download( command, filename);
+      rval = get_cached_posns( filename, glumph);
       }
+
+   for( i = 0; !rval && i < 5; i++, day--)
+      if( day > curr_day - 20 && day < curr_day + 3)
+         {
+         snprintf( filename, sizeof( filename), "COD%04d%d.EPH_5D",
+                        day / 7, day % 7);
+         snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
+         insert_data_path( filename);
+         if( gps_verbose)
+             printf("Five-day file: '%s', %d %d: '%s'\n", filename, glumph,
+               glumph - day * glumphs_per_day, command);
+         if( fetch_files)
+            try_to_download( command, filename);
+         rval = get_cached_posns( filename, glumph);
+         if( gps_verbose)
+            printf( "get_cached_posns: %p\n", (void *)rval);
+         }
+#endif         /* #ifdef UNIBE_BASE_URL */
+   if( day > IGU_START_WEEK * 7 && day < curr_day + 2)
+      for( i = 0; !rval && i < 8; i++)
+         {
+         const int tglumph = glumph + (i - 3) * glumphs_per_day / 4;
+         const int day = tglumph / glumphs_per_day;
+         const int glumphs_per_hour = 4;
+         const int hour = (tglumph % glumphs_per_day) / glumphs_per_hour;
+
+         week = day / 7;
+         snprintf( filename, sizeof( filename), "igu%d%d_%02d.sp3.Z",
+                     week, day % 7, (hour / 6) * 6);
+         snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/%d/%s",
+                     week, filename);
+         insert_data_path( filename);
+         if( gps_verbose)
+            printf( "IGU file: '%s'\n", command);
+         if( fetch_files)
+            try_to_download( command, filename);
+         remove_dot_z( filename);
+         rval = get_cached_posns( filename, glumph);
+         }
    return( rval);
 }
 
