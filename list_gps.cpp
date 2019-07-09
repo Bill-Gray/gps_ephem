@@ -974,9 +974,9 @@ int dummy_main( const int argc, const char **argv)
       }
    full_ctime( tbuff, utc, FULL_CTIME_YMD | FULL_CTIME_MILLISECS);
    printf( "GPS positions for JD %f = %s UTC\n", utc, tbuff);
-   if( utc > curr_t + 4.)
+   if( utc > curr_t + 7.)
       {
-      printf( "Predictions are only available for about four days in advance.\n");
+      printf( "Predictions are only available for about a week in advance.\n");
       return( ERR_CODE_TOO_FAR_IN_FUTURE);
       }
    if( utc < start_gps_jd)     /* 1992 Jun 20  0:00:00 UTC */
