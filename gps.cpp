@@ -368,6 +368,13 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    double *rval;
 
    *err_code = 0;
+   rval = get_cached_posns( filename, glumph);
+   if( rval)
+      {
+      if( gps_verbose)
+         printf( "Already got glumph %d in cache\n", glumph);
+      return( rval);
+      }
    i = 1980;
    while( i < 2200 && start_of_year( i + 1) < day)
       i++;
@@ -419,7 +426,8 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
 
    for( i = 0; !rval && i < 5; i++, day--)
       {
-      snprintf( filename, sizeof( filename), "COD%04d%d.EPH_5D", week, day % 7);
+      snprintf( filename, sizeof( filename), "COD%04d%d.EPH_5D",
+                     day / 7, day % 7);
       snprintf( command, sizeof( command), UNIBE_BASE_URL "%s", filename);
       insert_data_path( filename);
       if( gps_verbose)
