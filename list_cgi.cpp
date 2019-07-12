@@ -25,12 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <time.h>
 #include <sys/time.h>         /* these allow resource limiting */
 #include <sys/resource.h>
-#include "watdefs.h"
-#include "afuncs.h"
-#include "date.h"
-#include "lunar.h"         /* for obliquity( ) prototype */
-#include "mpc_func.h"
-#include "gps.h"
 #include "cgi_func.h"
 
 int dummy_main( const int argc, const char **argv);      /* list_cgi.cpp */
