@@ -37,9 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 
 int dummy_main( const int argc, const char **argv);      /* list_cgi.cpp */
 
-int main( const int argc, const char **argv)
+int main( void)
 {
-   const size_t max_buff_size = 10000;     /* should be enough for anybody */
+   const size_t max_buff_size = 1000000;   /* should be enough for anybody */
    char *idata = (char *)malloc( max_buff_size);
    const char *tptr = idata;
    char *buff = (char *)malloc( max_buff_size);
