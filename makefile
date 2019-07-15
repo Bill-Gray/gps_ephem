@@ -15,7 +15,7 @@
 CC=g++
 EXE=
 CURL=-lcurl
-CFLAGS=-Wextra -Wall -O3 -pedantic -Wno-unused-parameter -I $(INSTALL_DIR)/include
+CFLAGS=-Wextra -Wall -O3 -pedantic -I $(INSTALL_DIR)/include
 
 # You can have your include files in ~/include and libraries in
 # ~/lib,  in which case only the current user can use them;  or

@@ -145,7 +145,7 @@ static const char *beidou_and_qzs =
    "00000 99999 J03      2017-062A 42965 QZS-4\n"
    "00000 99999 J07      2017-048A 42917 QZS-3\n";
 
-int main( const int argc, const char **argv)
+int main( void)
 {
    FILE *ifile = fopen( "I14.ATX", "rb");
    char name[BUFF_SIZE], from[BUFF_SIZE], until[BUFF_SIZE], buff[BUFF_SIZE];
