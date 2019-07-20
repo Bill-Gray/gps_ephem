@@ -62,17 +62,64 @@ static int grab_file( const char *url, const char *outfilename,
     return 0;
 }
 
+static const char *fail_file = "url_fail.txt";
+
+/* When downloads fail,  we add that info -- including the time of
+failure -- to the above file.  When we're about to grab a URL,  we
+check to see if it failed within 'retry_wait' seconds.  If it did,
+we don't bang on the server trying to get it... should avoid what
+amounts to an unintended denial of service attack.   */
+
+static void add_download_failure( const char *url, const int failure_code)
+{
+   FILE *ofile = fopen( fail_file, "a");
+
+   assert( ofile);
+   fprintf( ofile, "%11ld%8d %s\n", (long)time( NULL), failure_code, url);
+   if( gps_verbose)
+      printf( "Added failure for '%s'\n", url);
+   fclose( ofile);
+}
+
+static int recent_download_failure( const char *url)
+{
+   const long t0 = (long)time( NULL);
+   long retry_wait = 360;
+   FILE *ifile = fopen( fail_file, "r");
+   char buff[400], *name = buff + 20;
+   const size_t url_len = strlen( url);
+   int rval = 0;
+
+   assert( ifile);
+   while( !rval && fgets( buff, sizeof( buff), ifile))
+      if( *buff != '#' && atol( buff) > t0 - retry_wait
+                   && !memcmp( name, url, url_len) && name[url_len] < ' ')
+         rval = atoi( buff + 11);
+      else if( !memcmp( buff, "Wait ", 5))
+         retry_wait = atol( buff + 5);
+   if( rval && gps_verbose)
+      printf( "Failed (%d) %ld seconds ago\n", rval,
+                  t0 - atol( buff));
+   fclose( ifile);
+   return( rval);
+}
+
 static void try_to_download( const char *url, const char *filename)
 {
    int rval;
    const time_t t0 = time( NULL);
 
    total_written = 0;
+   if( recent_download_failure( url))
+      return;
    rval = grab_file( url, filename, false);
    if( gps_verbose)
       printf( "Download '%s': %d, %ld bytes, %.24s\n", url, rval, total_written, ctime( &t0));
    if( rval || total_written < 500)      /* just got an error message */
+      {
       unlink( filename);
+      add_download_failure( url, rval);
+      }
    else if( toupper( filename[strlen( filename) - 1]) == 'Z')
       {
       char command[160];

@@ -1,0 +1,8 @@
+# See 'gps.c'.  This should list recent download failures.  If
+# the GPS tools attempt to download a file and fail,  that info
+# is added below.  We can then consider that file to be 'unavailable'
+# for a while,  avoiding repeated requests for files that we won't
+# get anyway.
+#   By default,  if a download attempt fails,  we'll wait three hours
+# (10800 seconds) before trying again.
+Wait 10800
