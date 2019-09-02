@@ -27,11 +27,11 @@ milliseconds.
 Compile the code in this repository,  and you'll have :
 
 * A utility which,  given a date/time and a position on the earth,
-will tell you which GPS satellites can be seen from that point at
+will tell you which GNSS satellites can be seen from that point at
 that time.
 
 * A utility you can then run to generate an ephemeris for a specific
-GPS satellite.  You can then go observe that satellite and check to see
+GNSS satellite.  You can then go observe that satellite and check to see
 if the position you measure matches the "expected" position to your
 desired level of accuracy.
 
