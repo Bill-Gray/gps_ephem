@@ -23,7 +23,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <assert.h>
 #include <math.h>
 #include <time.h>
-#include "watdefs.h"
+#ifdef __has_include
+   #if __has_include(<watdefs.h>)
+       #include "watdefs.h"
+   #else
+       #error   \
+         'watdefs.h' not found.  This project depends on the 'lunar'\
+         library.  See www.github.com/Bill-Gray/lunar .\
+         Clone that repository,  'make'  and 'make install' it.
+       #ifdef __GNUC__
+         #include <stop_compiling_here>
+            /* Above line suppresses cascading errors. */
+       #endif
+   #endif
+#else
+   #include "watdefs.h"
+#endif
 #include "afuncs.h"
 #include "date.h"
 #include "lunar.h"         /* for obliquity( ) prototype */

@@ -30,6 +30,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
          'cgi_func.h' not found.  This project depends on the 'lunar'\
          library.  See www.github.com/Bill-Gray/lunar .\
          Clone that repository,  'make'  and 'make install' it.
+       #ifdef __GNUC__
+         #include <stop_compiling_here>
+            /* Above line suppresses cascading errors. */
+       #endif
    #endif
 #else
    #include "cgi_func.h"
