@@ -406,7 +406,7 @@ against that,  with some extra margin because the limits appear to vary.
 We'll sometimes check for files that don't actually exist yet/existed
 and have been removed.        */
 
-#define MGEX_START_WEEK 1630
+#define MGEX_START_WEEK 1689
 #define IGU_START_WEEK 1030
 #define UNIBE_COD_START_WEEK 649
 
@@ -434,7 +434,18 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    if( use_mgex_data && day > MGEX_START_WEEK * 7 && day < curr_day)
       {
       if( week < GBM_OBSOLESCENCE_WEEK)
-         snprintf( filename, sizeof( filename), "gbm%04d%d.sp3.Z", week, day % 7);
+         {
+         const char *prefix;
+                                    /* see 'mgex.txt'.  The 'best' file */
+         if( week < 1777)           /* to use has changed over time.    */
+            prefix = "com";
+         else if( week < 1950)
+            prefix = "wum";
+         else
+            prefix = "gbm";
+         snprintf( filename, sizeof( filename), "%s%04d%d.sp3.Z",
+                                 prefix, week, day % 7);
+         }
       else
          snprintf( filename, sizeof( filename), "GFZ0MGXRAP_%d%03d0000_01D_05M_ORB.SP3.gz",
                            i, day_of_year);
