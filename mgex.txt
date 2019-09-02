@@ -1,0 +1,40 @@
+   The organization of MGEX (merged GNSS) files is somewhat complicated.
+Having gotten it somewhat straight in my head,  I'm entering it here for
+future self-reference.
+
+   The files are in directories of the form
+
+ftp://cddis.gsfc.nasa.gov/pub/gps/products/mgex/wwww
+
+   wherein wwww = GPS week.  SP3 files are then stored with names of
+the form
+
+xxxwwwwd.sp3.Z
+
+   wherein xxx = 'com',  'gbm',  'gfm',  'wum',  'tum',  and some others.
+The level of completeness (number of satellites included) is quite
+variable,  and some sources provide satellites that others don't.  The
+ideal situation,  from my standpoint,  would be a single file that
+merges everything.  But we don't get that.
+
+   Since we don't,  I've done some spot checks in an attempt to figure
+out which three-letter prefix ought to be used in what case.
+
+   Files start in week 1689.  (There are a few files before that,
+actually,  but it's spotty coverage at best.)  At this point,  'com'
+is the only game in town,  providing data for 60 satellites.
+
+   'com' files retained their lead up until about week 1777,  when
+'wum' (University of Wuhan) files took over.
+
+   'wum' maintained that lead up to week 1950 or so,  whereupon 'gbm'
+files took the lead (but it's about a one-satellite difference).
+
+   'gbm' files are good to GPS 20376 = 2019 Jan 26.  For GPS 20380
+= 2019 Jan 27,  the next such file is renamed to
+
+GFZ0MGXRAP_20190270000_01D_05M_ORB.SP3.gz
+
+   (same directory structure and it's in the week 2038 directory;
+note that the filename is given in YYYYDDD,  year-and-day-of-year.)
+I think this is just a renaming,  i.e.,  same basic data.
