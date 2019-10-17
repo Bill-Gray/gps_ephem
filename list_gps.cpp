@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <assert.h>
 #include <math.h>
@@ -60,6 +61,33 @@ const char *imprecise_position_message =
   "pluto (at) projectpluto (dot) com.\n";
 
 const char *relocation;
+static FILE *log_file = NULL;
+
+int snprintf_append( char *string, const size_t max_len,      /* ephem0.cpp */
+                                   const char *format, ...)
+#ifdef __GNUC__
+         __attribute__ (( format( printf, 3, 4)))
+#endif
+;
+
+int snprintf_append( char *string, const size_t max_len,      /* ephem0.cpp */
+                                   const char *format, ...)
+{
+   va_list argptr;
+   int rval;
+   const size_t ilen = strlen( string);
+
+   assert( ilen <= max_len);
+   va_start( argptr, format);
+#if _MSC_VER <= 1100
+   rval = vsprintf( string + ilen, format, argptr);
+#else
+   rval = vsnprintf( string + ilen, max_len - ilen, format, argptr);
+#endif
+   string[max_len - 1] = '\0';
+   va_end( argptr);
+   return( rval);
+}
 
 static int get_observer_loc( mpc_code_t *cdata, const char *code)
 {
@@ -435,39 +463,45 @@ bool asterisk_has_been_shown = false;
 static void display_satellite_info( const gps_ephem_t *loc, const bool show_ids)
 {
    char ra_buff[30], dec_buff[30];
+   char obuff[200];
    const char *ra_dec_fmt = (creating_fake_astrometry ? "%.12s%c%.11s" :
                                                         "%s %c%s");
 
    if( show_ids)
-      printf( "%s: ", loc->obj_desig);
+      snprintf( obuff, sizeof( obuff), "%s: ", loc->obj_desig);
+   else
+      *obuff = '\0';
 
    if( !creating_fake_astrometry)
       {
-      printf( loc->is_from_tle ? "*" : " ");
+      snprintf_append( obuff, sizeof( obuff), loc->is_from_tle ? "*" : " ");
       if( loc->is_from_tle)
          asterisk_has_been_shown = true;
       }
-   printf( ra_dec_fmt,
+   snprintf_append( obuff, sizeof( obuff), ra_dec_fmt,
                show_base_60( loc->ra * 180. / PI, ra_buff, 1),
                (loc->dec < 0. ? '-' : '+'),
                show_base_60( fabs( loc->dec * 180. / PI), dec_buff, 0));
    if( !creating_fake_astrometry)
       {
       if( show_decimal_degrees)
-         printf( " ");
-      printf( "  %.5f", loc->topo_r);
+         snprintf_append( obuff, sizeof( obuff), " ");
+//    printf( "  %.5f", loc->topo_r);
       if( is_topocentric)
-         printf( " %6.1f%6.1f", loc->az * 180. / PI, loc->alt * 180. / PI);
+         snprintf_append( obuff, sizeof( obuff), " %6.1f%6.1f", loc->az * 180. / PI, loc->alt * 180. / PI);
       if( loc->in_shadow)
-         printf( " Sha");
+         strcat( obuff, " Sha");
       else
-         printf( " %3.0f", (180 / PI) * loc->elong);
-      printf( "%6.2f %5.1f", loc->motion * 3600. * 180. / PI,
+         snprintf_append( obuff, sizeof( obuff), " %3.0f", (180 / PI) * loc->elong);
+      snprintf_append( obuff, sizeof( obuff), "%6.2f %5.1f", loc->motion * 3600. * 180. / PI,
                   360. - loc->posn_ang * 180. / PI);
       if( show_ids)
-         printf( " %s %s", loc->international_desig, loc->type);
-      printf( "\n");
+         snprintf_append( obuff, sizeof( obuff), " %s %s", loc->international_desig, loc->type);
+      strcat( obuff, "\n");
       }
+   printf( "%s", obuff);
+   if( log_file)
+      fprintf( log_file, "%s", obuff);
 }
 
 /* We don't have many satellites.  A stupid O(n^2) sort will do. */
@@ -604,6 +638,9 @@ static void get_field_size( double *width, double *height, const double jd,
          break;
       case 'J':         /* J95:  25' to 2005 jun 22, 18' for 2005 jun 27 on */
          *width = (jd < jun_24_2005 ? 25. / 60. : 18. / 60.);
+         break;
+      case 'T':         /* ATLAS (T05), (T08) : 7.4 degree FOV */
+         *width = 7.4;
          break;
       case 'V':         /* V06:  580" field of view */
          *width = 580. / 3600.;
@@ -772,8 +809,12 @@ static void test_astrometry( const char *ifilename)
                                  | FULL_CTIME_MONTHS_AS_DIGITS
                                  | FULL_CTIME_LEADING_ZEROES);
                      printf( "%s ", time_str);
+                     if( log_file)
+                        fprintf( log_file, "%s ", time_str);
                      display_satellite_info( loc + i, true);
-                     printf( "%s", buff + addenda_start);
+                     printf( "%s %s\n", mpc_code, buff + addenda_start);
+                     if( log_file)
+                        fprintf( log_file, "%s %s\n", mpc_code, buff + addenda_start);
                      }
                   n_found++;
                   match_found = true;
@@ -900,6 +941,9 @@ int dummy_main( const int argc, const char **argv)
                min_jd = get_time_from_string( curr_t, arg, FULL_CTIME_YMD,
                                  NULL);
                printf( "Min JD reset to %f\n", min_jd);
+               break;
+            case 'L':
+               log_file = fopen( arg, "wb");
                break;
             case 'n': case 'N':
                n_ephem_steps = atoi( arg);
