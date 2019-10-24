@@ -325,6 +325,15 @@ static void set_designations( const size_t n_sats, gps_ephem_t *loc,
 
 int tle_usage = USE_TLES_AND_SP3;
 
+#ifdef CGI_VERSION
+const char *tle_path =    "../../tles/all_tle.txt";
+#else
+const char *tle_path =    "../tles/all_tle.txt";
+#endif
+        /* Above paths are defaults for my ISP's server and my own desktop,
+           respectively.  Alter to suit file paths on your machine. */
+
+
 static int compute_gps_satellite_locations_minus_motion( gps_ephem_t *locs,
          const double jd_utc, const mpc_code_t *cdata)
 {
@@ -381,16 +390,8 @@ static int compute_gps_satellite_locations_minus_motion( gps_ephem_t *locs,
 
    if( tle_usage != USE_SP3_ONLY)
 /*    if( curr_jd( ) < jd_utc + 3. || tle_usage == USE_TLES_ONLY)    */
-#ifdef CGI_VERSION
-         get_gps_positions_from_tle( "../../tles/all_tle.txt", sat_locs,
+         get_gps_positions_from_tle( tle_path, sat_locs,
                      gps_time - 2400000.5);
-#else
-         get_gps_positions_from_tle( "../tles/all_tle.txt", sat_locs,
-                     gps_time - 2400000.5);
-#endif
-           /* Above paths are for my ISP's server and my own desktop,
-              respectively.  Alter to suit file paths on your machine. */
-
    get_unit_vector_to_sun( year, sun_vect);
 
    for( i = 0; i < MAX_N_GPS_SATS; i++, tptr += 3)
@@ -986,8 +987,11 @@ int dummy_main( const int argc, const char **argv)
             case 's': case 'S':
                sort_order = atoi( arg);
                break;
-            case 't': case 'T':
+            case 't':
                tle_usage = atoi( arg);
+               break;
+            case 'T':
+               tle_path = arg;
                break;
             case 'u':
                max_jd = get_time_from_string( curr_t, arg, FULL_CTIME_YMD,
