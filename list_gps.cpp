@@ -312,8 +312,8 @@ static void set_designations( const size_t n_sats, gps_ephem_t *loc,
                   {
                   memcpy( loc[i].international_desig, buff + 21, 9);
                   loc[i].international_desig[9] = '\0';
-                  strcpy( loc[i].type, buff + 37);
-                  loc[i].norad = atoi( buff + 31);
+                  strcpy( loc[i].type, buff + 39);
+                  loc[i].norad = atoi( buff + 33);
                   }
       fclose( ifile);
       }

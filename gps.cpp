@@ -753,7 +753,7 @@ const char *get_name_data( const char *search_str, const int mjd)
                ids_match = !memcmp( search_str, line + 16, 4);
                break;
             case 5:              /* NORAD five-digit desig */
-               ids_match = !memcmp( search_str, line + 31, 5);
+               ids_match = !memcmp( search_str, line + 33, 5);
                break;
             case 9:              /* YYYY-NNNA international designation */
                ids_match = !memcmp( search_str, line + 21, 9);
