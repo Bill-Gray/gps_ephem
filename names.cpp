@@ -58,7 +58,7 @@ The international designation is then cross-referenced to a five-digit NORAD
 one.   The results are written to 'names.txt' and used in 'list_gps.cpp'.
 The above example for G01 = 1992-079A = NORAD 22231 gets written as :
 
-48948 54756 G01 G032 1992-079A 22231 BLOCK IIA
+48948 54756 G01 G032 1992-079A   22231 BLOCK IIA
 */
 
 #define BUFF_SIZE 100
@@ -129,7 +129,7 @@ static void output_line( const char *name, const char *from, const char *until)
    output_mjd( until);
    while( len && name[len - 1] == ' ')
       len--;
-   printf( "%.3s %.4s %.9s %05d %.*s\n",
+   printf( "%.3s %.4s %.9s   %05d %.*s\n",
                name + 20, name + 40, name + 50,
                get_norad_number( name + 50),
                len, name);
@@ -140,25 +140,25 @@ to this list as new BeiDou satellites are added.  You still have to get the
 international ID elsewhere.         */
 
 static const char *beidou_and_qzs =
-   "00000 99999 C01      2010-001A 36287 Beidou 3\n"       /* Compass-G1; geo 140 E */
-   "00000 99999 C02      2012-059A 38953 Beidou 16\n"      /* Compass-G6: geo 80 E  */
-   "00000 99999 C03      2010-024A 36590 Beidou 4\n"       /* Compass-G7: geo 110.5 E */
-   "00000 99999 C04      2010-057A 37210 Beidou 6\n"       /* Compass-G4: geo 160 E */
-   "00000 99999 C05      2012-008A 38091 Beidou 11\n"      /* Compass-G5: geo 58.75 E */
-   "00000 99999 C06      2010-036A 36828 Beidou 5\n"       /* Compass-IGSO1 : 55 incl, 118 E */
-   "00000 99999 C07      2010-068A 37256 Beidou 7\n"       /* Compass-IGSO2 : 55 incl, 118 E */
-   "00000 99999 C08      2011-013A 37384 Beidou 8\n"       /* Compass-IGSO3 : 55 incl, 118 E */
-   "00000 99999 C09      2011-038A 37763 Beidou 9\n"       /* Compass-IGSO4 : 55 incl, 95 E */
-   "00000 99999 C10      2011-073A 37948 Beidou 10\n"      /* Compass-IGSO5 : 55 incl, 95 E */
-   "00000 99999 C11      2012-018A 38250 Beidou 12\n"      /* Compass-M3: slot A07         */
-   "00000 99999 C12      2012-018B 38251 Beidou 13\n"      /* Compass-M4: slot A08         */
-   "00000 99999 C13      2016-021A 41434 Beidou IGSO-6\n"  /* Compass-IGSO6 : 55 incl, 95 E */
-   "00000 99999 C14      2012-050B 38775 Beidou 15\n"      /* Compass-M6: slot B04         */
-   "00000 99999 C16      2018-057A 43539 Beidou IGSO-7\n"  /* Compass-M6: slot B04         */
-   "00000 99999 J01      2010-045A 37158 QZS-1 (MICHIBIKI)\n"
-   "00000 99999 J02      2017-028A 42738 QZS-2\n"
-   "00000 99999 J03      2017-062A 42965 QZS-4\n"
-   "00000 99999 J07      2017-048A 42917 QZS-3\n";
+   "00000 99999 C01      2010-001A   36287 Beidou 3\n"       /* Compass-G1; geo 140 E */
+   "00000 99999 C02      2012-059A   38953 Beidou 16\n"      /* Compass-G6: geo 80 E  */
+   "00000 99999 C03      2010-024A   36590 Beidou 4\n"       /* Compass-G7: geo 110.5 E */
+   "00000 99999 C04      2010-057A   37210 Beidou 6\n"       /* Compass-G4: geo 160 E */
+   "00000 99999 C05      2012-008A   38091 Beidou 11\n"      /* Compass-G5: geo 58.75 E */
+   "00000 99999 C06      2010-036A   36828 Beidou 5\n"       /* Compass-IGSO1 : 55 incl, 118 E */
+   "00000 99999 C07      2010-068A   37256 Beidou 7\n"       /* Compass-IGSO2 : 55 incl, 118 E */
+   "00000 99999 C08      2011-013A   37384 Beidou 8\n"       /* Compass-IGSO3 : 55 incl, 118 E */
+   "00000 99999 C09      2011-038A   37763 Beidou 9\n"       /* Compass-IGSO4 : 55 incl, 95 E */
+   "00000 99999 C10      2011-073A   37948 Beidou 10\n"      /* Compass-IGSO5 : 55 incl, 95 E */
+   "00000 99999 C11      2012-018A   38250 Beidou 12\n"      /* Compass-M3: slot A07         */
+   "00000 99999 C12      2012-018B   38251 Beidou 13\n"      /* Compass-M4: slot A08         */
+   "00000 99999 C13      2016-021A   41434 Beidou IGSO-6\n"  /* Compass-IGSO6 : 55 incl, 95 E */
+   "00000 99999 C14      2012-050B   38775 Beidou 15\n"      /* Compass-M6: slot B04         */
+   "00000 99999 C16      2018-057A   43539 Beidou IGSO-7\n"  /* Compass-M6: slot B04         */
+   "00000 99999 J01      2010-045A   37158 QZS-1 (MICHIBIKI)\n"
+   "00000 99999 J02      2017-028A   42738 QZS-2\n"
+   "00000 99999 J03      2017-062A   42965 QZS-4\n"
+   "00000 99999 J07      2017-048A   42917 QZS-3\n";
 
 int main( void)
 {
