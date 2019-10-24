@@ -484,16 +484,19 @@ static void display_satellite_info( const gps_ephem_t *loc, const bool show_ids)
                show_base_60( fabs( loc->dec * 180. / PI), dec_buff, 0));
    if( !creating_fake_astrometry)
       {
+      const double arcsec_per_sec = loc->motion * 3600. * 180. / PI;
+      const char *format = (arcsec_per_sec > 99. ? "%6.0f %5.1f" : "%6.2f %5.1f");
+
       if( show_decimal_degrees)
          snprintf_append( obuff, sizeof( obuff), " ");
-//    printf( "  %.5f", loc->topo_r);
+      snprintf_append( obuff, sizeof( obuff), " %12.5f", loc->topo_r);
       if( is_topocentric)
          snprintf_append( obuff, sizeof( obuff), " %6.1f%6.1f", loc->az * 180. / PI, loc->alt * 180. / PI);
       if( loc->in_shadow)
          strcat( obuff, " Sha");
       else
          snprintf_append( obuff, sizeof( obuff), " %3.0f", (180 / PI) * loc->elong);
-      snprintf_append( obuff, sizeof( obuff), "%6.2f %5.1f", loc->motion * 3600. * 180. / PI,
+      snprintf_append( obuff, sizeof( obuff), format, arcsec_per_sec,
                   360. - loc->posn_ang * 180. / PI);
       if( show_ids)
          snprintf_append( obuff, sizeof( obuff), " %s %s", loc->international_desig, loc->type);
