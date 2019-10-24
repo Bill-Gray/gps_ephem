@@ -806,7 +806,7 @@ static void test_astrometry( const char *ifilename)
                      printf( "    xresid %8.4f\"  along %10.6fs  ", cross_res, along_res);
                      printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
                      }
-                  else
+                  else if( !loc[i].in_shadow)
                      {
                      full_ctime( time_str, jd_new, FULL_CTIME_YMD
                                  | FULL_CTIME_MONTHS_AS_DIGITS
