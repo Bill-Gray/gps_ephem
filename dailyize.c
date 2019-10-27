@@ -1,5 +1,6 @@
 /* dailyize.c:  code to read and merge Earth Orientation Parameter (EOP)
-files downloaded from ftp://maia.usno.navy.mil/ser7.  Details below licence.
+files downloaded from ftp://maia.usno.navy.mil/ser7 or
+ftp://ftp.iers.org/products/eop/rapid/standard.  Details below licence.
 
 Copyright (C) 2018, Project Pluto
 

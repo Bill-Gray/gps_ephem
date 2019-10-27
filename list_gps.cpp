@@ -874,7 +874,8 @@ static void test_astrometry( const char *ifilename)
 const char *google_map_url =
    "<a title='Click for map' href='http://maps.google.com/maps?q=%+.5f,%+.5f'>";
 
-/* See 'dailyize.c' for info about 'finals.mix'. */
+/* See 'dailyize.c' for info about 'finals.mix'.  Note that 'finals.all'
+may also be available at ftp://maia.usno.navy.mil/ser7/finals.all.  */
 
 int dummy_main( const int argc, const char **argv)
 {
@@ -910,7 +911,7 @@ int dummy_main( const int argc, const char **argv)
               "advance).  The owner appears to have forgotten to do this.\n");
 #else
       printf( "You probably need to download the EOP file\n"
-              "ftp://maia.usno.navy.mil/ser7/finals.all\n"
+              "ftp://ftp.iers.org/products/eop/rapid/standard/finals.all\n"
               "This needs to be downloaded every few months (the earth's orientation\n"
               "can't be predicted far in advance).  Get a current 'finals.all',  and\n"
               "this error will probably go away.\n\n");
