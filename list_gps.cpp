@@ -804,8 +804,12 @@ static void test_astrometry( const char *ifilename)
                   along_res /= motion;
                   if( data_type == ASTROMETRY)
                      {
-                     printf( "    xresid %8.4f\"  along %10.6fs  ", cross_res, along_res);
+                     printf( "  %c xresid %8.4f\"  along %10.6fs  ",
+                                    (loc[i].is_from_tle ? '*' : ' '),
+                                    cross_res, along_res);
                      printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
+                     if( loc->is_from_tle)
+                        asterisk_has_been_shown = true;
                      }
                   else if( !loc[i].in_shadow)
                      {
@@ -1016,6 +1020,8 @@ int dummy_main( const int argc, const char **argv)
    if( argc >= 2 && argv[1][0] == '-' && argv[1][1] == 'f')
       {
       test_astrometry( get_arg( argc, argv, 1));
+      if( asterisk_has_been_shown)
+         printf( "%s", asterisk_message);
       return( 0);
       }
 
