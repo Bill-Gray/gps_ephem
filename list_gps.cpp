@@ -1021,7 +1021,7 @@ int dummy_main( const int argc, const char **argv)
       {
       test_astrometry( get_arg( argc, argv, 1));
       if( asterisk_has_been_shown)
-         printf( "%s", asterisk_message);
+         printf( "\n%s", asterisk_message);
       return( 0);
       }
 

@@ -601,6 +601,7 @@ int get_gps_positions( double *output_coords, const double *observer_loc,
    const double interpolation_loc = glumphs - (double)iglumph;
    int i, j, err_code;
 
+   memset( is_from_tle, 0, MAX_N_GPS_SATS);
    for( i = 0; i < MAX_N_GPS_SATS * 3; i++)
       output_coords[i] = 0.;
    for( i = 0; i < INTERPOLATION_ORDER; i++)
