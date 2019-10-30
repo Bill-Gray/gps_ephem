@@ -808,7 +808,7 @@ static void test_astrometry( const char *ifilename)
                                     (loc[i].is_from_tle ? '*' : ' '),
                                     cross_res, along_res);
                      printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
-                     if( loc->is_from_tle)
+                     if( loc[i].is_from_tle)
                         asterisk_has_been_shown = true;
                      }
                   else if( !loc[i].in_shadow)
