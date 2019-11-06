@@ -895,14 +895,14 @@ int dummy_main( const int argc, const char **argv)
    const double curr_t = jan_1_1970 + (double)time( NULL) / seconds_per_day;
    const double utc = get_time_from_string( curr_t,
                (argc > 1 ? argv[1] : "+0"), FULL_CTIME_YMD, NULL);
-   int i, n_sats;
+   int i, n_sats, eop_file_mjd;
    mpc_code_t cdata;
    gps_ephem_t loc[MAX_N_GPS_SATS];
    char tbuff[80];
-   int err_code = load_earth_orientation_params( "finals.mix");
+   int err_code = load_earth_orientation_params( "finals.mix", &eop_file_mjd);
 
    if( err_code <= 0)
-      err_code = load_earth_orientation_params( "finals.all");
+      err_code = load_earth_orientation_params( "finals.all", &eop_file_mjd);
 
    full_ctime( tbuff, curr_t, FULL_CTIME_YMD);
    printf( "Current time = %s UTC\n", tbuff);
@@ -923,9 +923,7 @@ int dummy_main( const int argc, const char **argv)
       }
    else
       {
-      const int n_predicted_days = 373;
-
-      full_ctime( tbuff, 2400000.5 + (double)( err_code - n_predicted_days),
+      full_ctime( tbuff, 2400000.5 + eop_file_mjd,
                              FULL_CTIME_YMD | FULL_CTIME_DATE_ONLY);
       printf( "Earth rotation parameter file date %s\n", tbuff);
       }
@@ -1166,7 +1164,7 @@ int dummy_main( const int argc, const char **argv)
          if( loc[i].alt > minimum_altitude || !is_topocentric)
             display_satellite_info( loc + i, true);
       }
-   load_earth_orientation_params( NULL);   /* free up memory */
+   load_earth_orientation_params( NULL, NULL);   /* free up memory */
    free_cached_gps_positions( );
    if( asterisk_has_been_shown)
       printf( "%s", asterisk_message);
