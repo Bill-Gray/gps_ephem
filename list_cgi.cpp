@@ -44,29 +44,16 @@ int dummy_main( const int argc, const char **argv);      /* list_cgi.cpp */
 int main( void)
 {
    const size_t max_buff_size = 1000000;   /* should be enough for anybody */
-   char *idata = (char *)malloc( max_buff_size);
-   const char *tptr = idata;
    char *buff = (char *)malloc( max_buff_size);
    char time_text[100], observatory_code[20];
    char field[30];
    FILE *lock_file = fopen( "lock.txt", "a");
    int rval, i;
-   extern char **environ;
    const time_t t0 = time( NULL);
    int n_args = 3;
    char *args[20];
 
-   *idata = '\0';
-   for( i = 0; environ[i]; i++)
-      if( !memcmp( environ[i], "QUERY_STRING=", 13))
-         strcpy( idata, environ[i] + 13);
    printf( "Content-type: text/html\n\n");
-   if( !*idata)      /* must be POST rather than GET */
-      if( !fgets( idata, max_buff_size, stdin))
-         {
-         printf( "<p> Well,  that's weird.  There's no input. </p>");
-         return( -1);
-         }
    printf( "<pre>");
    if( !lock_file)
       {
@@ -79,14 +66,20 @@ int main( void)
       }
    setvbuf( lock_file, NULL, _IONBF, 0);
    fprintf( lock_file, "Current time %s", ctime( &t0));
-   fprintf( lock_file, "Input '%s'\n", idata);
+   fprintf( lock_file, "list_cgi ver: %s %s\n", __DATE__, __TIME__);
    avoid_runaway_process( 300);
    fprintf( lock_file, "300-second limit set\n");
    args[0] = NULL;
    args[1] = time_text;
    args[2] = observatory_code;
-   while( !get_urlencoded_form_data( &tptr, field, sizeof( field),
-                                            buff, max_buff_size))
+   rval = initialize_cgi_reading( );
+   if( rval <= 0)
+      {
+      printf( "<p> <b> CGI data reading failed : error %d </b>", rval);
+      printf( "This isn't supposed to happen.</p>\n");
+      return( 0);
+      }
+   while( !get_cgi_data( field, buff, NULL, max_buff_size))
       {
       char option = 0;
 
