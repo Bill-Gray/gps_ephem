@@ -80,20 +80,38 @@ static char *err_fgets( char *buff, const size_t len, FILE *ifile)
    return( rval);
 }
 
+/* EOP lines start with a date in YYMMDD form,  without leading
+zeroes on the MM or DD.  This transforms the date to YYYY MM DD
+form,  with leading zeroes.  I just find that easier to read. */
+
+static char *format_eop_date( const char *iline, char *buff)
+{
+   sprintf( buff, "%s%.2s %.2s %.2s",
+            (*iline > '6' ? "19" : "20"), iline, iline + 2, iline + 4);
+
+   if( buff[5] == ' ')     /* add leading zero for months Jan-Sep */
+      buff[5] = '0';
+   if( buff[8] == ' ')     /* add leading zero for day of month 1-9 */
+      buff[8] = '0';
+   return( buff);
+}
+
 int main( const int argc, const char **argv)
 {
    FILE *all = err_fopen( "finals.all", "rb");
    FILE *daily = err_fopen( "finals.daily", "rb");
    FILE *ofile;
    int mjd1 = 41684, mjd2;
-   char buff[200];
+   char buff[200], date_buff[80];
    const char *start_of_finals_dot_all = "73 1 2 41684.00 I  0";
 
    err_fgets( buff, sizeof( buff), all);
+   printf( "%s : start date for finals.all\n", format_eop_date( buff, date_buff));
    assert( !memcmp( buff, start_of_finals_dot_all, 20));
    fseek( all, 0L, SEEK_SET);
 
    err_fgets( buff, sizeof( buff), daily);
+   printf( "%s : start date for finals.daily\n", format_eop_date( buff, date_buff));
    mjd2 = atoi( buff + 7);
    assert( mjd2 > 58150);
    assert( mjd2 > mjd1);
@@ -109,9 +127,11 @@ int main( const int argc, const char **argv)
       fwrite( buff, eop_line_len, 1, ofile);
       err_fgets( buff, sizeof( buff), all);
       }
+   printf( "%s : end date for finals.daily\n", format_eop_date( buff, date_buff));
    while( fgets( buff, sizeof( buff), all))
       fwrite( buff, eop_line_len, 1, ofile);
 
+   printf( "%s : end date for finals.all\n", format_eop_date( buff, date_buff));
    fclose( all);
    fclose( daily);
    fclose( ofile);
