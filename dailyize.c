@@ -25,7 +25,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <assert.h>
 #include <errno.h>
 
-/* 'finals.all' contains essentially all EOPs,  but is updated weekly.
+/* This software merges the Earth Orientation Parameter (EOP) files
+'finals.all' and 'finals.daily'.  The files should be available from
+
+ftp://ftp.iers.org/products/eop/rapid/standard/finals.all
+ftp://ftp.iers.org/products/eop/rapid/daily/finals.daily
+http://maia.usno.navy.mil/ser7/finals.all
+http://maia.usno.navy.mil/ser7/finals.daily
+
+   'finals.all' contains essentially all EOPs,  but is updated weekly.
 'finals.daily' gives you the last three months and the next three months,
 but is (as the name suggests) updated daily. Ideally,  you'd mix the two,
 using 'daily' data where you can and 'all' data for everything else.
@@ -96,7 +104,7 @@ static char *format_eop_date( const char *iline, char *buff)
    return( buff);
 }
 
-int main( const int argc, const char **argv)
+int main( void)
 {
    FILE *all = err_fopen( "finals.all", "rb");
    FILE *daily = err_fopen( "finals.daily", "rb");
@@ -104,6 +112,7 @@ int main( const int argc, const char **argv)
    int mjd1 = 41684, mjd2;
    char buff[200], date_buff[80];
    const char *start_of_finals_dot_all = "73 1 2 41684.00 I  0";
+   bool daily_predicts_shown = false, all_predicts_shown = false;
 
    err_fgets( buff, sizeof( buff), all);
    printf( "%s : start date for finals.all\n", format_eop_date( buff, date_buff));
@@ -125,7 +134,17 @@ int main( const int argc, const char **argv)
    while( fgets( buff, sizeof( buff), daily))
       {
       fwrite( buff, eop_line_len, 1, ofile);
+      if( !daily_predicts_shown && buff[16] == 'P')
+         {
+         printf( "%s : predicts begin for finals.daily\n", format_eop_date( buff, date_buff));
+         daily_predicts_shown = true;
+         }
       err_fgets( buff, sizeof( buff), all);
+      if( !all_predicts_shown && buff[16] == 'P')
+         {
+         printf( "%s : predicts begin for finals.all\n", format_eop_date( buff, date_buff));
+         all_predicts_shown = true;
+         }
       }
    printf( "%s : end date for finals.daily\n", format_eop_date( buff, date_buff));
    while( fgets( buff, sizeof( buff), all))
