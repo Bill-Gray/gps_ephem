@@ -178,6 +178,48 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
    return( rval);
 }
 
+static bool extract_region_data_for_mpc_station( char *buff,
+            const double lat, const double lon)
+{
+   FILE *ifile = fopen( "geo_rect.txt", "rb");
+   const double lat_in_degrees = (180. / PI) * lat;
+   const double lon_in_degrees = (180. / PI) * lon;
+
+   *buff = '\0';
+   if( ifile)
+      {
+      char tbuff[90];
+      size_t i = 0;
+
+      while( !*buff && fgets( tbuff, sizeof( tbuff), ifile))
+         if( *tbuff != '#')
+            {
+            double d_lon1 = atof( tbuff)      - lon_in_degrees;
+            double d_lon2 = atof( tbuff + 20) - lon_in_degrees;
+            const double d_lat1 = atof( tbuff + 10) - lat_in_degrees;
+            const double d_lat2 = atof( tbuff + 30) - lat_in_degrees;
+
+            while( d_lon1 > 180.)
+               d_lon1 -= 360.;
+            while( d_lon1 < -180.)
+               d_lon1 += 360.;
+            while( d_lon2 - d_lon1 > 180.)
+               d_lon2 -= 360.;
+            while( d_lon2 - d_lon1 < -180.)
+               d_lon2 += 360.;
+            if( d_lon1 * d_lon2 < 0. && d_lat1 * d_lat2 < 0.)
+               {
+               strcpy( buff, tbuff + 40);
+               while( buff[i] >= ' ')
+                  i++;
+               buff[i] = '\0';   /* remove trailing CR/LF */
+               }
+            }
+      fclose( ifile);
+      }
+   return( *buff ? true : false);
+}
+
 /* Aberration from the Ron-Vondrak method,  from Meeus'
 _Astronomical Algorithms_, p 153,  just the leading terms */
 
@@ -538,6 +580,9 @@ static void sort_sat_info( const int n_sats, gps_ephem_t *locs, const int criter
                break;
             case 6:
                compare = (locs[i].dec > locs[j].dec ? 1 : -1);
+               break;
+            case 7:
+               compare = (locs[i].topo_r > locs[j].topo_r ? 1 : -1);
                break;
             }
          if( criterion < 0)       /* negative 'criterion' = descending order */
@@ -1077,7 +1122,8 @@ int dummy_main( const int argc, const char **argv)
    if( err_code)
       return( err_code);
 
-   printf( "Observatory (%s) %s\n", observatory_code, cdata.name);
+   extract_region_data_for_mpc_station( tbuff, cdata.lat, cdata.lon);
+   printf( "Observatory (%s) %s %s\n", observatory_code, cdata.name, tbuff);
    if( cdata.lon > PI)
       cdata.lon -= PI + PI;
    is_topocentric = (cdata.rho_cos_phi || cdata.rho_sin_phi);
