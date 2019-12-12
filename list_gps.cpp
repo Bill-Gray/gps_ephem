@@ -331,10 +331,12 @@ static char *fgets_trimmed( char *buff, const size_t max_bytes, FILE *ifile)
    return( rval);
 }
 
+extern const char *names_filename;
+
 static void set_designations( const size_t n_sats, gps_ephem_t *loc,
                                  const int mjd_utc)
 {
-   FILE *ifile = fopen( "names.txt", "rb");
+   FILE *ifile = fopen( names_filename, "rb");
    size_t i;
 
    for( i = 0; i < n_sats; i++)     /* Ensure there are default values */
@@ -716,6 +718,8 @@ const double start_gps_jd = 2448793.500000;           /* 1992 Jun 20  0:00:00 UT
 double min_jd = start_gps_jd, max_jd = start_gps_jd + 365. * 100.;
             /* In 2092,  somebody may have to revise this */
 
+static bool show_sats_in_shadow = true;
+
 static void test_astrometry( const char *ifilename)
 {
    FILE *ifile = fopen( ifilename, "rb");
@@ -856,7 +860,7 @@ static void test_astrometry( const char *ifilename)
                      if( loc[i].is_from_tle)
                         asterisk_has_been_shown = true;
                      }
-                  else if( !loc[i].in_shadow)
+                  else if( !loc[i].in_shadow || show_sats_in_shadow)
                      {
                      full_ctime( time_str, jd_new, FULL_CTIME_YMD
                                  | FULL_CTIME_MONTHS_AS_DIGITS
@@ -997,8 +1001,11 @@ int dummy_main( const int argc, const char **argv)
             case 'L':
                log_file = fopen( arg, "wb");
                break;
-            case 'n': case 'N':
+            case 'n':
                n_ephem_steps = atoi( arg);
+               break;
+            case 'N':
+               names_filename = arg;
                break;
             case 'o':
                ephem_target = get_name_data( arg, (int)( utc - 2400000.5));

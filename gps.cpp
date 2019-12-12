@@ -720,6 +720,8 @@ may be testing an un-truncated line from a TLE.
 
    A pointer to the relevant line from 'names.txt' is returned. */
 
+const char *names_filename = "names.txt";
+
 const char *get_name_data( const char *search_str, const int mjd)
 {
    static char **lines;
@@ -737,7 +739,7 @@ const char *get_name_data( const char *search_str, const int mjd)
       const size_t search_len = strlen( search_str);
 
       if( !lines)
-         lines = load_file_into_memory( "names.txt", NULL);
+         lines = load_file_into_memory( names_filename, NULL);
       assert( lines);
       while( lines[i] && !rval)
          {
