@@ -711,6 +711,23 @@ static void get_field_size( double *width, double *height, const double jd,
    *height *= PI / 180.;
 }
 
+/* Computes tangent plane coords,  in radians,  gnomonic projection.  Returns
+0 if the result is 'OK' and the specified point really is on the tangent plane
+(i.e.,  within 90 degrees of the projection point).  Returns -1 otherwise. */
+
+static int compute_tangent_plane_coords( const double dec, const double dec0,
+                     const double delta_ra, double *xi, double *eta)
+{
+   const double x = sin( delta_ra) * cos( dec);
+   const double y = cos( delta_ra) * cos( dec);
+   const double z = sin( dec);
+   const double d = cos( dec0) * y + sin( dec0) * z;
+
+   *xi = x / d;
+   *eta = (-sin( dec0) * y + cos( dec0) * z) / d;
+   return( d > 0. ? 0 : -1);
+}
+
 #define ASTROMETRY 1
 #define FIELD_DATA 2
 
@@ -825,30 +842,27 @@ static void test_astrometry( const char *ifilename)
             n_sats = compute_gps_satellite_locations( loc, jd_new, &cdata);
             for( i = 0; i < n_sats; i++)
                {
-               double delta_dec = dec - loc[i].dec;
-               double delta_ra = ra - loc[i].ra;
+               double xi, eta;
 
-               while( delta_ra > PI)
-                  delta_ra -= PI + PI;
-               while( delta_ra < -PI)
-                  delta_ra += PI + PI;
-               delta_ra  *= radians_to_arcsec;
-               delta_dec *= radians_to_arcsec;
-               delta_ra *= cos( dec);
+               if( compute_tangent_plane_coords( dec, loc[i].dec, ra - loc[i].ra,
+                              &xi, &eta))
+                  xi = 10.;      /* place safely outside of contention */
+               xi  *= radians_to_arcsec;
+               eta *= radians_to_arcsec;
                if( tilt)
                   {
-                  const double tval = cos( tilt) * delta_ra - sin( tilt) * delta_dec;
+                  const double tval = cos( tilt) * xi - sin( tilt) * eta;
 
-                  delta_dec = cos( tilt) * delta_dec - sin( tilt) * delta_ra;
-                  delta_ra = tval;
+                  eta = cos( tilt) * eta - sin( tilt) * xi;
+                  xi = tval;
                   }
-               if( fabs( delta_dec) < width && fabs( delta_ra) < height)
+               if( fabs( eta) < width && fabs( xi) < height)
                   {
                   const double motion = loc[i].motion * radians_to_arcsec;
                   const double sin_ang = sin( loc[i].posn_ang);
                   const double cos_ang = cos( loc[i].posn_ang);
-                  const double cross_res = cos_ang * delta_ra + sin_ang * delta_dec;
-                  double along_res = cos_ang * delta_dec - sin_ang * delta_ra;
+                  const double cross_res = cos_ang * xi + sin_ang * eta;
+                  double along_res = cos_ang * eta - sin_ang * xi;
 
                   along_res /= motion;
                   if( data_type == ASTROMETRY)
