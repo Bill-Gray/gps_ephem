@@ -711,6 +711,61 @@ static void get_field_size( double *width, double *height, const double jd,
    *height *= PI / 180.;
 }
 
+/* Searching to see if a long trail may have crossed an image can be a little
+problematic.  We assume that the endpoints are at (x0, y0),  (x1, y1),
+expressed in units of the image width and height.  The segment can be
+described parametrically as x = x0 + t(x1 - x0), y = y0 + t(y1 - y0), with
+0 <= t <= 1. We're interested in finding if any t in that range runs
+through the unit square from -1 < x < 1 and similarly for y,  i.e.,  does
+the segment run through the image?
+
+I did this by clipping against _one_ edge (the x=-1 one) and rotating 90
+degrees four times.  At any of those four,  the line segment may be totally
+clipped (in which case we return t=-1),  or partly clipped (compute the
+intersection point and replace one endpoint and its t),  or nothing may
+happen (for example,  if both points are on the image,  we'll just rotate
+the endpoints four times,  do nothing to them,  and return 0.5.)       */
+
+static double trail_within_image( double x0, double y0, double x1, double y1)
+{
+   int loop;
+   double t0 = 0., t1 = 1.;
+
+   for( loop = 4; loop; loop--)
+      {
+      double new_y, new_t;
+
+      if( x0 < -1. && x1 < -1.)
+         return( -1.);
+      else if( x0 < -1. || x1 < -1.)
+         {
+         new_t = (t0 * (x1 + 1.) - t1 * (x0 + 1.)) / (x1 - x0);
+         new_y = (y0 * (x1 + 1.) - y1 * (x0 + 1.)) / (x1 - x0);
+         if( x0 < -1.)         /* First point is clipped */
+            {
+            x0 = -1.;
+            y0 = new_y;
+            t0 = new_t;
+            }
+         else              /* ...or second endpoint is clipped */
+            {
+            x1 = -1.;
+            y1 = new_y;
+            t1 = new_t;
+            }
+         }
+      new_y = -x0;        /* Rotate both endpoints 90 degrees around origin */
+      x0 = y0;
+      y0 = new_y;
+      new_y = -x1;
+      x1 = y1;
+      y1 = new_y;
+      }
+                     /* At least part of the line segment goes through the */
+                     /* unit square.  Return the 't' for the midpoint.     */
+   return( (t0 + t1) / 2.);
+}
+
 /* Computes tangent plane coords,  in radians,  gnomonic projection.  Returns
 0 if the result is 'OK' and the specified point really is on the tangent plane
 (i.e.,  within 90 degrees of the projection point).  Returns -1 otherwise. */
@@ -745,7 +800,7 @@ static void test_astrometry( const char *ifilename)
    double sum_along2 = 0., sum_cross2 = 0.;
    int n_found = 0;
    int data_type = 0, addenda_start;
-   double exposure = 0., tilt = 0.;
+   double exposure = 0., tilt = 0., override_field_size = 0.;
    void *ades_context = init_ades2mpc( );
    unsigned n_five_digit_times = 0;
 
@@ -767,6 +822,8 @@ static void test_astrometry( const char *ifilename)
          tilt = atof( buff + 8) * PI / 180.;
       if( !memcmp( buff, "# Exposure: ", 12))
          exposure = atof( buff + 12) / seconds_per_day;
+      if( !memcmp( buff, "# Field size : ", 15))
+         override_field_size = atof( buff + 15) * PI / 180.;
       if( !memcmp( buff, "COM MGEX", 8))
          {
          extern bool use_mgex_data;
@@ -804,12 +861,14 @@ static void test_astrometry( const char *ifilename)
          data_type = FIELD_DATA;
          ra *= PI / 180.;
          dec *= PI / 180.;
+//       jd -= exposure / 2.;
          count++;
          }
       if( jd > min_jd && jd < max_jd)
          {
          mpc_code_t cdata;
          gps_ephem_t loc[MAX_N_GPS_SATS];
+         double xi0[MAX_N_GPS_SATS], eta0[MAX_N_GPS_SATS];
          int i, n_sats, pass;
          const double earth_radius = 6378140.;  /* equatorial, in meters */
          const double TOL = 600.;                /* ten arcmin */
@@ -821,7 +880,10 @@ static void test_astrometry( const char *ifilename)
             height = width = TOL;
          else
             {
-            get_field_size( &width, &height, jd, mpc_code);
+            if( override_field_size)
+               width = height = override_field_size;
+            else
+               get_field_size( &width, &height, jd, mpc_code);
 #ifdef CURRENTLY_UNUSED_DEBUGGING_STATEMENTS
             if( count < 10)
                printf( "%f x %f deg FOV\n", width * 180. / PI, height * 180. / PI);
@@ -842,11 +904,13 @@ static void test_astrometry( const char *ifilename)
             n_sats = compute_gps_satellite_locations( loc, jd_new, &cdata);
             for( i = 0; i < n_sats; i++)
                {
-               double xi, eta;
+               double xi, eta, jd_to_show = jd_new;
+               bool is_a_match = false;
+               const double BAD_PROJECTION = 99999.;
 
                if( compute_tangent_plane_coords( dec, loc[i].dec, ra - loc[i].ra,
                               &xi, &eta))
-                  xi = 10.;      /* place safely outside of contention */
+                  xi = BAD_PROJECTION;      /* place safely outside of contention */
                xi  *= radians_to_arcsec;
                eta *= radians_to_arcsec;
                if( tilt)
@@ -856,7 +920,34 @@ static void test_astrometry( const char *ifilename)
                   eta = cos( tilt) * eta - sin( tilt) * xi;
                   xi = tval;
                   }
-               if( fabs( eta) < width && fabs( xi) < height)
+               if( fabs( xi) < width && fabs( eta) < height)
+                  is_a_match = true;
+               if( !pass)
+                  {
+                  xi0[i] = xi / width;
+                  eta0[i] = eta / height;
+                  if( xi == BAD_PROJECTION)
+                     xi0[i] = BAD_PROJECTION;
+                  }
+               else if( data_type != ASTROMETRY && !is_a_match
+                              && xi != BAD_PROJECTION && xi0[i] != BAD_PROJECTION)
+                  {
+                  const double t = trail_within_image( xi0[i], eta0[i],
+                           xi / width, eta / height);
+
+                  if( t > 0.)       /* part of the trail does cross the image */
+                     {
+                     gps_ephem_t temp_loc[MAX_N_GPS_SATS];
+
+                     is_a_match = true;
+                     xi = xi0[i] + (xi - xi0[i]) * t;
+                     eta = eta0[i] + (eta - eta0[i]) * t;
+                     jd_to_show = jd + (t - 0.5) * exposure;
+                     compute_gps_satellite_locations( temp_loc, jd_to_show, &cdata);
+                     loc[i] = temp_loc[i];
+                     }
+                  }
+               if( is_a_match)
                   {
                   const double motion = loc[i].motion * radians_to_arcsec;
                   const double sin_ang = sin( loc[i].posn_ang);
@@ -876,7 +967,7 @@ static void test_astrometry( const char *ifilename)
                      }
                   else if( !loc[i].in_shadow || show_sats_in_shadow)
                      {
-                     full_ctime( time_str, jd_new, FULL_CTIME_YMD
+                     full_ctime( time_str, jd_to_show, FULL_CTIME_YMD
                                  | FULL_CTIME_MONTHS_AS_DIGITS
                                  | FULL_CTIME_LEADING_ZEROES);
                      printf( "%s ", time_str);
@@ -1084,7 +1175,7 @@ int dummy_main( const int argc, const char **argv)
    if( argc >= 2 && argv[1][0] == '-' && argv[1][1] == 'f')
       {
       test_astrometry( get_arg( argc, argv, 1));
-      if( asterisk_has_been_shown)
+      if( asterisk_has_been_shown && tle_usage != USE_TLES_ONLY)
          printf( "\n%s", asterisk_message);
       return( 0);
       }
