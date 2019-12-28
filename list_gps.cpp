@@ -109,18 +109,20 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
          {
          char buff[200];
 
-         snprintf( buff, sizeof( buff), "%.3s !%+13.8f   %+12.8f   %8.2f    Relocated",
+         snprintf( buff, sizeof( buff), "%.3s !%+14.9f %+13.9f %12.6f Relocated",
                      code, lon, lat, alt);
          rval = get_mpc_code_info( cdata, buff);
          if( rval != 3)
             printf( "Didn't understand relocation '%s'\n", buff);
          else if( !relocation_message_shown)
+            {
+            rval = 0;
             printf( "Repositioned: latitude %.8f, longitude %.8f%c, alt %f meters above ellipsoid\n",
                            cdata->lat * 180. / PI,
                            fabs( cdata->lon) * 180. / PI,
                            (cdata->lon > 0. ? 'E' : 'W'),
                            cdata->alt);
-
+            }
          }
       relocation_message_shown = true;
       return( rval);
