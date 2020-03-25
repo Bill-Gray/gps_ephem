@@ -270,11 +270,6 @@ static void get_unit_vector_to_sun( const double year, double *vect)
       vect[i] = tvect[i] / tvect[5];
 }
 
-static double dot_product( const double *a, const double *b)
-{
-   return( a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
-}
-
 static double minimum_altitude = 0.;   /* only show objs above the horizon */
 
 static char *fgets_trimmed( char *buff, const size_t max_bytes, FILE *ifile)
