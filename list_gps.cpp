@@ -750,7 +750,7 @@ static bool show_sats_in_shadow = true;
 static void test_astrometry( const char *ifilename)
 {
    FILE *ifile = fopen( ifilename, "rb");
-   char buff[300];
+   char buff[700];
    double sum_along = 0., sum_cross = 0.;
    double sum_along2 = 0., sum_cross2 = 0.;
    int n_found = 0;
@@ -954,7 +954,7 @@ static void test_astrometry( const char *ifilename)
       sum_along2 /= (double)n_found;
       sum_cross /= (double)n_found;
       sum_cross2 /= (double)n_found;
-      printf( "Avg cross-track : %6.2f +/- %.2f\"\n",
+      printf( "Avg cross-track : %7.3f +/- %.3f\"\n",
                sum_cross, sqrt( sum_cross2 - sum_cross * sum_cross));
       printf( "Avg along-track (timing): %8.4f +/- %.4f seconds\n",
                sum_along, sqrt( sum_along2 - sum_along * sum_along));
