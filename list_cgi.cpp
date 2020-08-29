@@ -52,6 +52,7 @@ int main( void)
    const time_t t0 = time( NULL);
    int n_args = 3;
    char *args[20];
+   bool use_tles = false;
 
    printf( "Content-type: text/html\n\n");
    printf( "<pre>");
@@ -108,6 +109,8 @@ int main( void)
          option = 'i';
       if( !strcmp( field, "obj") && strlen( buff) < 10)
          option = 'o';
+      if( !strcmp( field, "use_tles"))
+         use_tles = true;
       if( !strcmp( field, "ast"))
          {
          const char *filename = "temp.ast";
@@ -137,6 +140,12 @@ int main( void)
          strcpy( args[n_args] + 2, buff);
          n_args++;
          }
+      }
+   if( !use_tles)
+      {
+      args[n_args] = (char *)malloc( 4);
+      strcpy( args[n_args], "-t1");
+      n_args++;
       }
    fprintf( lock_file, "Options read and parsed\n");
    for( i = 0; i < n_args; i++)

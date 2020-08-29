@@ -43,6 +43,9 @@ action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want t
 <br>
 <input type="radio" name="ang_fmt" value="0" checked="checked"> RA/dec in base 60 (Babylonian) <br>
 <input type="radio" name="ang_fmt" value="1"                  > RA/dec in decimal degrees <br>
+<br>
+<input type="checkbox" name="use_tles"> <a href="#gnss">Show TLE-based objects</a> </b> (you probably don't need
+   to tick this box) <br>
 
 <p><input value=" List GNSS satellites" type="submit"> <input value=" Reset " type="reset">
 </p><hr> </form>
@@ -111,23 +114,29 @@ sure. </p>
 <b> Source code</b> (C/C++) is available at GitHub. </a>
 
 <p> <a name="gnss"> <b> 'GNSS' </b> (Global Navigation Satellite System) </a>
-includes GPS,  GLONASS,  Galileo,
-QZSS,  and BeiDou satellites.  You can get precise positions for GPS and GLONASS
-for dates starting about a day ago and running a few days into the future (i.e.,
-predictions are available).  For Galileo,  QZSS,  and BeiDou,  this is
-sadly not the case.  You get approximate positions for finding them,  but
-the precise positions needed to really check your timing lag by a few days. </p>
+includes GPS,  GLONASS,  Galileo, QZSS,  and BeiDou satellites.  We have
+precise positions (within centimeters) for 'right now',  and a few days
+into the future,  for the GPS,  GLONASS,  and Galileo constellations.
+You can make plans to observe those objects,  get data for them,  and
+immediately check your data against the precise values. </p>
 
-<p> I realize this is an annoyance:  you can image the objects,  but then
-have to wait a few days to actually check your timing.  The problem is that
-very precise positions (centimeter-level accuracy) are provided in the
-<a href="https://www.ngs.noaa.gov/orbits/SP3_format.html"> SP3 format </a>
-for all GNSS satellites for those "past" dates.  But for the
-near future and last day or so,  SP3 data exists only for GPS and GLONASS. </p>
+<p> For Galileo,  QZSS,  and BeiDou,  we only get that precision a few
+days after the fact.  For 'right now' and the future,  we have less
+precise positions computed using
+<a href="tle_info.htm"> Two-Line Elements (TLEs)</a>.  Those are good to
+a few kilometers,  enough to let you find the objects with a telescope.
+Then,  after a few days,  full-precision positions good to centimeters
+will be posted,  and you can actually check your data against them. </p>
 
-<p> Positions for the remaining satellites are computed using
-<a href="tle_info.htm"> Two-Line Elements (TLEs)</a>.  Those are good enough
-to find the object,  but not good enough to really measure timing accurately. </p>
+<p> Usually,  there are plenty of GPS,  GLONASS,  and Galileo objects
+available,  and those will be the only one listed for 'right now' and the
+next few days.  If you tick the 'Show TLE-based objects' box above,  you'll
+get a <i>lot</i> more satellites that can be observed... but you you won't
+be able to actually process your observations against precise positions
+until a few days after you've made them.  This is annoying enough that by
+default,  that box is left unticked.  (And given how many objects are in
+the first three groups,  I can't really come up with a good reason
+to tick it.) </p>
 
 <h2> <a name="ack"> Acknowledgments </a> </h2>
 
