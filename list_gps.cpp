@@ -1147,7 +1147,8 @@ int dummy_main( const int argc, const char **argv)
               "-f          Filename contains astrometry;  get an evaluation of\n"
               "            cross/along-track errors\n"
               "-n(#)       Set number of ephemeris steps shown\n"
-              "-s(#)       Set sort order\n"
+              "-s(#)       Set sort order (1=elong, 2=RA, 3=alt, 4=desig, 5=COSPAR,\n"
+              "            6=dec, 7=dist)\n"
               "-t(#)       Set TLE usage: 1=don't use them, 0=use only TLEs\n"
               "-v          Verbose mode\n"
               "-z          Ephemerides are simulated 80-column MPC astrometry\n");
