@@ -824,7 +824,7 @@ static void test_astrometry( const char *ifilename)
          mpc_code_t cdata;
          gps_ephem_t loc[MAX_N_GPS_SATS];
          double xi0[MAX_N_GPS_SATS], eta0[MAX_N_GPS_SATS];
-         int i, n_sats, pass;
+         int i, n_sats, pass, err_code;
          const double earth_radius = 6378140.;  /* equatorial, in meters */
          const double TOL = 600.;                /* ten arcmin */
          double width, height;
@@ -847,7 +847,10 @@ static void test_astrometry( const char *ifilename)
             width *= radians_to_arcsec / 2.;
             }
 
-         get_observer_loc( &cdata, mpc_code);
+         err_code = get_observer_loc( &cdata, mpc_code);
+         if( err_code)
+            printf( "\nCouldn't find observer '%s': err %d\n", mpc_code,
+                                       err_code);
          cdata.rho_cos_phi *= 1. + altitude_adjustment / earth_radius;
          cdata.rho_sin_phi *= 1. + altitude_adjustment / earth_radius;
          if( data_type == ASTROMETRY)
