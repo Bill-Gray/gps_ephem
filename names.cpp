@@ -85,7 +85,7 @@ static void output_mjd( const char *date)
 five-digit designations.  Those are gathered from Jonathan McDowell's
 "master satellite list",  updated "every few months",  at
 
-http://www.planet4589.org/space/log/satcat.txt
+https://planet4589.org/space/gcat/data/cat/satcat.html
 
    and is currently hard-coded to be in a particular place on my hard drive.
 */
@@ -98,14 +98,15 @@ static int get_norad_number( const char *intl_id)
 
    if( !remap)
       {
-      FILE *ifile = fopen( "../.find_orb/satcat.txt", "rb");
-      char buff[250];
+      FILE *ifile = fopen( "../.find_orb/satcat.html", "rb");
+      char buff[750];
 
       assert( ifile);
       remap = tptr = (char *)malloc( MAX_REMAPS * 21);
       while( fgets( buff, sizeof( buff), ifile))
          {
-         memcpy( tptr, buff + 1, 21);
+         memcpy( tptr, buff + 12, 7);     /* NORAD number */
+         memcpy( tptr + 7, buff + 20, 14);      /* intl desig */
          tptr += 21;
          }
       *tptr = '\0';
