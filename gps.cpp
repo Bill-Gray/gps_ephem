@@ -449,7 +449,8 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
       else
          snprintf( filename, sizeof( filename), "GFZ0MGXRAP_%d%03d0000_01D_05M_ORB.SP3.gz",
                            i, day_of_year);
-      snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/mgex/%4d/%s",
+      snprintf( command, sizeof( command),
+               "https://cddis.nasa.gov/archive/gnss/products/mgex/%4d/%s",
                week, filename);
       insert_data_path( filename);
       if( gps_verbose)
