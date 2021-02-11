@@ -958,9 +958,9 @@ static void test_astrometry( const char *ifilename)
       sum_along2 /= (double)n_found;
       sum_cross /= (double)n_found;
       sum_cross2 /= (double)n_found;
-      printf( "Avg cross-track : %7.3f +/- %.3f\"\n",
+      printf( "Avg cross-track : %8.4f +/- %.4f\"\n",
                sum_cross, sqrt( sum_cross2 - sum_cross * sum_cross));
-      printf( "Avg along-track (timing): %8.4f +/- %.4f seconds\n",
+      printf( "Avg along-track (timing): %10.6f +/- %.6f seconds\n",
                sum_along, sqrt( sum_along2 - sum_along * sum_along));
       if( sum_along > 0.)
          printf( "Positive along-track errors mean your clock was 'behind' the actual time;\n"
