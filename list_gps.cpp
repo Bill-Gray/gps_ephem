@@ -114,10 +114,11 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
          rval = get_mpc_code_info( cdata, buff);
          if( rval != 3)
             printf( "Didn't understand relocation '%s'\n", buff);
-         else if( !relocation_message_shown)
+         else
             {
             rval = 0;
-            printf( "Repositioned: latitude %.8f, longitude %.8f%c, alt %f meters above ellipsoid\n",
+            if( !relocation_message_shown)
+               printf( "Repositioned: latitude %.8f, longitude %.8f%c, alt %f meters above ellipsoid\n",
                            cdata->lat * 180. / PI,
                            fabs( cdata->lon) * 180. / PI,
                            (cdata->lon > 0. ? 'E' : 'W'),
