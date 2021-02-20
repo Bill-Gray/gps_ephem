@@ -356,25 +356,22 @@ static int start_of_year( const int year)
    return( 365 * year  + (year - 1) / 4 - 723200);
 }
 
-/* .gbm files were discontinued after week 2038,  a.k.a. late in
-January 2019. */
-
-#define GBM_OBSOLESCENCE_WEEK  2038
-
 /* If possible,  we get positions from the MGEX (Multi-GNSS Experiment)
 files:  see http://mgex.igs.org/ for information about this.  MGEX
-conveniently provides data for (as of mid-2018) GPS,  GLONASS,  Galileo,
-BeiDou,  and QZSS satellites.   These are 'gbm' files for dates before
-January 2019;  after that,  they were replaced with GFZ data (German
-Research Centre for Geosciences).
+conveniently provides data for (as of early 2021) GPS,  GLONASS,  Galileo,
+BeiDou,  and QZSS satellites.  The file naming conventions changed after
+week 1797,  and we try both GBM (from the University of Potsdam) files
+and WUM (Wuhan University) files.  The latter actually extend a bit into
+the future,  meaning you can sometimes know where to look for all five
+constellations at least slightly ahead of time.
 
-   However,  MGEX lags real-time by a week or so,  and only goes back
-to early 2012.  For dates before then (going back to early 1992),  and
-dates within the last week to about five days in the future,  we use
-CODE ephems (Center for Orbit Determination in Europe),  downloaded from
-the University of Berne in Switzerland.  Unfortunately,  they'll only
-get you GPS and GLONASS satellites.  (You'd think the "Europe" part
-would mean they'd include Galileo,  but no.)
+   However,  MGEX provides very limited predictions,  and only goes back
+to early 2012.  Also,  some MGEX files are only available (as best I can
+tell) from the NASA CDDIS site,  which turned off anonymous ftp in early
+2021.  If we can't get an MGEX file,  we use CODE ephems (Center for
+Orbit Determination in Europe),  downloaded from the University of Berne
+in Switzerland.  Unfortunately,  they'll only get you GPS,  GLONASS,  and
+Galileo satellites.  (Though that's usually plenty.)
 
    And then,  if all else fails,  we go for the IGU ("ultra-rapid") file.
 These give only GPS satellites.  I don't think those will ever actually
@@ -431,26 +428,19 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    while( i < 2200 && start_of_year( i + 1) < day)
       i++;
    day_of_year = day - start_of_year( i);
-   if( use_mgex_data && day > MGEX_START_WEEK * 7 && day < curr_day)
+   if( use_mgex_data && day > MGEX_START_WEEK * 7 && day < curr_day + 4)
       {
-      if( week < GBM_OBSOLESCENCE_WEEK)
+      if( week >= 1797)                /* roughly after June 2014 */
          {
-         const char *prefix;
-                                    /* see 'mgex.txt'.  The 'best' file */
-         if( week < 1777)           /* to use has changed over time.    */
-            prefix = "com";
-         else if( week < 1950)
-            prefix = "wum";
+         if( week < 2081)
+            snprintf( filename, sizeof( filename), "gbm%04d%d.sp3.Z",
+                                         week, day % 7);
          else
-            prefix = "gbm";
-         snprintf( filename, sizeof( filename), "%s%04d%d.sp3.Z",
-                                 prefix, week, day % 7);
-         }
-      else
-         snprintf( filename, sizeof( filename), "GFZ0MGXRAP_%d%03d0000_01D_05M_ORB.SP3.gz",
+            snprintf( filename, sizeof( filename), "GBM0MGXRAP_%d%03d0000_01D_05M_ORB.SP3.gz",
                            i, day_of_year);
+         }
       snprintf( command, sizeof( command),
-               "https://cddis.nasa.gov/archive/gnss/products/mgex/%4d/%s",
+               "ftp://ftp.gfz-potsdam.de/GNSS/products/mgex/%4d/%s",
                week, filename);
       insert_data_path( filename);
       if( gps_verbose)
@@ -460,6 +450,22 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
          try_to_download( command, filename);
       remove_dot_z( filename);
       rval = get_cached_posns( filename, glumph);
+      if( !rval)           /* try WUM (Wuhan) files */
+         {
+         snprintf( filename, sizeof( filename), "WUM0MGXULA_%d%03d0000_01D_05M_ORB.SP3.gz",
+                  i, day_of_year);
+         snprintf( command, sizeof( command),
+               "ftp://igs.ign.fr/pub/igs/products/mgex/%4d/%s",
+               week, filename);
+         insert_data_path( filename);
+         if( gps_verbose)
+            printf( "MGEX (multi-GNSS) file: '%s', %d %d: '%s'\n", filename, glumph,
+                glumph - day * glumphs_per_day, command);
+         if( fetch_files)
+            try_to_download( command, filename);
+         remove_dot_z( filename);
+         rval = get_cached_posns( filename, glumph);
+         }
       if( rval)
          return( rval);
       }
