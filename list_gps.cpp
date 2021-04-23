@@ -917,7 +917,7 @@ static void test_astrometry( const char *ifilename)
                   along_res /= motion;
                   if( data_type == ASTROMETRY)
                      {
-                     printf( "  %c xresid %8.4f\"  along %10.6fs  ",
+                     printf( "  %c xresid %10.6f\"  along %11.7fs  ",
                                     (loc[i].is_from_tle ? '*' : ' '),
                                     cross_res, along_res);
                      printf( "%s %s\n", loc[i].obj_desig, loc[i].international_desig);
@@ -958,9 +958,9 @@ static void test_astrometry( const char *ifilename)
       sum_along2 /= (double)n_found;
       sum_cross /= (double)n_found;
       sum_cross2 /= (double)n_found;
-      printf( "Avg cross-track : %8.4f +/- %.4f\"\n",
+      printf( "Avg cross-track : %10.6f +/- %.6f\"\n",
                sum_cross, sqrt( sum_cross2 - sum_cross * sum_cross));
-      printf( "Avg along-track (timing): %10.6f +/- %.6f seconds\n",
+      printf( "Avg along-track (timing): %11.7f +/- %.7f seconds\n",
                sum_along, sqrt( sum_along2 - sum_along * sum_along));
       if( sum_along > 0.)
          printf( "Positive along-track errors mean your clock was 'behind' the actual time;\n"
