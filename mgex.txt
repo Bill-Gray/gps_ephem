@@ -38,3 +38,17 @@ GFZ0MGXRAP_20190270000_01D_05M_ORB.SP3.gz
    (same directory structure and it's in the week 2038 directory;
 note that the filename is given in YYYYDDD,  year-and-day-of-year.)
 I think this is just a renaming,  i.e.,  same basic data.
+
+Further notes : from Potsdam,  we can get
+
+for GPS weeks 1797 to 2080 (roughly June 2014 to Nov 2019) :
+ftp://ftp.gfz-potsdam.de/GNSS/products/mgex/1797/gbm17970.sp3.Z
+
+for GPS weeks 2081 to the present :
+ftp://ftp.gfz-potsdam.de/GNSS/products/mgex/2081/GBM0MGXRAP_20193320000_01D_05M_ORB.SP3.gz
+
+ftp://igs.ign.fr/pub/igs/products/mgex/2140/GFZ0MGXRAP_20210100000_01D_05M_ORB.SP3.gz
+   (which unZIPs to GBM,  i.e.,  same data as above,  but from a different site)
+ftp://igs.ign.fr/pub/igs/products/mgex/2145/WUM0MGXULA_20210510000_01D_05M_ORB.SP3.gz
+   (!!! Predictions going out about one day!)
+
