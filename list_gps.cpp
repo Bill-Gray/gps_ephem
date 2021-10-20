@@ -1259,7 +1259,7 @@ int dummy_main( const int argc, const char **argv)
                                     | FULL_CTIME_LEADING_ZEROES
                                     | FULL_CTIME_ROUNDING
                                     | FULL_CTIME_MONTHS_AS_DIGITS);
-            printf( "     GNS%s   C%s", ephem_target, tbuff);
+            printf( "     GNS%.3s   C%s", ephem_target, tbuff);
             }
          else
             {
