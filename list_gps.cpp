@@ -60,7 +60,7 @@ const char *imprecise_position_message =
   "using GPS or mapping software,  and sending that to the MPC and to me at\n"
   "pluto (at) projectpluto (dot) com.\n";
 
-const char *relocation;
+char relocation[80];
 static FILE *log_file = NULL;
 
 int snprintf_append( char *string, const size_t max_len,      /* ephem0.cpp */
@@ -94,36 +94,21 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
    int rval = -1, i;
    static bool imprecision_warning_shown = false;
 
-   if( relocation)
+   if( relocation[0])
       {
       static bool relocation_message_shown = false;
-      double lat, lon, alt;
-      const int n_fields = sscanf( relocation, "%lf,%lf,%lf", &lat, &lon, &alt);
 
-      if( n_fields != 3)
+      rval = get_lat_lon_info( cdata, relocation);
+      if( !relocation_message_shown)
          {
-         if( !relocation_message_shown)
-            printf( "Relocation text must be latitude,longitude,altitude\n");
-         }
-      else
-         {
-         char buff[200];
-
-         snprintf( buff, sizeof( buff), "%.3s !%+14.9f %+13.9f %12.6f Relocated",
-                     code, lon, lat, alt);
-         rval = get_mpc_code_info( cdata, buff);
-         if( rval != 3)
-            printf( "Didn't understand relocation '%s'\n", buff);
+         if( rval)
+            printf( "Relocation text '%s' wasn't parsed correctly\n", relocation);
          else
-            {
-            rval = 0;
-            if( !relocation_message_shown)
-               printf( "Repositioned: latitude %.8f, longitude %.8f%c, alt %f meters above ellipsoid\n",
+            printf( "Repositioned: latitude %.8f, longitude %.8f%c, alt %f meters above ellipsoid\n",
                            cdata->lat * 180. / PI,
                            fabs( cdata->lon) * 180. / PI,
                            (cdata->lon > 0. ? 'E' : 'W'),
                            cdata->alt);
-            }
          }
       relocation_message_shown = true;
       return( rval);
@@ -1103,7 +1088,7 @@ int dummy_main( const int argc, const char **argv)
                }
                break;
             case 'r':
-               relocation = arg;
+               strncpy( relocation, arg, sizeof( relocation) - 1);
                break;
             case 's': case 'S':
                sort_order = atoi( arg);
