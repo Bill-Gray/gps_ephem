@@ -1029,7 +1029,8 @@ int dummy_main( const int argc, const char **argv)
               "advance).  The owner appears to have forgotten to do this.\n");
 #else
       printf( "You probably need to download the EOP file\n"
-              "ftp://ftp.iers.org/products/eop/rapid/standard/finals.all\n"
+              "https://datacenter.iers.org/data/latestVersion/finals.all.iau1980.txt\n"
+              "and rename it to 'finals.all'.\n"
               "This needs to be downloaded every few months (the earth's orientation\n"
               "can't be predicted far in advance).  Get a current 'finals.all',  and\n"
               "this error will probably go away.\n\n");
