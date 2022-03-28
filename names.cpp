@@ -188,6 +188,7 @@ static const char *beidou_and_qzs =
    "00000 99999 J01      2010-045A   37158 QZS-1 (MICHIBIKI)\n"
    "00000 99999 J02      2017-028A   42738 QZS-2\n"
    "00000 99999 J03      2017-062A   42965 QZS-4\n"
+   "00000 99999 J04      2021-096A   49336 QZS-1R\n"
    "00000 99999 J07      2017-048A   42917 QZS-3\n";
 
 int main( void)
