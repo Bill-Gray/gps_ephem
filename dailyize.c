@@ -26,12 +26,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <errno.h>
 
 /* This software merges the Earth Orientation Parameter (EOP) files
-'finals.all' and 'finals.daily'.  The files should be available from
+'finals.all' and 'finals.daily'.  The files were available from
 
 ftp://ftp.iers.org/products/eop/rapid/standard/finals.all
 ftp://ftp.iers.org/products/eop/rapid/daily/finals.daily
 http://maia.usno.navy.mil/ser7/finals.all
 http://maia.usno.navy.mil/ser7/finals.daily
+
+   and can now (as of June 2022) be found at
+
+https://datacenter.iers.org/data/latestVersion/12_FINALS.DAILY_IAU1980_V2013_0112.txt
+https://datacenter.iers.org/data/latestVersion/7_FINALS.ALL_IAU1980_V2013_017.txt
+
+   The URLs have changed in random,  not predictable ways.  Be warned.
+But the format of the files,  at least,  hasn't changed since I started
+using them.
 
    'finals.all' contains essentially all EOPs,  but is updated weekly.
 'finals.daily' gives you the last three months and the next three months,
