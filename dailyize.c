@@ -1,6 +1,5 @@
 /* dailyize.c:  code to read and merge Earth Orientation Parameter (EOP)
-files downloaded from ftp://maia.usno.navy.mil/ser7 or
-ftp://ftp.iers.org/products/eop/rapid/standard.  Details below licence.
+files downloaded from sites listed below.
 
 Copyright (C) 2018, Project Pluto
 
@@ -25,8 +24,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <assert.h>
 #include <errno.h>
 
-/* This software merges the Earth Orientation Parameter (EOP) files
-'finals.all' and 'finals.daily'.  The files were available from
+/* Earth Orientation Parameter (EOP) files are provided as
+'finals.all' (covers the earth's orientation from early 1973
+to nearly the present) and 'finals.daily' (covers from about
+three months ago and gives predictions roughly a year ahead).
+This program merges them into 'finals.mix',  giving you one
+file running from 1973 to about a year from now.
+
+   The files were available from
 
 ftp://ftp.iers.org/products/eop/rapid/standard/finals.all
 ftp://ftp.iers.org/products/eop/rapid/daily/finals.daily
@@ -42,19 +47,13 @@ https://datacenter.iers.org/data/latestVersion/7_FINALS.ALL_IAU1980_V2013_017.tx
 But the format of the files,  at least,  hasn't changed since I started
 using them.
 
-   'finals.all' contains essentially all EOPs,  but is updated weekly.
-'finals.daily' gives you the last three months and the next three months,
-but is (as the name suggests) updated daily. Ideally,  you'd mix the two,
-using 'daily' data where you can and 'all' data for everything else.
-The following code does just that,  creating a 'finals.mix' file.
-
    Both files contain lines of 188 bytes each,  with each line giving
 parameters for one day. The code reads the first line of each file;  the
 difference between their MJDs tells us how many lines we can just read
 straight from 'finals.all' and write directly to the output.  Then we do
 the same thing for 'finals.daily', reading but ignoring the corresponding
 lines from 'finals.all' just so that we stay aligned.  Finally,  we read
-the remaining lines from 'finals.all' and output those.
+the remaining lines from 'finals.all' (if any) and output those.
 
    I have a cron job on the projectpluto.com server that downloads
 'finals.all' once a week,  and another that downloads 'finals.daily'
