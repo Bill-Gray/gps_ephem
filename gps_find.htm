@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN">
 <html><head>
    <title> GNSS satellites available for astrometry testing </title>
+   <link REL="icon" HREF="favicon.ico" TYPE="image/x-icon">
    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
    <meta name="Author" content="Bill Gray">
 
@@ -15,7 +16,10 @@ for(var i = 0; i < hashParams.length; i++){
         </script> </head>
 <body onload="populate()">
 
-<h1> GNSS satellites available for astrometry testing </h1>
+<h1> <IMG SRC="logo.png" ALT="logo">
+ GNSS satellites available for testing timing of astronomical images </h1>
+
+<p> <i> <a href="tools.htm"> Overview of tools for asteroid observers on this site </a> </i> </p>
 
 <p> <a href="gps_expl.htm"> Click here for an explanation of what this page
 is and why it exists, </a> and links to related tools. </p>
@@ -44,7 +48,7 @@ action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want t
 <input type="radio" name="ang_fmt" value="0" checked="checked"> RA/dec in base 60 (Babylonian) <br>
 <input type="radio" name="ang_fmt" value="1"                  > RA/dec in decimal degrees <br>
 <br>
-<input type="checkbox" name="use_tles"> <a href="#gnss">Show TLE-based objects</a> </b> (you probably don't need
+<input type="checkbox" name="use_tles"> <a href="#gnss">Show TLE-based objects</a> (you probably don't need
    to tick this box) <br>
 
 <p><input value=" List GNSS satellites" type="submit"> <input value=" Reset " type="reset">
@@ -143,8 +147,11 @@ to tick it.) </p>
 <p> My thanks go to Jaime Nomen and Noelia S&aacute;nchez Ortiz for their
 thoughts on using navigation satellites for timing astrometry,  and for
 providing <a href="https://www.projectpluto.com/pluto/mpecs/navst43.htm">
-some example astrometry for testing that I was getting the right answers.
-</a> </p>
+some example astrometry for testing that I was getting the right answers; </a>
+and to Dave Tholen for doing some really amazing tests of the sort
+that require a 2.2-m telescope,  the extreme conditions on Mauna Kea,
+and really knowing how to get the last bit of precision out of astrometry.
+</p>
 
 <h2> <a name="changes"> Change log </a> </h2>
 
