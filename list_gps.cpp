@@ -743,7 +743,7 @@ static void test_astrometry( const char *ifilename)
    int data_type = 0, addenda_start;
    double exposure = 0., tilt = 0., override_field_size = 0.;
    void *ades_context = init_ades2mpc( );
-   unsigned n_five_digit_times = 0;
+   unsigned n_five_digit_times = 0, n_one_second_times = 0;
 
    assert( ifile);
    assert( ades_context);
@@ -792,6 +792,8 @@ static void test_astrometry( const char *ifilename)
             data_type = ASTROMETRY;
             if( time_format == 5)
                n_five_digit_times++;
+            if( time_format == 20)
+               n_one_second_times++;
             }
          buff[80] = removed_char;
          }
@@ -960,15 +962,23 @@ static void test_astrometry( const char *ifilename)
       printf( "\nWARNING : %u of your observations had times given to five digits.\n"
               "This isn't terrible,  but it does limit those times to have a precision\n"
               "of 0.864 seconds.  Record a sixth digit to get 86.4 millisecond precision.\n"
-              "Or (preferred solution) use the ADES format.\n"
+              "Or (preferred solution) use the ADES format.\n", n_five_digit_times);
+
+   if( n_one_second_times)
+      printf( "\nWARNING : %u of your observations had times given to a precision of\n"
+              "one second.  This isn't terrible,  but it would be better to provide at\n"
+              "least 0.1-second precision.\n", n_one_second_times);
+
+   if( n_five_digit_times || n_one_second_times)
+      printf(
 #ifdef CGI_VERSION
               "<a href='https://www.projectpluto.com/gps_ast.htm#tips'>"
               "Click here for information about increasing the reported precision.</a>\n"
 #else
               "Visit https://www.projectpluto.com/gps_ast.htm#tips for information\n"
-              "about increasing the reported timing precision."
+              "about increasing the reported timing precision.\n"
 #endif
-               , n_five_digit_times);
+              );
 
    fclose( ifile);
 }
