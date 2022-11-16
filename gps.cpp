@@ -27,6 +27,8 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
     return written;
 }
 
+static const char *fail_file = "url_fail.txt";
+
 #define FETCH_FILESIZE_SHORT               -1
 #define FETCH_FOPEN_FAILED                 -2
 #define FETCH_CURL_PERFORM_FAILED          -3
@@ -52,8 +54,14 @@ static int grab_file( const char *url, const char *outfilename,
         curl_easy_cleanup(curl);
         fclose(fp);
         if( res) {
+           FILE *ofile = fopen( fail_file, "a");
+           time_t t0 = time( NULL);
+
            if( gps_verbose)
               printf( "Curl fail %d (%s)\n", res, errbuff);
+           fprintf( ofile, "# Curl fail %d (%s) %s",
+                                       res, errbuff, ctime( &t0));
+           fclose( ofile);
            unlink( outfilename);
            return( FETCH_CURL_PERFORM_FAILED);
            }
@@ -61,8 +69,6 @@ static int grab_file( const char *url, const char *outfilename,
         return( FETCH_CURL_INIT_FAILED);
     return 0;
 }
-
-static const char *fail_file = "url_fail.txt";
 
 /* When downloads fail,  we add that info -- including the time of
 failure -- to the above file.  When we're about to grab a URL,  we
