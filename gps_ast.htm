@@ -14,6 +14,7 @@ is and why it exists, </a> and for links to related tools. </p>
 <a href="http://www.minorplanetcenter.net/iau/info/OpticalObs.html"> MPC's
 80-column astrometric reporting format </a> and/or in <a href="#tips">
 ADES </a> format (PSV and/or XML),  and click 'Process observations'.
+(ADES is recommended,  because of its better time resolution.)
 The program will figure out which GNSS satellite(s) you observed and tell you
 how far off you were in along-track seconds and cross-track arcseconds,  for
 each observation.  (The object designations can be anything you like;
@@ -21,8 +22,12 @@ they'll be ignored.)   At the bottom,  you'll get averages and standard
 deviations. </p>
 
 <p></p><hr>
-<form method="GET" enctype="application/x-www-form-urlencoded"
+<form method="POST" enctype="application/x-www-form-urlencoded"
 action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want to reset the form to the defaults?')">
+
+<p> <input type="checkbox" name="distrib">
+   Do you give permission for your observations to be published?
+   <a href='#distribute'> (Click for explanation) </a>
 
 <p><textarea name="ast" id="ast" cols=90 rows=10
       placeholder="Paste astrometry in 80-column, XML ADES, and/or PSV ADES here. Details below.">
@@ -35,6 +40,42 @@ action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want t
 on this site,  including <a href="gps_find.htm"> a tool to list GNSS satellites
 visible from a given site</a> and <a href="gps_eph.htm"> a tool to generate ephemerides
 for a given satellite. </a> </p>
+
+<h2> <a name='distribute'> </a> Distribution of your observations :</h2>
+
+<p> As described on the <a href='privacy.htm'> privacy page for this
+site</a>, data entered into this form and others on this site are kept
+for as short a time as possible and are not shared with anyone.  (That
+usually includes me,  unless an error log indicates I ought to check
+something out and fix it... which does happen every now and then.) If
+nothing else,  when somebody else uploads data,  yours is overwritten.
+</p>
+
+<p> However,  it's occurred to me that we might be able to learn some
+things from these observations.  The International Asteroid Warning Network (IAWN)
+had an observing campaign in November 2021 to measure timing errors by
+observing the asteroid 2019 XS.
+<a href='https://iawn.net/obscamp/2005LW3/index.shtml'> Another IAWN
+campaign to measure timing errors,  this time by observing 2005 LW<sub>3</sub>,
+is afoot</a>.  The 2019 XS data resulted in
+<a href='https://iopscience.iop.org/article/10.3847/PSJ/ac7224'> an
+analysis of observatory timing errors</a>.  A similar analysis based
+on observations of navsats might be interesting,  and give some
+useful insights about this method of timing correction and about
+how timing errors tend to work. </p>
+
+<p> I can't promise that such a paper will occur.  However,  if you check
+the above permission box,  your data will be stored and made available for
+analysis on request. </p>
+
+<p> Another possible use for such data : Dave Tholen has done a 'reverse
+GPS' sort of analysis,  using navsat astrometry to determine where the
+2.2-m telescope on Mauna Kea is.  (This was accurate enough to enable us
+to detect a ~26-meter error caused by use of a geoid height where an
+ellipsoidal height should have been used.)  It would be interesting to
+try the same trick with other observatories.  In fact,  I've been
+thinking about having a 'best fit observatory position' be part of the
+output of this tool. </p>
 
 <h2> <a name="tips"> Tips for high-precision timing </a> </h2>
 

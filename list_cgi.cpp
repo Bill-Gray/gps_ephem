@@ -53,6 +53,7 @@ int main( void)
    int n_args = 3;
    char *args[20];
    bool use_tles = false;
+   bool distribution_allowed = false;
 
    printf( "Content-type: text/html\n\n");
    printf( "<pre>");
@@ -111,6 +112,8 @@ int main( void)
          option = 'o';
       if( !strcmp( field, "use_tles"))
          use_tles = true;
+      if( !strcmp( field, "distrib"))
+         distribution_allowed = true;
       if( !strcmp( field, "ast"))
          {
          const char *filename = "temp.ast";
@@ -151,8 +154,17 @@ int main( void)
    for( i = 0; i < n_args; i++)
       fprintf( lock_file, "%d: '%s'\n", i, args[i]);
    rval = dummy_main( n_args, (const char **)args);
+   if( distribution_allowed)
+      {
+      time_t t0 = time( NULL);
+
+      sprintf( buff, "ast_%x.txt", (unsigned)t0);
+      fprintf( lock_file, "Renaming to '%s'\n", buff);
+      rename( "temp.ast", buff);
+      }
    fprintf( lock_file, "Done: rval %d\n", rval);
    for( i = 3; i < n_args; i++)
       free( args[i]);
+   free( buff);
    fclose( lock_file);
 }
