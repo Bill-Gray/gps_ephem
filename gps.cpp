@@ -436,6 +436,8 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    day_of_year = day - start_of_year( i);
    if( use_mgex_data && day > MGEX_START_WEEK * 7 && day < curr_day + 4)
       {
+      int pass;
+
       if( week >= 1797)                /* roughly after June 2014 */
          {
          if( week < 2081)
@@ -456,9 +458,10 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
          try_to_download( command, filename);
       remove_dot_z( filename);
       rval = get_cached_posns( filename, glumph);
-      if( !rval)           /* try WUM (Wuhan) files */
+      for( pass = 0; !rval && pass < 2; pass++)    /* try WUM (Wuhan) files */
          {
-         snprintf( filename, sizeof( filename), "WUM0MGXULA_%d%03d0000_01D_05M_ORB.SP3.gz",
+         snprintf( filename, sizeof( filename), "WUM0MGX%s_%d%03d0000_01D_05M_ORB.SP3.gz",
+                  (pass ? "ULA" : "FIN"),
                   i, day_of_year);
          snprintf( command, sizeof( command),
                "ftp://igs.ign.fr/pub/igs/products/mgex/%4d/%s",
@@ -479,7 +482,11 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
 #ifdef UNIBE_BASE_URL
    if( week >= UNIBE_COD_START_WEEK && day <= curr_day + 1)
       {
-      snprintf( filename, sizeof( filename), "COD%04d%d.EPH.Z", week, day % 7);
+      if( i < 2023)
+         snprintf( filename, sizeof( filename), "COD%04d%d.EPH.Z", week, day % 7);
+      else
+         snprintf( filename, sizeof( filename), "COD0OPSFIN_%d%03d0000_01D_05M_ORB.SP3.gz",
+                                    i, day_of_year);
       snprintf( command, sizeof( command), UNIBE_BASE_URL "%4d/%s", i, filename);
       insert_data_path( filename);
       if( gps_verbose)
