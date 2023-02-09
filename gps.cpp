@@ -50,6 +50,7 @@ static int grab_file( const char *url, const char *outfilename,
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
         curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuff);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15L);
         CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
         fclose(fp);
@@ -437,6 +438,7 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
    if( use_mgex_data && day > MGEX_START_WEEK * 7 && day < curr_day + 4)
       {
       int pass;
+      const char *suffix = (day < curr_day - 28 ? "" : "_IGS20");
 
       if( week >= 1797)                /* roughly after June 2014 */
          {
@@ -448,8 +450,8 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
                            i, day_of_year);
          }
       snprintf( command, sizeof( command),
-               "ftp://ftp.gfz-potsdam.de/GNSS/products/mgex/%4d/%s",
-               week, filename);
+               "ftp://ftp.gfz-potsdam.de/GNSS/products/mgex/%4d%s/%s",
+               week, suffix, filename);
       insert_data_path( filename);
       if( gps_verbose)
          printf( "MGEX (multi-GNSS) file: '%s', %d %d: '%s'\n", filename, glumph,
