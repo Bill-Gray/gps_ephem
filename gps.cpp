@@ -50,7 +50,8 @@ static int grab_file( const char *url, const char *outfilename,
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
         curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuff);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15L);
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 25L);
         CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
         fclose(fp);
@@ -529,27 +530,6 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             printf( "get_cached_posns: %p\n", (void *)rval);
          }
 #endif         /* #ifdef UNIBE_BASE_URL */
-   if( day > IGU_START_WEEK * 7 && day < curr_day + 2)
-      for( i = 0; !rval && i < 8; i++)
-         {
-         const int tglumph = glumph + (i - 3) * glumphs_per_day / 4;
-         const int day = tglumph / glumphs_per_day;
-         const int glumphs_per_hour = 4;
-         const int hour = (tglumph % glumphs_per_day) / glumphs_per_hour;
-
-         week = day / 7;
-         snprintf( filename, sizeof( filename), "igu%d%d_%02d.sp3.Z",
-                     week, day % 7, (hour / 6) * 6);
-         snprintf( command, sizeof( command), "ftp://cddis.gsfc.nasa.gov/pub/gps/products/%d/%s",
-                     week, filename);
-         insert_data_path( filename);
-         if( gps_verbose)
-            printf( "IGU file: '%s'\n", command);
-         if( fetch_files)
-            try_to_download( command, filename);
-         remove_dot_z( filename);
-         rval = get_cached_posns( filename, glumph);
-         }
    return( rval);
 }
 
