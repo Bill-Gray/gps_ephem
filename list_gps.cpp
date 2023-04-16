@@ -1019,6 +1019,7 @@ int dummy_main( const int argc, const char **argv)
 
    full_ctime( tbuff, curr_t, FULL_CTIME_YMD);
    printf( "Current time = %s UTC\n", tbuff);
+   printf( "Version 2023 Apr 15\n");
    if( err_code <= 0)
       {
       printf( "\nProblem loading EOPs (Earth Orientation Parameters):  rval %d\n", err_code);
