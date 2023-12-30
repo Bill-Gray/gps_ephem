@@ -264,32 +264,34 @@ Daw !   0.0000       0.00000   +0.00000    @10 Dawn spacecraft
    Updated 2020 Mar 12 using data from the Mars24 clock program,
    https://www.giss.nasa.gov/tools/mars24/ .  Note that it gives remarks
    about significant disagreements in positions between sources.  East
-   longitudes are positive,  as on Earth.
-Spi ! 175.47848      -14.571892        0   @4  Spirit
-Opp ! 354.47417      -01.9483          0   @4  Opportunity
-MSL ! 137.441635     -04.589465        0   @4  MSL (Curiosity)
-InS ! 135.623447     +04.502384        0   @4  Mars InSight
-Pho ! 234.24845      +68.21878         0   @4  Phoenix lander, Mars
-Pat ! 326.74576      +19.09985         0   @4  Mars Pathfinder
-Vk1 ! 312.04863      +22.2715          0   @4  Viking 1
-Vk2 ! 134.2803       +47.6698          0   @4  Viking 2
+   longitudes are positive,  as on Earth.  Positions given with altitudes
+   are from JPL _Horizons_ (entered 2023 Nov 26).
+Spi !-184.5271       -14.5691999   -2647.5 @4  Spirit
+Opp ! 354.6427098    -02.2554835   -2104.2 @4  Opportunity
+MSL !-222.5583       -04.5894999   -4501.  @4  MSL (Curiosity)
+InS !-224.3765531    +04.5023842   -2613.4 @4  Mars InSight
+Pho !-125.752        +68.219       -4100.  @4  Phoenix lander, Mars
+Pat !-033.2542969    +19.3115308   -4190.7 @4  Mars Pathfinder
+Vk1 !-047.95137      +22.5093139   -3941.7 @4  Viking 1
+Vk2 !-225.719635     +48.0061408   -3365.8 @4  Viking 2
 Be2 !  90.43         +11.53            0   @4  Beagle 2
 ExM ! 353.79         -02.07            0   @4  ExoMars Schiaparelli
-Per !  77.45088572   +18.44462715      0   @4  Perseverance, Mars
-Ti1 ! 110.318        +24.748           0   @4  Tianwen-1 lander, Mars
+Per !-282.5491       +18.4446      -2567.  @4  Perseverance, Mars
 ExM ! 335.45         +18.20            0   @4  ExoMars 2022
 MPL ! 195.3          -76.1             0   @4  Mars Polar Lander
 Ma6 !  19.42         -23.9             0   @4  Mars 6 site
 Ma3 ! 202.           -45.              0   @4  Mars 3 site
 Ma2 !  47.           -45.              0   @4  Mars 2 site
 
-   Following position, measured from an HiRISE image,  is from
-   https://space.stackexchange.com/questions/53586/whats-the-exact-location-lat-lon-of-zhurong
-Zhu ! 109.9249       +25.0644          0   @4  Zhurong landing site
+Zhu ! 109.925        +25.066       -4099.4 @4  Zhurong landing site
 
    In some cases,  viewpoints from the Moon may be useful.
 Ch4 ! 177.589        -45.457           0   @10 Chang'e 4 lander
 Ch3 ! -19.5116       +44.1214          0   @10 Chang'e 3 lander
+11a !  23.47307      +00.67344989  -1927.6 @10 Apollo 11 LRRR
+LHD !  62.2129       +12.7142001   -3670.0 @10 Luna-24 landing site
+Su7 ! 348.4873       -40.9811999      81.0 @10 Surveyor 7 landing site
+Cd3 !  32.319        -69.3729998     492.0 @10 Chandrayaan-3 Vikram site
 
 LNA ! -45.896527     -22.01097      1000       LNA (Laboratorio Nacional de Astrofisica)
 
@@ -741,12 +743,17 @@ G34 !  13.701403     +50.860289      490.67    Oberfrauendorf
    is 155 metres above sea level;  the geoid height is about 46 metres.
    (J69) is one of five domes visible on G__gle Earth as part of the
    Hampshire Astronomical Group site.  The altitudes appear to be identical.
+   Further identification is given at https://hantsastro.org.uk/tour/index.php
+   (comments come from that page).
 
 J69 !  -1.0196556    +50.9390167     201       North Observatory, Clanfield
-Ha1 !  -1.019663     +50.939114      201       HAG about 10m north of (J69)
-Ha2 !  -1.019629     +50.938673      201       HAG about 40m south of (J69)
-Ha3 !  -1.019306     +50.938298      201       HAG smaller dome ~85m SSE of (J69)
-Ha3 !  -1.019140     +50.938284      201       HAG larger dome ~85m SSE of (J69)
+Cdi !  -1.019663     +50.939114      201       12" Dome, Clanfield
+   "This dome is privately owned... 12-inch f5.5 Newtonian... for imaging"
+J84 !  -1.019629     +50.938673      201       South Observatory, Clanfield
+C7i !  -1.019306     +50.938298      201       7" Dome,  Clanfield
+   "...the favourite amongst members for astronomical imaging"
+C5i !  -1.019140     +50.938284      201       5" Dome,  Clanfield
+   "The oldest of our telescopes are housed in this dome"
 
    Some telescopes at (711) McDonald Observatory in Texas,  sorted using the
    site map at http://www.as.utexas.edu/mcdonald/observers/mcd_site_map.pdf
@@ -1125,7 +1132,7 @@ OHe !+005.712389   +43.932077        780.      SATINO, Observatoire Haute-Proven
 
 576 !+000.374425   +50.995594         118.     Burwash
 984 !-002.739722   +50.922992         101.     Eastfield
-986 !+000.639444   +51.408888         115.     Ascot
+986 !-000.639444   +51.408888         115.     Ascot
 993 !+002.505833   +51.047117         136.     Woolston
 
    Peter's page at https://birtwhistle.org.uk/HistoryMillHill.htm
@@ -1153,7 +1160,7 @@ OHe !+005.712389   +43.932077        780.      SATINO, Observatoire Haute-Proven
    Lowell Observatory scopes.  24m subtracted for geoid height.
    The NPOI location is that at the center of the three 'arms'.  Some IDs
    made using https://lowell.edu/history/the-mars-hill-campus/ .
-Per !-111.536786   +35.097069        2178.     Perkins 1.8-m, Lowell Observatory
+Pek !-111.536786   +35.097069        2178.     Perkins 1.8-m, Lowell Observatory
 Hal !-111.536335   +35.096740        2177.     Hall 1.1-m, Lowell Observatory
 699 !-111.536703   +35.095857        2177.     Lowell Observatory-LONEOS
 NPO !-111.533918   +35.095946        2180.     Navy Precision Optical Interferometer
@@ -1375,12 +1382,28 @@ AN23!+149.062396   -31.271647        1171.     Australian National Univ 2.3-m, S
 AN16!+149.062227   -31.272120        1183.     Australian National Univ 16-inch, Siding Spring
 AN40!+149.062103   -31.271163        1180.     Australian National Univ 40-inch, Siding Spring
 Q57 !+149.062545   -31.271108        1167.     Korea Microlensing Telescope Network-SSO
+HatS!+149.062060   -31.272295        1174.     HAT-South, Siding Spring
+Sola!+149.061874   -31.272380        1175.     Solaris telescope, Siding Spring
 
 Upp5!+149.064160   -31.273225        1151.     Uppsala 0.5-m, Siding Spring
-ROTS!+149.064252   -31.273447        1148.     UNSW ROTSE Telescope, Siding Spring
 UNSW!+149.064297   -31.273297        1149.     0.5-m UNSW Automated Patrol Telescope
 UKSc!+149.071132   -31.272289        1142.     1.2-m UK Schmidt, Siding Spring
 AAO !+149.067264   -31.275358        1161.     3.9-m Anglo-Australian Telescope, Siding Spring
+
+   Ian Adams provided some "on-the-ground" corrections/additions for
+Siding Spring.  He pointed out the following two GOTO (Gravitational-
+wave Optical Transient Observatory) scopes,  and supplied a corrected
+location for ROTSE (I'd mis-labelled the JAXA observatory as ROTSE) :
+
+GOS !+149.064123   -31.273454        1148.     GOTO South
+GON !+149.064119   -31.273374        1149.     GOTO North
+ROTS!+149.064040   -31.273364        1150.     UNSW ROTSE Telescope, Siding Spring
+
+   Ian also identified a couple of roll-off roof structures in the
+neighborhood that had me baffled :
+
+JAXS!+149.064204   -31.273410        1121      JAXA, Siding Spring
+APT !+149.064281   -31.273343        1122      APT, Siding Spring
 
    Should check in with Las Cumbres folks to disambiguate the following :
 
@@ -1401,7 +1424,7 @@ St50!+149.007461   -35.320406         786.     50-in reflector, Mt Stromlo
 
 ET2 !-070.73904    -29.25522         2359.     ESA Test-Bed Telescope 2, La Silla
 
-SSA !+114.0899     -21.8957            40.     Space Surveillance Telescope, Exmouth
+P07 !+114.0899     -21.8957            40.     Space Surveillance Telescope, HEH Station
 SOR !-106.463864   +34.9642312       1892.     Starfire Optical Range,  Albuqueque
 
    Private communication from Francois Kugel,  2021 Oct 18 : N 43 59' 59.26",
@@ -1452,15 +1475,16 @@ L78 !+014.780211   +40.6826087        134.     San Marco Observatory, Salerno
 UAZ !-110.947361   +32.232722         100.000  University of Arizona 24"
 
    DSS 47 isn't in the aforementioned file where I got data for other DSN
-   locations.  The following coordinates came from JPL's radar astrometry
-   service at https://ssd.jpl.nasa.gov/sb/radar.html .  I am not sure they're
-   right;  I can't get good results for the DSS 47 radar astrometry.
+   locations.  The following coordinates came a private communication from
+   Jon Giorgini at JPL.
 
-d47 ! 149.5501     -30.31287         235.23    DSS 47
+d47 ! 149.5501388  -30.3128846       236.87    DSS 47
 
-   (Opt) is a 'floating' location.  It should be the best topocentric location
-   for observing an object at a given time,  and therefore moves around as the
-   Earth rotates and the object moves around in the sky.
+   (Opt) is a 'floating' location,  used internally in Find_Orb.  It is the
+   'best' topocentric location for observing an object at a given time (puts
+   the object well above the horizon and the sun well below it),  and
+   therefore moves around as the Earth rotates and the object moves around
+   in the sky.
 
 Opt !   0.0000       0.00000   +0.00000    @3  Optimal topocentric location
 
@@ -1472,3 +1496,56 @@ Opt !   0.0000       0.00000   +0.00000    @3  Optimal topocentric location
 LC1 !   0.0000       0.00000   +0.00000    @3  Las Cumbres Observatory (1m)
 LC2 !   0.0000       0.00000   +0.00000    @3  Las Cumbres Observatory (2m)
 ATL !   0.0000       0.00000   +0.00000    @3  ATLAS (all scopes)
+
+RA2 !-110.847070   +32.581105        1190.     RAPTORS-2
+RMI !+145.061634   -37.680589         160.4    RMIT Robotic Optical Observatory
+
+TCO !-156.44052777 +20.7097222         59.0    Tennis Court Observatory, Maui
+
+   Identified some Perth Observatory scopes from an annotated map at
+   http://www.phys.ttu.edu/~ozprof/pobs.htm ,  which also describes some of
+   the scopes at this facility.  Perth has three official MPC codes,  (319),
+   (322),  and (323).  I don't know to which telescopes those last two refer.
+
+Pe1 !+116.13545    -32.00773          355.0    UWA 16" telescope
+319 !+116.13645    -32.00690          355.0    Perth Observatory, Perth-Lowell Telescope
+Pe2 !+116.13607    -32.00710          355.0    Perth Observatory Transit Telescope
+Pe3 !+116.13648    -32.00777          355.0    Perth Observatory 13" Astrograph
+Pe4 !+116.13648    -32.00742          355.0    Perth Observatory unidentified 1
+Pe5 !+116.13663    -32.00716          355.0    Perth Observatory unidentified 2
+Pe6 !+116.13645    -32.00729          355.0    Perth Observatory roll-off roof?
+
+   The MPC location for (662) Lick is about 200 meters east-southeast of the
+   nearest telescope (36" refractor).  I don't know which telescope(s) really
+   corresponds to (662);  I am putting it at the location for the 36"
+   refractor,  which is at least an improvement by ~200 meters.  Site map is
+   https://mthamilton.ucolick.org/techdocs/practical_info/lick_map.html
+   32 meters subtracted for geoid height.
+
+662 !-121.643015   +37.341081        1273.0    Lick Observatory, 36" refractor
+662a!-121.642877   +37.341707        1264.0    Lick Observatory, 40" reflector
+662b!-121.640246   +37.341893        1241.0    Lick Observatory, 22" Touchmann reflector
+662c!-121.638793   +37.342747        1252.0    Lick Observatory, Crocker dome
+662d!-121.638222   +37.342536        1250.0    Lick Observatory, Automatic Planet Finder scope
+662e!-121.638003   +37.342617        1251.0    Lick Observatory, Double Astrograph
+662f!-121.637157   +37.342842        1245.0    Lick Observatory, Coude' Auxiliary telescope
+662g!-121.637209   +37.343034        1246.0    Lick Observatory, 120" Shane telescope
+662h!-121.634823   +37.343376        1265.0    Lick Observatory, Katzman Automatic Imaging telescope
+
+   (672) Mount Wilson scopes identified via
+   https://www.mtwilson.edu/wp-content/uploads/2023/05/MWO-Campus-Map-Printable.pdf
+   The MPC position is at least in the right ballpark,  such that I don't
+   know which way to move it (again,  I don't know which of the following was
+   the "real" (672).)  I've omitted (G73),  the 24" scope used for TIE (Telescopes
+   In Education).  It was moved from Mount Wilson in 2007.  I don't know where it
+   was when it was in use,  but the MPC position is probably about 1.3 km south of
+   reality;  it's way out in the woods.  33 meters subtracted for geoid height.
+
+672a!-118.057487   +34.224572        1695.0    Mount Wilson, 60"
+672b!-118.057186   +34.225873        1690.0    Mount Wilson, 100" Hooker
+672c!-118.057053   +34.224403        1696.0    Mount Wilson, CHARA S1
+672d!-118.057110   +34.224699        1699.0    Mount Wilson, CHARA S2
+672e!-118.058963   +34.226347        1683.0    Mount Wilson, CHARA W1
+672f!-118.057823   +34.226189        1685.0    Mount Wilson, CHARA W2
+672g!-118.055694   +34.227149        1660.0    Mount Wilson, CHARA E1
+672h!-118.056292   +34.226829        1674.0    Mount Wilson, CHARA E2
