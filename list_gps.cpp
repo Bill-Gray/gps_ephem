@@ -748,9 +748,11 @@ static void test_astrometry( const char *ifilename)
    double exposure = 0., tilt = 0., override_field_size = 0.;
    void *ades_context = init_ades2mpc( );
    unsigned n_five_digit_times = 0, n_one_second_times = 0;
+   mpc_code_t rover_data;
 
    assert( ifile);
    assert( ades_context);
+   memset( &rover_data, 0, sizeof( rover_data));
    while( fgets_with_ades_xlation( buff, sizeof( buff), ades_context, ifile))
       {
       double ra, dec, jd = 0.;
@@ -759,6 +761,18 @@ static void test_astrometry( const char *ifilename)
       static int count;
       size_t i;
 
+      if( get_xxx_location_info( &rover_data, buff) == -2)
+         {
+#ifdef CGI_VERSION
+         printf( "<b>Failure to read roving observer line:\n%s\n"
+                 "<a href='https://www.projectpluto.com/xxx.htm'>Click here for information about how to fix this.\n"
+                 "The lat/lon has to be provided in a very specific format.</b>\n", buff);
+#else
+         printf( "Failure to read roving observer line:\n%s\n"
+                 "See https://www.projectpluto.com/xxx.htm.  The lat/lon has\n"
+                 "to be provided in a very specific format.\n", buff);
+#endif
+         }
       if( !memcmp( buff, "COM ignore obs", 14))
          while( fgets_trimmed( buff, sizeof( buff), ifile))
             if( !memcmp( buff, "COM end ignore obs", 18))
@@ -839,10 +853,29 @@ static void test_astrometry( const char *ifilename)
             width *= radians_to_arcsec / 2.;
             }
 
-         err_code = get_observer_loc( &cdata, mpc_code);
-         if( err_code)
-            printf( "\nCouldn't find observer '%s': err %d\n", mpc_code,
+         if( !strcmp( mpc_code, "XXX"))
+            {
+            err_code = (strcmp( rover_data.code, "XXX") ? -1 : 0);
+            if( err_code)
+#ifdef CGI_VERSION
+               printf( "<b>No position found for code (XXX)."
+                       "<a href='https://www.projectpluto.com/xxx.htm'> Click here for information\n"
+                       "on how to specify a <tt>COD Long.</tt> line in your astrometry file.</a></b>\n");
+#else
+               printf( "No position found for code (XXX).  See\n"
+                       "https://www.projectpluto.com/xxx.htm for information\n"
+                       "on how to specify one in your astrometry file.\n");
+#endif
+            else
+               cdata = rover_data;
+            }
+         else
+            {
+            err_code = get_observer_loc( &cdata, mpc_code);
+            if( err_code)
+               printf( "\nCouldn't find observer '%s': err %d\n", mpc_code,
                                        err_code);
+            }
          cdata.rho_cos_phi *= 1. + altitude_adjustment / earth_radius;
          cdata.rho_sin_phi *= 1. + altitude_adjustment / earth_radius;
          if( data_type == ASTROMETRY)
