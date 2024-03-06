@@ -123,10 +123,11 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
       if( ifile)
          {
          char buff[200], *obs_name;
+         const char end_char = (code[3] ? code[3] : ' ');
 
          while( rval && fgets_trimmed( buff, sizeof( buff), ifile))
-            if( !memcmp( buff, code, 3) &&
-                     get_mpc_code_info( cdata, buff) == 3)
+            if( !memcmp( buff, code, 3) && buff[3] == end_char
+                     && get_mpc_code_info( cdata, buff) == 3)
                {
                rval = 0;         /* we got it */
                obs_name = (char *)malloc( strlen( cdata->name) + 1);
