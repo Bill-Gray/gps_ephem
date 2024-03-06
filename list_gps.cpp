@@ -606,12 +606,16 @@ static void get_field_size( double *width, double *height, const double jd,
    *height = 0.;
    switch( code)
       {
+      case 291:         /* (291) Spacewatch, 1.8-m : 20' square */
+         *width = *height = 1. / 3.;
+         break;
       case 566:         /* (566) Haleakala-NEAT/GEODSS  */
          *width = 4096. * 1.43 / 3600.;
          break;
       case 691:         /* (691) Spacewatch */
-         *width = 1.85;
-         *height = 1.73;
+//       *width = 1.85;      /* if treated as four small rectangles */
+//       *height = 1.73;
+         *width = *height = 2.9;    /* if treated as one big square */
          break;
       case 644:         /* (644) NEAT at Palomar Sam'l Oschbin Schmidt */
          *width = 4096. * 1.01 / 3600.;
@@ -636,7 +640,8 @@ static void get_field_size( double *width, double *height, const double jd,
          *width = 7.4;
          break;
       case 3100:         /* (V00) Bok */
-         *width = 1.16;
+         *width = 1. / 12.;               /* Spacewatch */
+//       *width = 1.16;                   /* CSS */
          break;
       case 3106:          /* (V06) */
          *width = 580. / 3600.;
