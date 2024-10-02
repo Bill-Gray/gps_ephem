@@ -53,12 +53,14 @@ static char *fgets_trimmed( char *buff, const size_t max_bytes, FILE *ifile);
 
 #define PI 3.1415926535897932384626433832795028841971693993751058209749445923
 
+#define MANGLED_EMAIL "pluto (at) \x70roject\x70lu\x74o (d\x6ft) co\x6d"
+
 const char *imprecise_position_message =
   "WARNING: Your observatory's position is given with low precision.  This will\n"
   "cause the computed positions for navigation satellites to be imprecise,  too.\n"
   "I'd recommend getting a corrected,  precise latitude,  longitude,  and altitude\n"
   "using GPS or mapping software,  and sending that to the MPC and to me at\n"
-  "pluto (at) projectpluto (dot) com.\n";
+  MANGLED_EMAIL ".\n";
 
 char relocation[80];
 static FILE *log_file = NULL;
@@ -1001,6 +1003,15 @@ static void test_astrometry( const char *ifilename)
               "i.e.,  the times reported in the astrometry are later than the positions\n"
               "of the GPS satellites would indicate.\n");
       }
+   if( !data_type)
+      printf( "Didn't find any astrometry in the input data.  Check the data\n"
+#ifdef CGI_VERSION
+            "to be sure it is in <a href='astromet.htm'>either MPC80 or ADES"
+            "format</a>"
+#else
+            "to be sure it is in either MPC80 or ADES format"
+#endif
+            " and try again.\n");
    if( n_five_digit_times)
       printf( "\nWARNING : %u of your observations had times given to five digits.\n"
               "This isn't terrible,  but it does limit those times to have a precision\n"
@@ -1199,6 +1210,16 @@ int dummy_main( const int argc, const char **argv)
       return( -1);
       }
    strcpy( observatory_code, argv[2]);
+   if( strlen( observatory_code) < 3)
+      {
+      printf( "You must specify a three-character MPC code for your site.\n"
+              "Use 500 for the geocenter.  If your site lacks an observatory\n"
+              "code,  send me your latitude,  longitude,  and altitude,  and\n"
+              "I'll add an (unofficial) MPC observatory code for you.  I can\n"
+              "be contacted at\n" MANGLED_EMAIL "\n"
+              "(remove diacritics if you're not a spammer).\n");
+      return( -1);
+      }
    i = (int)strlen( observatory_code) - 2;
    if( i > 0 && !strcmp( observatory_code + i, " m"))
       {
