@@ -24,7 +24,7 @@ for(var i = 0; i < hashParams.length; i++){
 <p> <a href="gps_expl.htm"> Click here for an explanation of what this page
 is and why it exists, </a> and links to related tools. </p>
 
-<p> Use the form below to find out what <a href="#gnss"> GNSS
+<p> Use the form below to find out what <a href='#gnss'> GNSS
 satellites </a> (GPS,  Galileo,  GLONASS,  BeiDou,  JXSS) are
 observable from your MPC code at a given time. </p>
 
@@ -48,7 +48,7 @@ action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want t
 <input type="radio" name="ang_fmt" value="0" checked="checked"> RA/dec in base 60 (Babylonian) <br>
 <input type="radio" name="ang_fmt" value="1"                  > RA/dec in decimal degrees <br>
 <br>
-<input type="checkbox" name="use_tles"> <a href="#gnss">Show TLE-based objects</a> (you probably don't need
+<input type="checkbox" name="use_tles"> <a href='#use_tles'>Show TLE-based objects</a> (you probably don't need
    to tick this box) <br>
 
 <p><input value=" List GNSS satellites" type="submit"> <input value=" Reset " type="reset">
@@ -117,25 +117,38 @@ sure. </p>
 <p> <a href="https://github.com/Bill-Gray/gps_ephem">
 <b> Source code</b> (C/C++) is available at GitHub. </a>
 
-<p> <a name="gnss"> <b> 'GNSS' </b> (Global Navigation Satellite System) </a>
-includes GPS,  GLONASS,  Galileo, QZSS,  and BeiDou satellites.  We have
-precise positions (within centimeters) for 'right now',  and a few days
+<h2> <a name='gnss'> 'GNSS' definition </a> </h2>
+
+<p> The terms 'GNSS' (Global Navigation Satellite System)
+includes GPS,  GLONASS,  Galileo, QZSS,  and BeiDou satellites.
+(It also includes the <a href='https://en.wikipedia.org/wiki/Indian_Regional_Navigation_Satellite_System'>
+Indian Regional Navigation Satellite System (IRNSS)</a>,  but we
+don't have positions for those.)  These are also generically
+referred to as 'navigation satellites' or 'navsats'.  They are
+sometimes called 'GPS',  but that term really ought to be used
+to refer specifically to the U.S. navigation satellites.
+
+<h2> <a name='use_tles'> Using TLEs (Two-Line Elements) </a> </h2>
+
+<p> We have precise positions (within centimeters) for 'right now',  and a few days
 into the future,  for the GPS,  GLONASS,  and Galileo constellations.
 You can make plans to observe those objects,  get data for them,  and
 immediately check your data against the precise values. </p>
 
 <p> For Galileo,  QZSS,  and BeiDou,  we only get that precision a few
-days after the fact.  For 'right now' and the future,  we have less
-precise positions computed using
-<a href="tle_info.htm"> Two-Line Elements (TLEs)</a>.  Those are good to
-a few kilometers,  enough to let you find the objects with a telescope.
-Then,  after a few days,  full-precision positions good to centimeters
-will be posted,  and you can actually check your data against them. </p>
+days after the fact.  We can give you a 'pretty good' idea of where they
+are,  though,  using
+<a href="tle_info.htm"> Two-Line Elements (TLEs)</a> that are published
+for all navigation satellites.  The TLE-based positions are good to
+a few kilometers,  enough to let you find the objects with a telescope,
+but not really good enough to check your timing.  But after a few days,
+full-precision positions good to centimeters will be posted for all
+navsats,  and you can check your timing then. </p>
 
-<p> Usually,  there are plenty of GPS,  GLONASS,  and Galileo objects
+<p> Almost always,  there are plenty of GPS,  GLONASS,  and Galileo objects
 available,  and those will be the only one listed for 'right now' and the
 next few days.  If you tick the 'Show TLE-based objects' box above,  you'll
-get a <i>lot</i> more satellites that can be observed... but you you won't
+get a <i>lot</i> more satellites that can be observed... but you won't
 be able to actually process your observations against precise positions
 until a few days after you've made them.  This is annoying enough that by
 default,  that box is left unticked.  (And given how many objects are in

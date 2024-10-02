@@ -14,6 +14,7 @@
 <ul>
 <li> <a href="#overview"> Overview of how to calibrate image timing and why you should do it </a> </li>
 <li> <a href="#procedure"> Basic procedure </a> </li>
+<li> <a href="#observing"> Some observing considerations </a> </li>
 <li> <a href="#tles"> Ephemeris sources </a> </li>
 <li> <a href="#sites"> Low-precision site locations and how to fix them </a> </li>
 <li> <a href="#required"> How good should I try to get my timing? </a> </li>
@@ -63,6 +64,14 @@ within centimeters,  more than good enough for our purposes.
 
 <h2> <a name="procedure"> Basic procedure </a> </h2>
 
+<p> <b><i>Note :</b></i> there is
+<a href='https://birtwhistle.org.uk/MethodsCheckTiming.htm'>
+an excellent outline of how to actually use these tools
+on Peter Birtwhistle's site.</a>  Unlike me,  Peter is an
+actual observer (I'm more of a math/physics/software guy)
+and fills in some details on how you actually get all of this
+to work properly. </p>
+
 <p> First,  you'll need to <a href="gps_find.htm"> get a list of
 GNSS satellites visible at your location for a given time.</a>  You
 can then pick out one or more to observe;  I recommend choosing those
@@ -99,6 +108,64 @@ difference for each observation,  and how far "cross-track" you were
 closest the object should have come to that position).  You'll
 also get the average timing and cross-track residual errors,  and
 their scatter (standard deviation). </p>
+
+<h2> <a name="observing"> Some observing considerations </a> </h2>
+
+<p> &bull; As mentioned above,
+<a href='https://birtwhistle.org.uk/MethodsCheckTiming.htm'>
+Peter Birtwhistle has a page with thoughts on how to use these tools. </a> </p>
+
+<p> &bull; Choosing exposure durations is a little tricky.  It's
+easier to measure a short streak (and these objects move ~40"/second).
+But set too short an exposure time,  and you won't get enough
+reference stars with enough SNR for a good astrometric solution.
+There's no one-size-fits-all solution here;  you may just have to
+play around with exposure lengths until you "get it right" (and
+then you <i>still</i> should try a variety of exposure lengths to
+make sure the "time" you get is that of mid-exposure,  and not
+start or end or something else.)
+
+<p> &bull; Shutter movement can cause trouble as well.  If your
+shutter moves left,  then right,  or is an iris-type that opens and
+closes,  the mid-exposure time for all pixels will be identical
+(some pixels will get a longer exposure than others,  which can
+foul up photometry,  but your timing will be unaffected).
+
+<p> But some shutters move (say) right,  stop during the
+exposure,  then move right again;  on the next exposure,  the
+travel is to the left. That ensures that all pixels get exposed
+for the same amount of time,  making photometrists happy.  But it
+does mean that the exposure time is a function of where you are
+in the image.
+
+<p> Some people have compensated for this,  figuring out how long
+it takes the shutter to move and making the reported time a function
+of (usually) the x-coordinate within the image.  If you can't do
+that,  the only thing I can suggest is getting the target as close
+to the center of the image as you can.  (My thanks to Dave Tholen
+for bringing up both of the above points.  Dave has to deal with
+the additional headache of not knowing at the beginning of the night
+if the shutter is on the left side or the right side.)
+
+<p> &bull; Marco Micheli pointed out that some software has a nasty
+tendency of assuming that one-second precision should be good
+enough for anybody.  So you can measure time to milliseconds,
+then have the time that's written out be rounded (or truncated!)
+to the nearest second.
+
+<p> &bull; Rob Seaman has pointed out that you still really want to
+have a stable hardware clock.  (Without one,  your time will start
+to drift shortly after you calibrate it.)  The
+<a href='https://millerjs.org/timehat'> TimeHat </a> looks to be
+a high-quality,  inexpensive solution... hobbled (as of late 2022)
+by supply-chain issues : it uses a Raspberry Pi,  currently
+almost completely unavailable.  I've also heard good things
+about the <a href='https://siderealtechnology.com/TimeServer.html'>
+SiTech Time Server</a>.  </p>
+
+<p> Note that use of an excellent clock doesn't relieve you of the
+need to check timing.  The aforementioned issues of software or
+hardware mangling your precise timing still apply. </p>
 
 <h2> <a name="tles"> Ephemeris sources </a> </h2>
 
