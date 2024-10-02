@@ -132,24 +132,30 @@ Lun !   0.0000       0.00000   +0.00000    @10 Luna
    at fractions based on the relative masses of the objects. L4 and L5
    are at equilateral triangle points. Perturbations are ignored.  I
    don't expect observations to be made from these points;  this is
-   really so you can compute ephemerides from these locations.  See
-   'environ.dat' for info on how to set up L points for other systems.
+   really so you can compute ephemerides from these locations.  For
+   each point,  the indices for the primary and secondary object are
+   given (moon=10);  then fraction of distance from primary to secondary,
+   and then fraction "along orbit" (non-zero for L4 and L5,  where the
+   value is +/- sqrt(.75) to make the equilateral triangle.)  For
+   example,  EM1 is 84.906% of the way from the earth to the moon.  See
+   'lagrange.c' in the 'junk' repository for mathematical details and
+   code to generate these values for other systems.
 
-SE1 !   0.0000       0.00000   +0.00 @90000031 Sun-Earth L1
-SE2 !   0.0000       0.00000   +0.00 @90000032 Sun-Earth L2
-SE3 !   0.0000       0.00000   +0.00 @90000033 Sun-Earth L3
-SE4 !   0.0000       0.00000   +0.00 @90000034 Sun-Earth L4
-SE5 !   0.0000       0.00000   +0.00 @90000035 Sun-Earth L5
-EM1 !   0.0000       0.00000   +0.00 @90030101 Earth-Moon L1
-EM2 !   0.0000       0.00000   +0.00 @90030102 Earth-Moon L2
-EM3 !   0.0000       0.00000   +0.00 @90030103 Earth-Moon L3
-EM4 !   0.0000       0.00000   +0.00 @90030104 Earth-Moon L4
-EM5 !   0.0000       0.00000   +0.00 @90030105 Earth-Moon L5
-SJ1 !   0.0000       0.00000   +0.00 @90000051 Sun-Jupiter L1
-SJ2 !   0.0000       0.00000   +0.00 @90000052 Sun-Jupiter L2
-SJ3 !   0.0000       0.00000   +0.00 @90000053 Sun-Jupiter L3
-SJ4 !   0.0000       0.00000   +0.00 @90000054 Sun-Jupiter L4
-SJ5 !   0.0000       0.00000   +0.00 @90000055 Sun-Jupiter L5
+SE1 !   0    3 0.98998902 0              @9001 Sun-Earth L1
+SE2 !   0    3 1.01007824 0              @9002 Sun-Earth L2
+SE3 !   0    3 -0.99999823 0             @9003 Sun-Earth L3
+SE4 !   0    3 0.5  0.8660254            @9004 Sun-Earth L4
+SE5 !   0    3 0.5 -0.8660254            @9005 Sun-Earth L5
+EM1 !   3   10 0.84906572  0             @9006 Earth-Moon L1
+EM2 !   3   10 1.16783275  0             @9007 Earth-Moon L2
+EM3 !   3   10 -0.99291206 0             @9008 Earth-Moon L3
+EM4 !   3   10 0.5  0.8660254            @9009 Earth-Moon L4
+EM5 !   3   10 0.5 -0.8660254            @9010 Earth-Moon L5
+SJ1 !   0    5 0.93331933 0              @9011 Sun-Jupiter L1
+SJ2 !   0    5 1.06978454 0              @9012 Sun-Jupiter L2
+SJ3 !   0    5 -0.99944357 0             @9013 Sun-Jupiter L3
+SJ4 !   0    5 0.5  0.8660254            @9014 Sun-Jupiter L4
+SJ5 !   0    5 0.5 -0.8660254            @9015 Sun-Jupiter L5
 
    Note that ephems generated from these spacecraft require auxiliary
    files saying where the spacecraft were at a given time.  I don't
@@ -157,7 +163,9 @@ SJ5 !   0.0000       0.00000   +0.00 @90000055 Sun-Jupiter L5
    large and (b) you can only go just so far into the future before
    they may not be entirely accurate.  Should you want ephems for
    objects as seen from these spacecraft,  or any other spacecraft
-   listed on JPL's Horizons system,  contact me.
+   listed on JPL's Horizons system,  contact me.  (I may set this up
+   so that Find_Orb just looks for the relevant ephems on Horizons,
+   as you need them.)
 
 Luc !   0.0000       0.00000   +0.00000    @-2 Lucy
 SoO !   0.0000       0.00000   +0.00000    @-2 Solar Orbiter
@@ -286,6 +294,8 @@ Ma2 !  47.           -45.              0   @4  Mars 2 site
 Zhu ! 109.925        +25.066       -4099.4 @4  Zhurong landing site
 
    In some cases,  viewpoints from the Moon may be useful.
+Ch6 !-153.9852       -41.6385          0   @10 Chang'e 6 lander
+Ch5 ! -51.9161       +43.0576          0   @10 Chang'e 5 lander
 Ch4 ! 177.589        -45.457           0   @10 Chang'e 4 lander
 Ch3 ! -19.5116       +44.1214          0   @10 Chang'e 3 lander
 11a !  23.47307      +00.67344989  -1927.6 @10 Apollo 11 LRRR
@@ -303,40 +313,54 @@ LNA ! -45.896527     -22.01097      1000       LNA (Laboratorio Nacional de Astr
 
 Jah ! 008.351507     +54.652323       10       Jost Jahn's home observatory
 
-   Coordinates for DSN Stations,  added 2016 Sep 27,  from
+   Coordinates for DSN stations,  added from
+   https://ssd.jpl.nasa.gov/ftp/eph/planets/stations/dsn.itrf93/dsn.itrf93_cartesian_19oct2020.txt
+   and converted from Cartesian coordinates to lat/lon/alt.
+
+d12 !-116.80548923 +35.29993708      962.1551  DSS 12 Goldstone Echo 34-meter
+d13 !-116.79445900 +35.24716424     1070.4438  DSS 13 Goldstone Venus 34-meter
+d14 !-116.88953821 +35.42590087     1001.3206  DSS 14 Goldstone 70-meter
+d15 !-116.88719510 +35.42185328      973.1963  DSS 15 Goldstone 34-meter
+d16 !-116.87364975 +35.34153939      943.9776  DSS 16 Goldstone 26-meter
+d17 !-116.87350536 +35.34217657      936.9160  DSS 17 Goldstone 9-meter
+d24 !-116.87479439 +35.33989280      951.5116  DSS 24 Goldstone 34-meter
+d25 !-116.87536320 +35.33761197      959.6343  DSS 25 Goldstone 34-meter
+d26 !-116.87301642 +35.33568918      968.6932  DSS 26 Goldstone 34-meter
+d27 !-116.77665045 +35.23827178     1052.4689  DSS 27 Goldstone 34-meter
+d28 !-116.77889117 +35.23827202     1064.6481  DSS 28 Goldstone 34-meter
+d34 ! 148.98196443 -35.39847884      692.0204  DSS 34 Canberra 34-meter
+d35 ! 148.98145576 -35.39579552      694.8893  DSS 35 Canberra 34-meter
+d36 ! 148.97854426 -35.39510176      685.5055  DSS 36 Canberra 34-meter
+d42 ! 148.98126740 -35.40067464      674.6155  DSS 42 Canberra 34-meter
+d43 ! 148.98126731 -35.40242423      688.7973  DSS 43 Tidbinbilla 70-meter
+d45 ! 148.97768563 -35.39845769      674.3329  DSS 45 Canberra 34-meter
+d46 ! 148.98308169 -35.40501064      676.8121  DSS 46 Canberra 26-meter
+d49 ! 148.26351559 -32.99839901      414.8151  DSS 49 Parkes
+d54 !  -4.25409682 +40.42562168      837.0518  DSS 54 Madrid 34-meter
+d56 !  -4.25206069 +40.42596469      835.7366  DSS 56 Madrid 34-meter
+d55 !  -4.25263330 +40.42429590      819.0613  DSS 55 Madrid 34-meter
+d61 !  -4.24902224 +40.42873917      840.4264  DSS 61 Robledo 34-meter
+d63 !  -4.24800854 +40.43120975      864.7465  DSS 63 Robledo 70-meter
+d65 !  -4.25069890 +40.42720636      833.8398  DSS 65 Madrid 34-meter
+
+   From the same file : these three radiotelescopes were moved or raised,
+   and the previous positions are given below.
+
+d1b !-116.80548923 +35.29993708      959.1071  DSS 12 Goldstone Echo 26-meter (before Oct 1978)
+d6a !  -4.24902224 +40.42873917      837.3783  DSS 61 Robledo 26-meter (before August 1979)
+d6e !  -4.25141796 +40.42718512      833.8158  DSS 65 Madrid 34-meter (before March 2005)
+
+
+   Coordinates for these four DSN Stations were given in
    ftp://ssd.jpl.nasa.gov/pub/eph/planets/stations/dsn.itrf93/dsn.itrf93_geodetic_19sep2016.txt
-   Similar degree/minute/second formatting as with (273) EISCAT above.
+   but apparently dropped in the above 2020 version.  Similar
+   degree/minute/second formatting as with (273) EISCAT above.
 
         longitude    latitude       height
       DDDmmss.sssss   DDmmss.sssss       (m)
-d12 ! 2431140.23879  +351759.77350   962.15503 DSS 12 Goldstone Echo 34-meter
-d13 ! 2431219.94762  +351449.79132  1070.44450 DSS 13 Goldstone Venus 34-meter
-d14 ! 2430637.66245  +352533.24313  1001.39054 DSS 14 Goldstone 70-meter
-d15 ! 2430646.09763  +352518.67180   973.21110 DSS 15 Goldstone 34-meter
-d16 ! 2430734.86091  +352029.54181   943.97719 DSS 16 Goldstone 26-meter
-d17 ! 2430735.38070  +352031.83568   936.91591 DSS 17 Goldstone 9-meter
 d23 ! 2430737.69313  +352022.38127   945.35142 DSS 23 Goldstone 11-meter
-d24 ! 2430730.74021  +352023.61408   951.51136 DSS 24 Goldstone 34-meter
-d25 ! 2430728.69246  +352015.40307   959.63401 DSS 25 Goldstone 34-meter
-d26 ! 2430737.14089  +352008.48104   968.69315 DSS 26 Goldstone 34-meter
-d27 ! 2431324.05839  +351417.77841  1052.46882 DSS 27 Goldstone 34-meter
-d28 ! 2431315.99178  +351417.77927  1064.64775 DSS 28 Goldstone 34-meter
 d33 ! 1485859.13040  -352401.74505   684.09999 DSS 33 Canberra 11-meter
-d34 ! 1485855.07192  -352354.52383   692.02036 DSS 34 Canberra 34-meter
-d35 ! 1485853.24074  -352344.86387   694.88925 DSS 35 Canberra 34-meter
-d36 ! 1485842.75932  -352342.36634   685.50534 DSS 36 Canberra 34-meter
-d42 ! 1485852.56264  -352402.42868   674.61529 DSS 42 Canberra 34-meter
-d43 ! 1485852.56232  -352408.72724   688.86727 DSS 43 Tidbinbilla 70-meter
-d45 ! 1485839.66828  -352354.44767   674.34745 DSS 45 Canberra 34-meter
-d46 ! 1485859.09407  -352418.03830   676.81253 DSS 46 Canberra 26-meter
-d49 ! 1481548.65612  -325954.23645   414.81554 DSS 49 Parkes
 d53 ! 3554501.25220  +402538.48625   826.79158 DSS 53 Madrid 11-meter
-d54 ! 3554445.25142  +402532.23806   837.05188 DSS 54 Madrid 34-meter
-d55 ! 3554450.52012  +402527.46526   819.06158 DSS 55 Madrid 34-meter
-d56 ! 3554452.58152  +402533.48293   835.86840 DSS 56 Madrid 34-meter
-d61 ! 3554503.51994  +402543.46101   840.42622 DSS 61 Robledo 34-meter
-d63 ! 3554507.16925  +402552.35510   864.81685 DSS 63 Robledo 70-meter
-d65 ! 3554457.48397  +402537.94289   833.85442 DSS 65 Madrid 34-meter
 d66 ! 3554454.89654  +402547.90955   849.87404 DSS 66 Madrid 26-meter
 
    The coordinates supplied for these stations by the MPC are
@@ -357,9 +381,9 @@ d66 ! 3554454.89654  +402547.90955   849.87404 DSS 66 Madrid 26-meter
    https://arxiv.org/abs/1210.1616 , Table 6.  Note that some positions
    given here don't match those given by MPC's ObsCodes.html.  In
    particular,  the location for (I33) given by MPC is about half a
-   kilometer west of reality (compared to the above reference,  and
-   the map at http://www.ctio.noao.edu/soar/content/location , and
-   inspection on G__gle Maps).  I am reasonably sure that (I02) 2MASS,
+   kilometer west of reality (compared to the above reference,  and the
+   map and lat/lon given at https://noirlab.edu/science/images/soar-map,
+   and inspection on G__gle Maps).  I am reasonably sure that (I02) 2MASS,
    and five LCO telescopes are among those listed below,  but matching
    up the telescopes listed below to their MPC codes is difficult;
    the area is a packed array of domes,  and the MPC coordinates are
@@ -518,13 +542,16 @@ H01 !-1071121.6      +335905.4      3227       Magdalena Ridge Observatory, Soco
 
    https://spacewatch.lpl.arizona.edu/telescopes
 
-   with 30 meters subtracted for geoid height.
+   with 30 meters subtracted for geoid height.  (695) corresponds to
+   the 0.7-m Solar Vacuum Telescope and should probably be moved,  but
+   I don't know where.
 
 291 !-111.599905     +31.961669     2045.      LPL/Spacewatch II
 
    Other scopes measured while looking at Kitt Peak in Google Earth.
-   https://www.noao.edu/kpno/usrhnbk/mtn.gif used to ID most telescopes.
-   30m subtracted to get ellipsoidal altitudes.
+   https://www-kpno.kpno.noirlab.edu/usrhnbk/mtn.gif used to ID most
+   scopes.  30m subtracted to get ellipsoidal altitudes.  I omitted the 2.3-m
+   Bok telescope,  because it has code (V00) and is fairly well placed.
 
 May !-111.599895     +31.964027     2051.      Mayall telescope,  Kitt Peak
 1.3 !-111.598406     +31.959634     2042.      1.3-m RCT telescope, Kitt Peak
@@ -543,12 +570,10 @@ Unk3!-111.602183     +31.958133     2058.      Roll-off roof W of WIYN,  Kitt Pe
 12m !-1113653.475    +315712.0      1884.      ARO 12 Meter Telescope
 
    The MDM Observatory at Kitt Peak has the 1.3-m McGraw-Hill Telescope and
-   the 2.4-m Hiltner Telescope,  separated by roughly 60 meters. The MPC
-   coordinates for (697) appear to come from
-   http://mdm.kpno.noao.edu/13_manual/mgh03.html , and are given to arcminute
-   precision,  about 1.5 km from the positions below. I've measured both scopes
-   on Google Maps;  Eric Galayda provided altitudes and IDs as to which scope was
-   which (not really apparent otherwise). As with other Kitt Peak scopes, 30
+   the 2.4-m Hiltner Telescope,  separated by roughly 60 meters.
+   I've measured both scopes on Google Maps;  Eric Galayda provided
+   altitudes and IDs as to which scope was which (not really apparent
+   from just looking at Google Maps). As with other Kitt Peak scopes, 30
    meters is subtracted from the geoid heights to get ellipsoidal heights.
 
 Hil !-111.615864     +31.951503     1908.5     Kitt Peak, Hiltner
@@ -730,8 +755,8 @@ Nar !  98.4856944    +18.589972     2559       NARIT, Chiangmai
    used to report (204) data,  but has been discontinued.  Luca tells me
    (Sc3),  a smaller dome between the two,  houses a C14 that will be
    remotely controlled in early 2021 (hasn't actually submitted any data).
+   MPC corrected their position for (204) in early 2024.
 
-204 !   8.76993      +45.86833      1278       Schiaparelli Observatory, 0.85-m scope
 Sc2 !   8.77061      +45.86845      1278       Schiaparelli Observatory, 0.60-m scope
 Sc3 !   8.77027      +45.86853      1278       Schiaparelli Observatory, C14
 
@@ -1453,11 +1478,22 @@ P5m !-116.86503    +33.35627         1662.     Palomar 5m
    Coords from Andrea Mattei.
 L78 !+014.780211   +40.6826087        134.     San Marco Observatory, Salerno
 
-   The MPC coordinates for Bucharest are in a pond.  I'm pretty sure one of
+   The MPC coordinates for Bucharest were in a pond.  I thought that one of
    these two domes,  about 60m apart from each other and ~300m south-southwest
-   of the MPC coordinates,  are the "right" place. 37m added for geoid height.
-073 !+026.09487    +44.41095          124.     Bucharest
-073a!+026.09485    +44.41038          134.     Bucharest (southern dome)
+   of the MPC coordinates,  was the "right" place. 37m added for geoid height.
+073a!+026.09487    +44.41095          124.     Bucharest (northern dome)
+073b!+026.09485    +44.41038          134.     Bucharest (southern dome)
+
+   About 180 meters NW of the above pair is a pair of smaller domes,  about
+   20m from each other :
+
+073c!+026.09378    +44.41224          134.     Bucharest (small NE dome)
+073d!+026.09362    +44.41207          134.     Bucharest (small SW dome)
+
+   However,  Adrian Sonka tells me the actual location is none of these;
+   it is a roll-off roof observatory a little southeast of the above pair.
+   (MPC has since 'moved' (073) to these coordinates.)
+073 !+026.09391    +44.41197          134.     Bucharest
 
    The MPC coordinates for Geneva are about 190m north-northeast of the dome
    as seen on G__gle Maps.  50m added for geoid height.
@@ -1549,3 +1585,40 @@ Pe6 !+116.13645    -32.00729          355.0    Perth Observatory roll-off roof?
 672f!-118.057823   +34.226189        1685.0    Mount Wilson, CHARA W2
 672g!-118.055694   +34.227149        1660.0    Mount Wilson, CHARA E1
 672h!-118.056292   +34.226829        1674.0    Mount Wilson, CHARA E2
+
+   Private communication from Gary Hug.  32m subtracted for geoid height.
+
+H36 !-095.706554   +38.797700         322.0    Sandlot Observatory, Scranton
+
+SQO !-086.5263889  +38.97702778       153.0    Star Quarry Observatory
+
+   https://en.wikipedia.org/wiki/Vassar_College_Observatory provides the
+   following position for (794),  and explains that it is the 'historic'
+   observatory.  Positions from (794) in MPC data are all quite old and
+   would have come from this location,  which is about 300 meters west
+   of the MPC coordinates for it.  The new observatory has three domes
+   visible on G__gle Maps;  see
+   https://en.wikipedia.org/wiki/Class_of_1951_Observatory .
+
+794 !-073.89331    +41.68829           55.0    Vassar College Observatory, Poughkeepsie
+VCe !-073.89045    +41.68295           55.0    Vassar College (since 1997), larger east dome
+VCw !-073.89063    +41.68295           55.0    Vassar College (since 1997), larger west dome
+VCn !-073.89054    +41.68323           55.0    Vassar College (since 1997), small north dome
+
+   (Roz) is a new telescope near (071),  described at
+   https://www.ta3.sk/caosp/Eedition/Abstracts/2024/Vol_54/No_2/pp15-21_abstract.html
+   Coordinates for it,  and for (AOB),  are via a private communication
+   from Rositsa Miteva.
+
+Roz !+024.73833    +41.69694         1762.0    1.5-m NAO Rozhen, Smolyan
+AOB !+022.675      +43.622777         650.0    AO Belogradchik
+
+   Gael Musquet supplied the coordinates for the following two telescopes.
+
+VO1 !+001.49914017 +49.103662056      169.222  Vernon Observatory CB
+VO2 !+001.49767872 +49.107084983      170.486  Vernon Observatory L1
+BoR !+007.192566   +51.426990         159.65   Bochum radio observatory
+Cha !+016.11250    -23.290000        1182.0    Chamaeleon Observatory
+
+McC !-078.329166   +44.331944         206.77   Hevans Drive Observatory
+088 !+031.827694   +029.93400         494.0    Kottamia
