@@ -95,7 +95,13 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
 {
    int rval = -1, i;
    static bool imprecision_warning_shown = false;
+   static mpc_code_t cached_cdata;
 
+   if( !strcmp( cached_cdata.code, code))
+      {
+      *cdata = cached_cdata;
+      return( 0);
+      }
    if( relocation[0])
       {
       static bool relocation_message_shown = false;
@@ -162,6 +168,10 @@ static int get_observer_loc( mpc_code_t *cdata, const char *code)
                   cdata->rho_cos_phi += offset * cos( cdata->lat);
                   cdata->rho_sin_phi += offset * sin( cdata->lat);
                   }
+               if( !i)
+                  printf( "Location for (%s) %s found in 'rovers' file\n",
+                          cdata->code, cdata->name);
+               cached_cdata = *cdata;
                }
          fclose( ifile);
          }
@@ -1069,7 +1079,7 @@ int dummy_main( const int argc, const char **argv)
 
    full_ctime( tbuff, curr_t, FULL_CTIME_YMD);
    printf( "Current time = %s UTC\n", tbuff);
-   printf( "Version 2023 Apr 15\n");
+   printf( "Version 2024 Oct 30\n");
    if( err_code <= 0)
       {
       printf( "\nProblem loading EOPs (Earth Orientation Parameters):  rval %d\n", err_code);
