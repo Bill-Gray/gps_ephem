@@ -1240,13 +1240,6 @@ int dummy_main( const int argc, const char **argv)
       }
    full_ctime( tbuff, utc, FULL_CTIME_YMD | FULL_CTIME_MILLISECS);
    printf( "GPS positions for JD %f = %s UTC\n", utc, tbuff);
-#ifdef NOW_OBSOLETE_I_THINK
-   if( utc > curr_t + 7.)
-      {
-      printf( "Predictions are only available for about a week in advance.\n");
-      return( ERR_CODE_TOO_FAR_IN_FUTURE);
-      }
-#endif
    if( utc < start_gps_jd)     /* 1992 Jun 20  0:00:00 UTC */
       {
       printf( "GPS/GLONASS ephemerides only extend back to 1992 June 20.\n");
@@ -1354,11 +1347,24 @@ int dummy_main( const int argc, const char **argv)
    else if( !desig_not_found)       /* just list all the satellites */
       {
       n_sats = compute_gps_satellite_locations( loc, utc, &cdata);
-      sort_sat_info( n_sats, loc, sort_order);
-      printf( " Nr:    %s   Desig\n", legend);
-      for( i = 0; i < n_sats; i++)
-         if( loc[i].alt > minimum_altitude || !is_topocentric)
-            display_satellite_info( loc + i, true);
+      if( n_sats <= 0)
+         {
+         printf( "No satellites found\n");
+         if( utc > curr_t + 4.)
+            {
+            printf( "Precise predictions are only available for about five days\n"
+                    "in advance.  You should probably try again a few days before\n"
+                    "your planned observation time.\n");
+            }
+         }
+      else
+         {
+         sort_sat_info( n_sats, loc, sort_order);
+         printf( " Nr:    %s   Desig\n", legend);
+         for( i = 0; i < n_sats; i++)
+            if( loc[i].alt > minimum_altitude || !is_topocentric)
+               display_satellite_info( loc + i, true);
+         }
       }
    load_earth_orientation_params( NULL, NULL);   /* free up memory */
    free_cached_gps_positions( );
