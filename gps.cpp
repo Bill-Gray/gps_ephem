@@ -369,9 +369,13 @@ files:  see http://mgex.igs.org/ for information about this.  MGEX
 conveniently provides data for (as of early 2021) GPS,  GLONASS,  Galileo,
 BeiDou,  and QZSS satellites.  The file naming conventions changed after
 week 1797,  and we try both GBM (from the University of Potsdam) files
-and WUM (Wuhan University) files.  The latter actually extend a bit into
-the future,  meaning you can sometimes know where to look for all five
-constellations at least slightly ahead of time.
+and WUM (Wuhan University) and SHA (Shanghai?) files.  The last two
+actually extend a bit into the future,  meaning you can sometimes know
+where to look for all five constellations at least slightly ahead of
+time.
+
+   (Note that,  as of December 2024,  the Potsdam files were unavailable.
+They are shut off for the nonce.)
 
    However,  MGEX provides very limited predictions,  and only goes back
 to early 2012.  Also,  some MGEX files are only available (as best I can
@@ -454,18 +458,21 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
                "ftp://ftp.gfz-potsdam.de/GNSS/products/mgex/%4d%s/%s",
                week, suffix, filename);
       insert_data_path( filename);
+#ifdef GFZ_POTSDAM
       if( gps_verbose)
          printf( "MGEX (multi-GNSS) file: '%s', %d %d: '%s'\n", filename, glumph,
                 glumph - day * glumphs_per_day, command);
       if( fetch_files)
          try_to_download( command, filename);
+#endif
       remove_dot_z( filename);
       rval = get_cached_posns( filename, glumph);
-      for( pass = 0; !rval && pass < 2; pass++)    /* try WUM (Wuhan) files */
+      for( pass = 0; !rval && pass < 3; pass++)    /* try WUM (Wuhan) & SHA files */
          {
-         snprintf( filename, sizeof( filename), "WUM0MGX%s_%d%03d0000_01D_05M_ORB.SP3.gz",
-                  (pass ? "ULA" : "FIN"),
-                  i, day_of_year);
+         const char *paths[3] = { "SHA0MGXULT", "WUM0MGXFIN", "WUM0MGXULT" };
+
+         snprintf( filename, sizeof( filename), "%s_%d%03d0000_01D_05M_ORB.SP3.gz",
+                  paths[pass], i, day_of_year);
          snprintf( command, sizeof( command),
                "ftp://igs.ign.fr/pub/igs/products/mgex/%4d/%s",
                week, filename);
