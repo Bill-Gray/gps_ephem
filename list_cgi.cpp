@@ -74,6 +74,7 @@ int main( void)
    args[0] = NULL;
    args[1] = time_text;
    args[2] = observatory_code;
+   strcpy( observatory_code, "XXX");
    rval = initialize_cgi_reading( );
    if( rval <= 0)
       {
@@ -92,7 +93,8 @@ int main( void)
          option = 'a';
       if( !strcmp( field, "sort") && strlen( buff) < 10)
          option = 's';
-      if( !strcmp( field, "relocate") && strlen( buff) < 60)
+      if( !strcmp( field, "relocate") && strlen( buff) < 60
+                     && strlen( buff) > 10)
          option = 'r';
       if( !strcmp( field, "n_steps") && strlen( buff) < 10)
          option = 'n';
@@ -126,7 +128,8 @@ int main( void)
          n_args = 1;
          option = 'f';
          }
-      if( !strcmp( field, "obscode") && strlen( buff) < 20)
+      if( !strcmp( field, "obscode") && strlen( buff) < 20
+                                     && strlen( buff) > 2)
          {
          strcpy( observatory_code, buff);
          if( buff[3] == 'v')
