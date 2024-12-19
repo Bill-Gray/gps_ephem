@@ -24,6 +24,12 @@ for(var i = 0; i < hashParams.length; i++){
 <p> <a href="gps_expl.htm"> Click here for an explanation of what this page
 is and why it exists, </a> and links to related tools. </p>
 
+<h2> <b> NOTE: </b> The ability to specify your location as a latitude/longitude/altitude,
+instead of as an <a href='#mpc_code'>MPC observatory code</a>,
+is new (2024 Dec 16) and not as thoroughly tested as the rest of the system.
+Please <a href='contact.htm'>contact me</a> if you run into problems or
+questions or ideas for making it work better. </h2>
+
 <p> Use the form below to find out what <a href='#gnss'> GNSS
 satellites </a> (GPS,  Galileo,  GLONASS,  BeiDou,  JXSS) are
 observable from your MPC code at a given time. </p>
@@ -34,6 +40,7 @@ action="/cgi-bin/gps/list_gps.cgi" onreset="return confirm('Do you really want t
 
   <p> <a href="#time">Time</a>: <input name="time" id="time" maxlength="40" size="40" placeholder="many formats accepted; see below"> UTC </p>
   <p> <a href="#mpc_code">MPC observatory code</a> : <input name="obscode" id="obscode" maxlength="9" size="13" placeholder="Three characters">
+  <p> <a href='#relocate'><i>Or</i> enter a lat/lon/altitude</a> : <input name='relocate' id='relocate' maxlength='60' size='40'>
   <p> Minimum altitude: <input name="min_alt" id="min_alt" maxlength="5" size="5" value="10" placeholder="-90 to 90">
 
   <p> Sort order: <br>
@@ -89,7 +96,31 @@ three-character code from
 <a href="http://www.minorplanetcenter.org/iau/lists/ObsCodesF.html">
 the MPC's list of observatory codes. </a>  If you don't have such a code,
 send me your latitude,  longitude,  and altitude (see contact details at
-bottom) and I'll add a code for you. </p>
+bottom) and I'll add a code for you.  Or you can use the next line to
+enter your latitude,  longitude,  and altitude. </p>
+
+<p> <a name='relocate'> <b> Lat/lon/altitude location: </b> </a> Instead of
+specifying your location with an MPC code (see previous paragraph),  you
+can enter a latitude,  longitude,  and altitude here.  These are examples
+of valid locations : </p>
+
+<p><pre>
+w69.93, n44.02, 120m
+N44 1 12, w 69 55 48, 300ft
+44 1.2 N, W69 55.8 W, 120m
+</pre> </p>
+
+<p> As you can see,  the format is somewhat flexible.  The lat/lon can be
+reversed,  and they can be in decimal degrees,  or degrees/minutes,  or
+degrees/minutes/seconds.  And the altitude can be in feet or meters.
+You do have to specify compass signs (N or S for latitude,  E or W for
+longitude). These can be before or after the lat or lon.</p>
+
+<p> The output will show the extracted lat/lon/alt position,  and may show
+a location (such as 'US/Maine' for the above).  It will also show a link
+to a Google map of that location.  I recommend using this to make sure
+you're really at the right location. </p>
+
 
 <p> <b> Satellite magnitudes</b>:  Jaime Nomen told me the magnitudes for GPS
 satellites range from 10 to 14,  depending in part on the phase angle.  (I'm
@@ -135,7 +166,7 @@ into the future,  for the GPS,  GLONASS,  and Galileo constellations.
 You can make plans to observe those objects,  get data for them,  and
 immediately check your data against the precise values. </p>
 
-<p> For Galileo,  QZSS,  and BeiDou,  we only get that precision a few
+<p> For QZSS and BeiDou,  we only get that precision a few
 days after the fact.  We can give you a 'pretty good' idea of where they
 are,  though,  using
 <a href="tle_info.htm"> Two-Line Elements (TLEs)</a> that are published
