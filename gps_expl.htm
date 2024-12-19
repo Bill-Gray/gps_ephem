@@ -177,11 +177,11 @@ been tested;  millisecond-level accuracy is expected,  but I haven't
 figured out a way to test it yet.)
 
 <p> Positions at that level of accuracy are
-available a few days in advance for GPS and GLONASS satellites.
-For Galileo,  BeiDou,  and QZSS satellites,  you only get that level
+available a few days in advance for GPS,  GLONASS,  and Galileo satellites.
+For BeiDou and QZSS satellites,  you only get that level
 of accuracy a few days late.  These tools will give you positions
 for such satellites in those cases,  usually good to within a few
-arcminutes.  So you can go out,  observe a BeiDou or Galileo satellite,
+arcminutes.  So you can go out,  observe a BeiDou or QZSS satellite,
 then wait a few days for the precise ephemerides to become available.
 Once you've got them,  you can use them to check how accurate your
 timing was.
@@ -189,13 +189,13 @@ timing was.
 <p> I realize that this is somewhat annoying.  Unfortunately,  we
 seem to be stuck with it.  I'm getting the "imprecise" positions
 from <a href="tle_info.htm"> TLEs (Two-Line Elements)</a>.  Without
-those,  we'd have no idea where to look in advance for Galileo,
-BeiDou,  or QZSS objects.  We'd know exactly where they had been,
-but not where to point our telescopes tonight.
+those,  we'd have no idea where to look in advance for BeiDou or QZSS
+objects.  We'd know exactly where they had been, but not where to
+point our telescopes tonight.
 
-<p> Fortunately,  though,  there are plenty of GPS and GLONASS
-satellites.  You may find that limiting yourself only to those
-constellations is not,  in practice,  all that limiting.
+<p> This used to be somewhat limiting.  However,  there are now plenty
+of GPS,  GLONASS,  and Galileo satellites.  My recommendation would be
+to just use those constellations.
 
 <h2> <a name="sites"> Low-precision site locations and how to fix them </a> </h2>
 
@@ -219,13 +219,11 @@ For most people, <a href="#required"> that's more than good enough. </a> </p>
 <p> You <i>may</i> find an 'observatory code' in my
 <a href="https://github.com/Bill-Gray/find_orb/blob/master/rovers.txt">
 errata to the MPC observatory list</a> that gives correct precision.
-In particular,  Mauna Kea is not only given to low precision;  the
-position is for one telescope,  probably the IRTF.  As described at
-the above link,  one can instead use 'codes' such as Sub for Subaru,
-Ke1 and Ke2 for the two Keck telescopes,  and so on.  Positions are
-also given for scopes at Cerro Tololo,  Cerro Paranal,  Kitt Peak,
-Haleakal&#x101;,  La Silla,  and some others that would be lumped
-into one position by MPC. </p>
+This can be particularly helpful for sites with multiple telescopes;
+MPC may provide one obscode for the entire site,  instead of a code for
+your specific telescope.  (Such lumping is almost never a problem for
+minor planet observing,  but is a significant source of error for artsat
+observing.)
 
 <p> Also,  you can <a href="#contact"> send me your latitude,  longitude,
 and altitude</a> and I'll either correct the MPC's position or add
@@ -264,7 +262,7 @@ way. </p>
 
 <p> The tools on these pages really ought to let you knock down
 timing problems to be a tiny fraction of your overall errors,
-and I don't think you'll usually find it difficult to do so. </p>
+and you'll usually find it relatively easy to do so. </p>
 
 <h2> <a name="desigs"> Designations for GNSS satellites </a> </h2>
 
