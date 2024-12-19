@@ -28,6 +28,12 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
 }
 
 static const char *fail_file = "url_fail.txt";
+static int have_netrc = -1;
+static const char *netrc_filename = "netrc.txt";
+      /* NASA's CDDIS site requires a userid,  password,  and cookies,  for
+         no good reason I can see.  Hence the code in this to look for a
+         'netrc.txt' file and the temporary creation and removal of the
+         'cookies.txt' file.   */
 
 #define FETCH_FILESIZE_SHORT               -1
 #define FETCH_FOPEN_FAILED                 -2
@@ -43,6 +49,7 @@ static int grab_file( const char *url, const char *outfilename,
     if (curl) {
         FILE *fp = fopen( outfilename, (append ? "ab" : "wb"));
         char errbuff[CURL_ERROR_SIZE];
+        const char *cookie_file_name = "cookies.txt";
 
         if( !fp)
             return( FETCH_FOPEN_FAILED);
@@ -52,9 +59,19 @@ static int grab_file( const char *url, const char *outfilename,
         curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuff);
         curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 25L);
+        if( have_netrc)
+            {
+            curl_easy_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
+            curl_easy_setopt(curl, CURLOPT_NETRC_FILE, netrc_filename);
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_COOKIEFILE, cookie_file_name);
+            curl_easy_setopt(curl, CURLOPT_COOKIEJAR, cookie_file_name);
+            }
         CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
         fclose(fp);
+        if( have_netrc)
+            unlink( cookie_file_name);
         if( res) {
            FILE *ofile = fopen( fail_file, "a");
            time_t t0 = time( NULL);
@@ -467,15 +484,34 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
 #endif
       remove_dot_z( filename);
       rval = get_cached_posns( filename, glumph);
-      for( pass = 0; !rval && pass < 3; pass++)    /* try WUM (Wuhan) & SHA files */
+      if( have_netrc == -1)         /* haven't checked yet for a .netrc */
          {
-         const char *paths[3] = { "SHA0MGXULT", "WUM0MGXFIN", "WUM0MGXULT" };
+         FILE *netrc_file = fopen( netrc_filename, "rb");
 
-         snprintf( filename, sizeof( filename), "%s_%d%03d0000_01D_05M_ORB.SP3.gz",
-                  paths[pass], i, day_of_year);
-         snprintf( command, sizeof( command),
-               "ftp://igs.ign.fr/pub/igs/products/mgex/%4d/%s",
-               week, filename);
+         if( netrc_file)
+            fclose( netrc_file);
+         have_netrc = (netrc_file ? 1 : 0);
+         }
+      for( pass = (have_netrc ? 0 : 1); !rval && pass < 4; pass++)
+         {           /* try CDDIS,  WUM (Wuhan) & SHA files */
+         if( !pass)
+            {
+            snprintf( filename, sizeof( filename),
+                  "GFZ0OPSULT_%d%d0000_02D_05M_ORB.SP3.gz", i, day_of_year);
+            snprintf( command, sizeof( command),
+                   "https://cddis.nasa.gov/archive/gnss/products/%4d/%s",
+                   week, filename);
+            }
+         else
+            {                 /* WUM (Wuhan) & SHA (Shanghai?) from IGS */
+            const char *paths[3] = { "SHA0MGXULT", "WUM0MGXFIN", "WUM0MGXULT" };
+
+            snprintf( filename, sizeof( filename), "%s_%d%03d0000_01D_05M_ORB.SP3.gz",
+                     paths[pass - 1], i, day_of_year);
+            snprintf( command, sizeof( command),
+                  "ftp://igs.ign.fr/pub/igs/products/mgex/%4d/%s",
+                  week, filename);
+            }
          insert_data_path( filename);
          if( gps_verbose)
             printf( "MGEX (multi-GNSS) file: '%s', %d %d: '%s'\n", filename, glumph,
