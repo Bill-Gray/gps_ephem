@@ -4,7 +4,7 @@
 
 I expect almost everyone will simply visit the above link,  rather than go to the trouble of building and running the code on their own machines.  In fact, I don't really know if _anyone_ except me has actually built and run these utilities.  (They could,  and you could.  But the on-line utilities are pretty easy to use.)
 
-Astronomers occasionally run into the problem of ensuring that the date/time for their images is correct,  sometimes to within milliseconds. Verifying that you've gotten the timing right even to within seconds can be difficult.  This is particularly an issue for people measuring the positions of fast-moving asteroids.
+Astronomers occasionally run into the problem of ensuring that the date/time for their images is correct,  sometimes to within milliseconds. Verifying that you've gotten the timing right even to within seconds can be difficult.  Shutters lag;  software writes out the wrong time,  or start or end of the exposure,  or the time the file was written.  This is particularly an issue for people measuring the positions of fast-moving asteroids (the crowd with whom I do most of my work).
 
 One solution is to observe GPS/GLONASS (more generally,  GNSS:  'global navigation satellite systems',  including also the European Galileo, Chinese BeiDou, and Japanese QZSS) satellites and measure their positions. The "correct" positions of these satellites are known to within centimeters, and they appear to move about 40 arcseconds every second.  If you're able to measure their positions within your images to an accuracy of one arcsecond,  you can know your timing to about 1/40 second = 25 milliseconds.
 
@@ -20,7 +20,7 @@ Compile the code in this repository (and two dependencies mentioned at bottom), 
 
 * The code for the on-line versions of these utilities.  I've not gotten around to documenting that as thoroughly as I should.  To do it properly, one needs `cron` jobs on the server to update the Earth orientation parameter files,  the list of observatories,  and so forth.  If you'd like to set up an on-line version of these tools,  please let me know,  and I'll send details.
 
-The various utilities can be compiled for DOS/Windows and for Linux,  and (almost certainly) *BSD and other platforms.  But at present,  the `makefile` is for Linux builds and cross-compiling to Windows with `mingw-64`.
+The various utilities can be compiled for DOS/Windows,  Linux,  *BSD,  and (I'm reasonably sure) OS/X and other platforms.  The `makefile` is for GNU `make' and for cross-compiling to Microsoft(R) Windows with `mingw-64`.
 
 These utilities rely on the following two repositories :
 
