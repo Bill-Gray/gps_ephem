@@ -17,13 +17,26 @@ const double pi =
       3.1415926535897932384626433832795028841971693993751058209749445923;
 
 static size_t total_written;
+time_t download_start_time;
 int gps_verbose;
+
+/* Somewhat arbitrarily,  if the overall download rate is less than the
+following,  we assume we're stuck and abort the download.  Added because
+the IGS server has been rather annoying on this point,  returning just
+barely enough data to make you think you might someday get a file.  We
+start checking the rate after five seconds.  */
+
+const size_t min_download_rate = 100000;
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
     size_t written;
+    const time_t t_elapsed = time( NULL) - download_start_time;
 
     written = fwrite(ptr, size, nmemb, stream);
     total_written += written;
+    if( t_elapsed > 5)
+        if( total_written / (size_t)t_elapsed < min_download_rate)
+            return( 0);
     return written;
 }
 
@@ -78,8 +91,8 @@ static int grab_file( const char *url, const char *outfilename,
 
            if( gps_verbose)
               printf( "Curl fail %d (%s)\n", res, errbuff);
-           fprintf( ofile, "# Curl fail %d (%s) %s",
-                                       res, errbuff, ctime( &t0));
+           fprintf( ofile, "# Curl fail %d (%s) %.24s UTC",
+                                       res, errbuff, asctime( gmtime( &t0)));
            fclose( ofile);
            unlink( outfilename);
            return( FETCH_CURL_PERFORM_FAILED);
@@ -123,8 +136,8 @@ static int recent_download_failure( const char *url)
       else if( !memcmp( buff, "Wait ", 5))
          retry_wait = atol( buff + 5);
    if( rval && gps_verbose)
-      printf( "Failed (%d) %ld seconds ago\n", rval,
-                  t0 - atol( buff));
+      printf( "Failed (%d) %ld seconds ago, at %24s UTC\n", rval,
+                  t0 - atol( buff), asctime( gmtime( &t0)));
    fclose( ifile);
    return( rval);
 }
@@ -132,15 +145,16 @@ static int recent_download_failure( const char *url)
 static void try_to_download( const char *url, const char *filename)
 {
    int rval;
-   const time_t t0 = time( NULL);
 
    total_written = 0;
+   download_start_time = time( NULL);
    if( recent_download_failure( url))
       return;
    rval = grab_file( url, filename, false);
    if( gps_verbose)
-      printf( "Download '%s': %d, %ld bytes, %.24s\n", url, rval, total_written, ctime( &t0));
-   if( rval || total_written < 500)      /* just got an error message */
+      printf( "Download '%s': %d, %ld bytes, %.24s UTC\n", url, rval, total_written,
+                     asctime( gmtime( &download_start_time)));
+   if( rval || total_written < 22000)      /* just got an error message */
       {
       unlink( filename);
       add_download_failure( url, rval);
