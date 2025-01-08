@@ -158,7 +158,7 @@ int main( void)
    *name = '\0';
    memset( from, 0, sizeof( from));
    memset( until, 0, sizeof( until));
-   printf( "#  See 'names.cpp'. Run at %s", ctime( &t0));
+   printf( "#  See 'names.cpp'. Run at %.24s UTC\n", asctime( gmtime( &t0)));
    while( !done && fgets( buff, sizeof( buff), ifile))
       {
       if( !memcmp( buff + 60, "TYPE / SERIAL NO", 16))
