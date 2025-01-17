@@ -136,7 +136,7 @@ static int recent_download_failure( const char *url)
       else if( !memcmp( buff, "Wait ", 5))
          retry_wait = atol( buff + 5);
    if( rval && gps_verbose)
-      printf( "Failed (%d) %ld seconds ago, at %24s UTC\n", rval,
+      printf( "Failed (%d) %ld seconds ago, at %.24s UTC\n", rval,
                   t0 - atol( buff), asctime( gmtime( &t0)));
    fclose( ifile);
    return( rval);

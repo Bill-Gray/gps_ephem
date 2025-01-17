@@ -67,7 +67,7 @@ int main( void)
       return( 0);
       }
    setvbuf( lock_file, NULL, _IONBF, 0);
-   fprintf( lock_file, "Current time %24s UTC\n", asctime( gmtime( &t0)));
+   fprintf( lock_file, "Current time %.24s UTC\n", asctime( gmtime( &t0)));
    fprintf( lock_file, "list_cgi ver: %s %s\n", __DATE__, __TIME__);
    avoid_runaway_process( 300);
    fprintf( lock_file, "300-second limit set\n");
