@@ -887,6 +887,18 @@ static void test_astrometry( const char *ifilename)
             else
                cdata = rover_data;
             }
+         else if( !strcmp( mpc_code, "247"))
+            {
+            char loc_buff[100];
+
+            if( fgets_with_ades_xlation( loc_buff, sizeof( loc_buff), ades_context, ifile))
+               {
+               if( 3 != get_mpc_code_info( &cdata, loc_buff))
+                  printf( "ERROR : didn't parse the location line for a roving observer correctly\n");
+               }
+            else
+               printf( "ERROR : didn't get a location line for a roving observer\n");
+            }
          else
             {
             err_code = get_observer_loc( &cdata, mpc_code);
