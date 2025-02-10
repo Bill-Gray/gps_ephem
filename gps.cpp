@@ -91,7 +91,7 @@ static int grab_file( const char *url, const char *outfilename,
 
            if( gps_verbose)
               printf( "Curl fail %d (%s)\n", res, errbuff);
-           fprintf( ofile, "# Curl fail %d (%s) %.24s UTC",
+           fprintf( ofile, "# Curl fail %d (%s) %.24s UTC\n",
                                        res, errbuff, asctime( gmtime( &t0)));
            fclose( ofile);
            unlink( outfilename);
