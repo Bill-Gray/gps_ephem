@@ -749,6 +749,9 @@ static int compute_tangent_plane_coords( const double dec, const double dec0,
 #define ASTROMETRY 1
 #define FIELD_DATA 2
 
+const char *google_map_url =
+   "<a title='Click for map' href='http://maps.google.com/maps?q=%+.5f,%+.5f'>";
+
 const double start_gps_jd = 2448793.500000;           /* 1992 Jun 20  0:00:00 UTC */
 double min_jd = start_gps_jd, max_jd = start_gps_jd + 365. * 100.;
             /* In 2092,  somebody may have to revise this */
@@ -893,8 +896,27 @@ static void test_astrometry( const char *ifilename)
 
             if( fgets_with_ades_xlation( loc_buff, sizeof( loc_buff), ades_context, ifile))
                {
+               static bool first_time = true;
+
                if( 3 != get_mpc_code_info( &cdata, loc_buff))
                   printf( "ERROR : didn't parse the location line for a roving observer correctly\n");
+               else if( first_time)
+                  {
+                  if( cdata.lon > PI)
+                     cdata.lon -= PI + PI;
+                  first_time = false;
+                  printf( "Roving observer found at:\n");
+                  printf( "   Lat %c %f\n", (cdata.lat > 0. ? 'N' : 'S'),
+                                    fabs( cdata.lat * 180. / PI));
+                  printf( "   Lon %c %f\n", (cdata.lon > 0. ? 'E' : 'W'),
+                                    fabs( cdata.lon * 180. / PI));
+                  printf( "   Alt %.3f meters\n", cdata.alt);
+#ifdef CGI_VERSION
+                  printf( google_map_url, cdata.lat * (180. / PI), cdata.lon * (180. / PI));
+                  printf( "Click here for a Google Map for this site.</a>  If you have doubts\n");
+                  printf( "about your roving observer coordinates,  this is a good sanity check.\n");
+#endif
+                  }
                }
             else
                printf( "ERROR : didn't get a location line for a roving observer\n");
@@ -983,9 +1005,9 @@ static void test_astrometry( const char *ifilename)
                      full_ctime( time_str, jd_to_show, FULL_CTIME_YMD
                                  | FULL_CTIME_MONTHS_AS_DIGITS
                                  | FULL_CTIME_LEADING_ZEROES);
-                     printf( "%s ", time_str);
+                     printf( "%s %s ", mpc_code, time_str);
                      if( log_file)
-                        fprintf( log_file, "%s ", time_str);
+                        fprintf( log_file, "%s %s ", mpc_code, time_str);
                      display_satellite_info( loc + i, true);
                      printf( "%s %s\n", mpc_code, buff + addenda_start);
                      if( log_file)
@@ -1058,9 +1080,6 @@ static void test_astrometry( const char *ifilename)
 
    fclose( ifile);
 }
-
-const char *google_map_url =
-   "<a title='Click for map' href='http://maps.google.com/maps?q=%+.5f,%+.5f'>";
 
 /* See 'dailyize.c' for info about 'finals.mix'.  Note that 'finals.all'
 may also be available at ftp://maia.usno.navy.mil/ser7/finals.all.  */
