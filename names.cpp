@@ -99,14 +99,23 @@ static int get_norad_number( const char *intl_id)
    if( !remap)
       {
       FILE *ifile = fopen( "../.find_orb/satcat.html", "rb");
-      char buff[750];
+      char buff[750], *norad_num, *piece;
 
       assert( ifile);
+      if( !fgets( buff, sizeof( buff), ifile))
+         {
+         fprintf( stderr, "Couldn't read header in 'satcat.html'\n");
+         exit( -1);
+         }
+      norad_num = strstr( buff, "Satca");
+      piece = strstr( buff, "Piece");
+      assert( norad_num);
+      assert( piece);
       remap = tptr = (char *)malloc( MAX_REMAPS * 21);
       while( fgets( buff, sizeof( buff), ifile))
          {
-         memcpy( tptr, buff + 12, 7);     /* NORAD number */
-         memcpy( tptr + 7, buff + 20, 14);      /* intl desig */
+         memcpy( tptr, norad_num, 7);     /* NORAD number */
+         memcpy( tptr + 7, piece, 14);      /* intl desig */
          tptr += 21;
          }
       *tptr = '\0';
