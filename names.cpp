@@ -100,13 +100,17 @@ static int get_norad_number( const char *intl_id)
       {
       FILE *ifile = fopen( "../.find_orb/satcat.html", "rb");
       char buff[750], *norad_num, *piece;
+      bool header_found = false;
 
       assert( ifile);
-      if( !fgets( buff, sizeof( buff), ifile))
-         {
-         fprintf( stderr, "Couldn't read header in 'satcat.html'\n");
-         exit( -1);
-         }
+      while( !header_found)
+         if( !fgets( buff, sizeof( buff), ifile))
+            {
+            fprintf( stderr, "Couldn't read header in 'satcat.html'\n");
+            exit( -1);
+            }
+         else
+            header_found = !memcmp( buff, "JCAT ", 5);
       norad_num = strstr( buff, "Satca");
       piece = strstr( buff, "Piece");
       assert( norad_num);
