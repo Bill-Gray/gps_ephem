@@ -1394,7 +1394,8 @@ int dummy_main( const int argc, const char **argv)
          printf( " Nr:    %s   Desig\n", legend);
          for( i = 0; i < n_sats; i++)
             if( loc[i].alt > minimum_altitude || !is_topocentric)
-               display_satellite_info( loc + i, true);
+               if( !loc[i].in_shadow)
+                  display_satellite_info( loc + i, true);
          }
       }
    load_earth_orientation_params( NULL, NULL);   /* free up memory */
