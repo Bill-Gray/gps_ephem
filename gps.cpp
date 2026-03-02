@@ -518,12 +518,12 @@ static double *get_tabulated_gps_posns( const int glumph, int *err_code,
             }
          else
             {                 /* WUM (Wuhan) & SHA (Shanghai?) from IGS */
-            const char *paths[3] = { "SHA0MGXULT", "WUM0MGXFIN", "WUM0MGXULT" };
+            const char *paths[3] = { "SHA0MGXULT", "WUM0MGXFIN", "WUM0MGXRAP" };
 
             snprintf( filename, sizeof( filename), "%s_%d%03d0000_01D_05M_ORB.SP3.gz",
                      paths[pass - 1], i, day_of_year);
             snprintf( command, sizeof( command),
-                  "ftp://igs.ign.fr/pub/igs/products/mgex/%4d/%s",
+                  "ftp://igs.ign.fr/pub/igs/products/%4d/%s",
                   week, filename);
             }
          insert_data_path( filename);
