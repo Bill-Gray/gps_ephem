@@ -890,7 +890,7 @@ static void test_astrometry( const char *ifilename)
             else
                cdata = rover_data;
             }
-         else if( !strcmp( mpc_code, "247"))
+         else if( !strcmp( mpc_code, "247") || !strcmp( mpc_code, "270"))
             {
             char loc_buff[100];
 
