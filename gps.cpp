@@ -428,7 +428,7 @@ See the get_gps_positions_from_tle( ) function below.
 
 Base URL for the University of Bern files: */
 
-#define UNIBE_BASE_URL "ftp://ftp.aiub.unibe.ch/CODE/"
+#define UNIBE_BASE_URL "https://www.aiub.unibe.ch/download/CODE/"
 
 bool use_mgex_data = true;
 
